@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Painel de Produção — Padaria</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Painel de Produção — Padaria (Soma Contínua)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -13,671 +13,259 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --bg:#F7F2E6;
-  --bg-soft:#EFE6D2;
-  --panel:#FFFFFF;
-  --ink:#2A2019;
-  --ink-soft:#6B5D4D;
-  --ink-faint:#9C8F7C;
-  --border:#E4D9C3;
-  --border-strong:#D2C3A4;
-  --accent:#C68A2E;
-  --accent-dark:#9C6B1D;
-  --accent-soft:#F3E1BB;
-  --good:#4F7A62;
-  --good-soft:#DFEAE2;
-  --bad:#B9483D;
-  --bad-soft:#F5DFDB;
-  --info:#3E6E8E;
-  --info-soft:#DCE8EE;
-  --radius-sm:8px;
-  --radius-md:14px;
-  --radius-lg:22px;
-  --shadow-sm:0 1px 2px rgba(42,32,25,.06), 0 1px 1px rgba(42,32,25,.04);
-  --shadow-md:0 8px 24px rgba(42,32,25,.08);
-  --font-display:'Fraunces', serif;
-  --font-body:'Inter', sans-serif;
-  --font-mono:'IBM Plex Mono', monospace;
+  --bg:#F4F1EA; --bg-soft:#EAE4D8; --panel:#FFFFFF;
+  --ink:#2C241B; --ink-soft:#685A4A; --ink-faint:#9A8D7C;
+  --border:#DFD5C4; --border-strong:#CBBCA3;
+  --accent:#D88C22; --accent-dark:#A66812; --accent-soft:#F8E7CD;
+  --good:#3D7A55; --good-soft:#D5ECD9;
+  --bad:#B94235; --bad-soft:#F8D7D4;
+  --info:#356A8E; --info-soft:#D5E7F3;
+  --radius-sm:10px; --radius-md:16px; --radius-lg:24px;
+  --shadow-sm:0 2px 8px rgba(44,36,27,.05); --shadow-md:0 12px 32px rgba(44,36,27,.12);
+  --font-display:'Fraunces', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
 }
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  font-family:var(--font-body);
-  background:var(--bg);
-  color:var(--ink);
-  -webkit-font-smoothing:antialiased;
-  min-height:100vh;
-}
-::selection{background:var(--accent-soft);}
-button{font-family:inherit;cursor:pointer;}
-input,select,textarea{font-family:inherit;}
-a{color:var(--accent-dark);}
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
 
-/* ===== Layout shell (padrão app mobile: topbar fina + navegação inferior) ===== */
 #app{display:flex;flex-direction:column;min-height:100vh;}
-
-.topbar{
-  position:sticky;top:0;z-index:40;
-  display:flex;align-items:center;gap:10px;
-  padding:13px 18px;
-  background:var(--ink);color:#EFE6D2;
-  border-bottom:1px solid rgba(239,230,210,.12);
-}
-.topbar .brand-mark{width:26px;height:26px;flex-shrink:0;}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--ink);color:#F4F1EA;}
+.brand-mark{width:26px;height:26px;flex-shrink:0;}
 .topbar-title{flex:1;min-width:0;}
-.topbar-title .t1{font-family:var(--font-display);font-weight:600;font-size:15.5px;line-height:1.15;color:#FBF6EA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.topbar-title .t2{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#C8B79A;margin-top:1px;}
-.topbar-backup{
-  display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:20px;
-  background:rgba(239,230,210,.08);border:none;color:#DCCEB4;font-size:11.5px;font-weight:600;flex-shrink:0;
-}
-.topbar-backup:hover{background:rgba(239,230,210,.14);}
-.topbar-backup .dot{width:7px;height:7px;}
+.topbar-title .t1{font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1.2;color:#FFF;}
+.topbar-title .t2{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:#CBBCA3;}
 
-/* ---- Navegação inferior (bottom tab bar, estilo app nativo) ---- */
 nav.bottomnav{
-  position:fixed;left:0;right:0;bottom:0;z-index:60;
-  display:flex;justify-content:center;align-items:stretch;gap:2px;
+  position:fixed;left:0;right:0;bottom:0;z-index:999;
+  display:flex;justify-content:space-evenly;align-items:center;
   background:var(--panel);border-top:1px solid var(--border);
-  box-shadow:0 -6px 20px rgba(42,32,25,.07);
-  padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  box-shadow:0 -4px 20px rgba(0,0,0,.08);
 }
 .tabbtn{
-  position:relative;flex:1;max-width:104px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  flex:1;min-width:0; display:flex;flex-direction:column;align-items:center;gap:4px;
   border:none;background:transparent;color:var(--ink-faint);
-  padding:7px 4px 6px;border-radius:12px;font-size:10.3px;font-weight:600;
-  transition:color .15s ease, background .15s ease;
+  padding:8px 2px;border-radius:12px;font-size:10.5px;font-weight:600; transition:.2s;
 }
-.tabbtn svg{width:21px;height:21px;stroke-width:1.9;}
-.tabbtn:hover{color:var(--ink-soft);background:var(--bg-soft);}
-.tabbtn.active{color:var(--accent-dark);}
-.tabbtn.active svg{stroke-width:2.3;}
-.tabbtn .more-badge{
-  position:absolute;top:5px;right:22%;width:7px;height:7px;border-radius:50%;background:var(--bad);
-  border:1.5px solid var(--panel);display:none;
-}
-.tabbtn.has-alert .more-badge{display:block;}
+.tabbtn svg{width:22px;height:22px;stroke-width:1.8;flex-shrink:0;}
+.tabbtn.active{color:var(--accent-dark);background:var(--accent-soft);}
+.tabbtn.active svg{stroke-width:2.2;}
+@media (max-width: 420px) { .tabbtn span { display:none; } .tabbtn svg { width: 26px; height: 26px; } }
 
-/* ---- Menu oculto ("Mais"): sheet deslizante estilo app nativo ---- */
-.sheet-overlay{position:fixed;inset:0;background:rgba(42,32,25,.4);display:none;align-items:flex-end;justify-content:center;z-index:90;}
-.sheet-overlay.active{display:flex;}
-.sheet{
-  background:var(--panel);width:100%;max-width:520px;
-  border-radius:22px 22px 0 0;padding:10px 14px calc(18px + env(safe-area-inset-bottom));
-  box-shadow:0 -10px 30px rgba(42,32,25,.18);
-  animation:sheetup .22s ease;
-}
-@keyframes sheetup{from{transform:translateY(24px);opacity:.6;}to{transform:translateY(0);opacity:1;}}
-.sheet-handle{width:36px;height:4px;background:var(--border-strong);border-radius:3px;margin:6px auto 14px;}
-.sheet-title{font-family:var(--font-display);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:600;padding:0 8px 8px;}
-.sheet-item{
-  width:100%;display:flex;align-items:center;gap:13px;
-  border:none;background:transparent;padding:13px 10px;border-radius:12px;
-  font-size:14.5px;font-weight:600;color:var(--ink);text-align:left;
-}
-.sheet-item svg{width:20px;height:20px;color:var(--ink-soft);flex-shrink:0;}
-.sheet-item:hover{background:var(--bg-soft);}
-.sheet-item.active{background:var(--accent-soft);}
-.sheet-item .sheet-item-extra{margin-left:auto;font-size:11px;font-weight:600;color:var(--ink-faint);display:flex;align-items:center;gap:5px;}
-.sheet-close-row{display:flex;justify-content:center;padding-top:6px;}
+main.content{flex:1;width:100%;padding:20px 16px 120px;max-width:1200px;margin:0 auto;}
+.view{display:none;} .view.active{display:block;animation:fadein .3s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-main.content{
-  flex:1;min-width:0;width:100%;
-  padding:22px 20px calc(94px + env(safe-area-inset-bottom));
-  max-width:1180px;margin:0 auto;
-}
-.view{display:none;}
-.view.active{display:block;animation:fadein .25s ease;}
-@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.view-header{margin-bottom:24px;}
+.eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dark);font-weight:700;margin-bottom:6px;}
+.view-title{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--ink);line-height:1.1;}
+.view-sub{color:var(--ink-soft);font-size:13.5px;margin-top:6px;}
 
-.view-header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
-.view-title{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--ink);letter-spacing:-.01em;}
-.view-sub{color:var(--ink-soft);font-size:13.5px;margin-top:4px;}
-.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent-dark);font-weight:600;margin-bottom:4px;}
-
-/* ===== Cards / panels ===== */
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-sm);}
-.panel + .panel{margin-top:18px;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm);margin-bottom:20px;}
 .panel-title{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 4px;}
 .panel-sub{color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;margin-bottom:20px;}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-sm);}
+.kpi-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
+.kpi-value{font-family:var(--font-mono);font-size:26px;font-weight:600;margin-top:8px;color:var(--ink);}
+.chart-wrap { position: relative; height: 260px; width: 100%; }
 
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px 18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
-.kpi-label{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
-.kpi-value{font-family:var(--font-mono);font-size:26px;font-weight:600;margin-top:6px;color:var(--ink);}
-.kpi-delta{font-size:12px;margin-top:6px;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
-.kpi-delta.up{color:var(--good);}
-.kpi-delta.down{color:var(--bad);}
-.kpi-delta.flat{color:var(--ink-faint);}
-
-.grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:18px;}
-.grid-2 .panel{margin-top:0;}
-@media (max-width:980px){.grid-2{grid-template-columns:1fr;} .kpi-grid{grid-template-columns:repeat(2,1fr);}}
-
-.chart-wrap{position:relative;height:260px;}
-.chart-wrap.tall{height:320px;}
-
-.ranking-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
-.ranking-item{display:flex;align-items:center;gap:10px;}
-.rank-num{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);width:16px;flex-shrink:0;}
-.rank-bar-track{flex:1;height:8px;background:var(--bg-soft);border-radius:5px;overflow:hidden;}
-.rank-bar-fill{height:100%;background:var(--accent);border-radius:5px;}
-.rank-info{display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px;}
-.rank-item-full{flex:1;}
-.rank-val{font-family:var(--font-mono);color:var(--ink-soft);font-size:12px;}
-
-.alert{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:8px;}
-.alert svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
-.alert.warn{background:var(--accent-soft);color:#7A5312;}
-.alert.bad{background:var(--bad-soft);color:#7C2F27;}
-.alert.good{background:var(--good-soft);color:#2F4F3E;}
-.alert.info{background:var(--info-soft);color:#274A5E;}
-
-/* ===== Forms ===== */
-.field-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
-.field input,.field select{
-  border:1px solid var(--border-strong);border-radius:9px;padding:8px 11px;font-size:14px;
-  background:var(--panel);color:var(--ink);min-width:140px;
-}
-.field input:focus,.field select:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);}
-.btn{
-  display:inline-flex;align-items:center;gap:7px;
-  border:1px solid var(--border-strong);background:var(--panel);color:var(--ink);
-  padding:9px 15px;border-radius:9px;font-size:13.5px;font-weight:600;
-  transition:transform .1s ease, box-shadow .15s ease, background .15s ease;
-}
-.btn svg{width:15px;height:15px;}
-.btn:hover{box-shadow:var(--shadow-sm);}
-.btn:active{transform:scale(.98);}
-.btn-primary{background:var(--ink);color:#F7F2E6;border-color:var(--ink);}
-.btn-primary:hover{background:#3A2C1E;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--ink);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;transition:.15s; cursor:pointer;}
+.btn-primary{background:var(--ink);color:#FFF;border-color:var(--ink);}
 .btn-accent{background:var(--accent);color:#241A0E;border-color:var(--accent-dark);}
-.btn-accent:hover{background:#D89734;}
-.btn-danger{background:var(--panel);color:var(--bad);border-color:#E3B9B2;}
-.btn-danger:hover{background:var(--bad-soft);}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--ink-soft);padding:8px 10px;}
-.btn-ghost:hover{background:var(--bg-soft);color:var(--ink);}
-.btn-sm{padding:6px 11px;font-size:12.5px;}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.btn-row{display:flex;gap:9px;flex-wrap:wrap;}
+.btn-ghost{border-color:transparent;background:transparent;}
+.btn-sm{padding:8px 14px;font-size:13px;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.field{display:flex;flex-direction:column;gap:6px; min-width:0;}
+.field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;}
+.field input, .field select{border:1.5px solid var(--border-strong);border-radius:10px;padding:12px 14px;font-size:14px;background:var(--panel);color:var(--ink); width: 100%;}
+.field input:focus, .field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.field-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
 
-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-th{
-  text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
-  color:var(--ink-soft);font-weight:600;padding:9px 10px;border-bottom:2px solid var(--border-strong);
-  background:var(--bg-soft);
-}
-td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tbody tr:hover{background:var(--bg-soft);}
-tfoot td{font-weight:700;border-top:2px solid var(--border-strong);border-bottom:none;background:var(--bg-soft);}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;}
+.prod-card{background:var(--panel);border:2px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:all .2s ease;display:flex;flex-direction:column;}
+.card-header{padding:14px 16px;background:var(--bg-soft);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.card-header h4{margin:0;font-size:15px;font-weight:700;}
+.card-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:var(--panel);color:var(--ink-soft);}
+
+.card-body{padding:16px;display:flex;gap:12px;align-items:flex-end;}
+.card-input-group{flex:1;display:flex;flex-direction:column;gap:4px; min-width:0;}
+.card-input-group label{font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;}
+.card-input-group input{width:100%;font-size:18px;font-family:var(--font-mono);font-weight:600;padding:10px;text-align:center;border:1.5px solid var(--border-strong);border-radius:8px;}
+.multiply{color:var(--ink-faint);font-size:18px;font-weight:700;padding-bottom:10px;}
+
+.card-footer{padding:14px 16px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;background:#FAFAFA;}
+.card-totals .kg{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--good);display:block;}
+.card-totals .unid{font-size:11px;color:var(--ink-soft);font-weight:600;display:block;}
+.btn-save-item{padding:8px 14px;font-size:13px;border-radius:8px;background:var(--ink);border:none;font-weight:700;color:#FFF; cursor:pointer;}
+.btn-save-item:active{transform:scale(0.96);}
+
+.table-wrap{border:1px solid var(--border);border-radius:var(--radius-md);overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;} 
+th{text-align:left;font-size:11px;text-transform:uppercase;font-weight:700;padding:12px 10px;background:var(--bg-soft); word-wrap: break-word;}
+td{padding:12px 10px;border-bottom:1px solid var(--border); word-wrap: break-word;}
 .num-cell{font-family:var(--font-mono);text-align:right;}
-.tel-input{width:78px;text-align:right;padding:6px 8px;border:1px solid var(--border-strong);border-radius:6px;font-family:var(--font-mono);font-size:13.5px;}
-.section-caption{
-  font-family:var(--font-display);font-weight:600;font-size:14px;
-  background:var(--ink);color:#F0E6D2;padding:9px 14px;border-radius:9px 9px 0 0;margin-top:20px;
-}
-.section-caption:first-child{margin-top:0;}
-.table-wrap{border:1px solid var(--border);border-radius:0 0 10px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:4px;}
-.table-wrap table{margin:0;min-width:520px;}
-.table-wrap.no-min table{min-width:0;}
 
-.icon-btn{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:32px;height:32px;border-radius:9px;border:1px solid var(--border-strong);
-  background:var(--panel);color:var(--ink-soft);flex-shrink:0;
-}
-.icon-btn svg{width:16px;height:16px;}
-.icon-btn:hover{background:var(--bg-soft);color:var(--ink);}
-.icon-btn.danger{color:var(--bad);border-color:#E3B9B2;}
-.icon-btn.danger:hover{background:var(--bad-soft);}
-.icon-btn.accent{color:var(--accent-dark);border-color:var(--accent-dark);}
-.icon-btn.accent:hover{background:var(--accent-soft);}
-.action-cell{display:flex;gap:6px;flex-wrap:nowrap;}
-
-/* ---- Lançamento: lista de produtos em cartões (evita tabela larga cortando dados) ---- */
-.prod-list{border:1px solid var(--border);border-radius:0 0 12px 12px;overflow:hidden;background:var(--panel);}
-.prod-row{
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-  padding:12px 14px;border-bottom:1px solid var(--border);
-}
-.prod-row:last-child{border-bottom:none;}
-.prod-row:hover{background:var(--bg-soft);}
-.prod-name{flex:1 1 150px;min-width:120px;font-size:14px;font-weight:600;color:var(--ink);}
-.prod-inputs{display:flex;align-items:flex-end;gap:8px;flex-shrink:0;}
-.mini-field{display:flex;flex-direction:column;gap:3px;}
-.mini-field label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);}
-.mini-field input{
-  width:64px;text-align:center;padding:7px 4px;border:1px solid var(--border-strong);border-radius:8px;
-  font-family:var(--font-mono);font-size:14px;background:var(--bg);
-}
-.mini-field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent);background:var(--panel);}
-.mult-sign{color:var(--ink-faint);font-size:13px;padding-bottom:9px;flex-shrink:0;}
-.prod-total{
-  flex-shrink:0;min-width:76px;text-align:right;font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--ink);
-  padding:5px 10px;border-radius:8px;background:var(--bg-soft);
-}
-.prod-total.has-value{background:var(--accent-soft);color:#7A5312;}
-.prod-total small{font-family:var(--font-body);font-weight:600;font-size:9.5px;text-transform:uppercase;color:var(--ink-faint);display:block;margin-top:1px;}
-.prod-list-foot{
-  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:12px 14px;background:var(--ink);color:#F0E6D2;border-radius:0 0 12px 12px;margin-top:-1px;
-}
-.prod-list-foot .foot-label{font-family:var(--font-display);font-weight:600;font-size:13.5px;}
-.prod-list-foot .foot-vals{display:flex;gap:18px;font-family:var(--font-mono);font-size:13px;}
-.prod-list-foot .foot-vals b{color:#F3C567;}
-@media (max-width:480px){
-  .prod-name{flex-basis:100%;}
-  .prod-row{gap:8px;}
-  .prod-total{margin-left:auto;}
-}
-
-.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.02em;}
-.badge.balcao{background:var(--info-soft);color:#274A5E;}
-.badge.gondola{background:var(--good-soft);color:#2F4F3E;}
-.badge.amostra{background:var(--accent-soft);color:#7A5312;}
-
-.empty-state{text-align:center;padding:40px 20px;color:var(--ink-soft);}
-.empty-state svg{width:48px;height:48px;margin-bottom:10px;opacity:.5;}
-.empty-state p{margin:4px 0;font-size:13.5px;}
-.empty-state .btn{margin-top:12px;}
-
-/* modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(42,32,25,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(20,15,10,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);}
 .modal-overlay.active{display:flex;}
-.modal{background:var(--panel);border-radius:var(--radius-lg);max-width:560px;width:100%;max-height:88vh;overflow:auto;padding:24px;box-shadow:var(--shadow-md);}
-.modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
-.modal-title{font-family:var(--font-display);font-size:19px;font-weight:600;}
-.modal-close{background:none;border:none;color:var(--ink-soft);font-size:20px;line-height:1;padding:4px;}
-
-.toast-stack{position:fixed;bottom:78px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:200;}
-.toast{background:var(--ink);color:#F7F2E6;padding:11px 16px;border-radius:10px;font-size:13.5px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:9px;animation:toastin .2s ease;max-width:340px;}
-.toast.err{background:#7C2F27;}
-.toast.ok{background:#2F4F3E;}
-@keyframes toastin{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
-.status-card{display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-md);border:1px solid var(--border);}
-.status-card .dot{width:11px;height:11px;}
-.status-card .main{flex:1;}
-.status-card .main .t{font-weight:600;font-size:14px;}
-.status-card .main .s{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
-
-.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block;}
-.dot.ok{background:#7CB894;}
-.dot.warn{background:#E0B24C;}
-.dot.bad{background:#DE7C6E;}
-
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
-@media (max-width:900px){.two-col{grid-template-columns:1fr;}}
-
-.small-note{font-size:12px;color:var(--ink-faint);margin-top:8px;line-height:1.5;}
-.divider{height:1px;background:var(--border);margin:18px 0;}
-.tag-toggle{display:flex;gap:6px;background:var(--bg-soft);padding:4px;border-radius:10px;}
-.tag-toggle button{border:none;background:transparent;padding:7px 13px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink-soft);}
-.tag-toggle button.active{background:var(--panel);color:var(--ink);box-shadow:var(--shadow-sm);}
-
-@media (max-width:840px){
-  main.content{padding:18px 14px calc(94px + env(safe-area-inset-bottom));}
-  .kpi-grid{grid-template-columns:1fr 1fr;}
-  .view-title{font-size:22px;}
-  .tabbtn{font-size:9.8px;}
-}
-@media (max-width:380px){
-  .tabbtn span.tab-label{display:none;}
-}
+.modal{background:var(--panel);border-radius:var(--radius-lg);width:100%;max-width:520px;padding:24px;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto;}
+.toast-stack{position:fixed;bottom:90px;right:16px;left:16px;display:flex;flex-direction:column;gap:10px;z-index:1100;pointer-events:none;align-items:center;}
+.toast{background:var(--ink);color:#FFF;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-md);animation:toastin .3s ease;}
+.toast.ok{background:var(--good);} .toast.err{background:var(--bad);}
+@keyframes toastin{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:768px){ .grid-2{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
+
 <div id="app">
   <header class="topbar">
-    <svg class="brand-mark" viewBox="0 0 40 40" fill="none">
-      <rect x="2" y="10" width="36" height="24" rx="4" stroke="#D6A419" stroke-width="2.4"/>
-      <circle cx="11" cy="19" r="3.1" fill="#D6A419"/>
-      <circle cx="20" cy="19" r="3.1" fill="#D6A419"/>
-      <circle cx="29" cy="19" r="3.1" fill="#D6A419"/>
-      <circle cx="15.5" cy="27" r="3.1" fill="#D6A419"/>
-      <circle cx="24.5" cy="27" r="3.1" fill="#D6A419"/>
-    </svg>
-    <div class="topbar-title">
-      <div class="t1" id="topbarTitle">Painel de produção</div>
-      <div class="t2">Padaria · Telas &amp; Balcão</div>
-    </div>
-    <button class="topbar-backup" id="topbarBackupBtn" title="Status do backup">
-      <span class="dot" id="topbarBackupDot"></span>
-      <span id="topbarBackupText">Backup</span>
-    </button>
+    <svg class="brand-mark" viewBox="0 0 40 40" fill="none"><rect x="2" y="10" width="36" height="24" rx="4" stroke="#D88C22" stroke-width="2.4"/><circle cx="11" cy="19" r="3" fill="#D88C22"/><circle cx="20" cy="19" r="3" fill="#D88C22"/><circle cx="29" cy="19" r="3" fill="#D88C22"/><circle cx="15.5" cy="27" r="3" fill="#D88C22"/><circle cx="24.5" cy="27" r="3" fill="#D88C22"/></svg>
+    <div class="topbar-title"><div class="t1">Sistema de Produção</div><div class="t2">Controle de Rendimento</div></div>
   </header>
 
   <nav class="bottomnav" id="bottomnav">
-    <button class="tabbtn" data-view="dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-      <span class="tab-label">Painel</span>
-    </button>
-    <button class="tabbtn" data-view="lancamento">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span class="tab-label">Lançar</span>
-    </button>
-    <button class="tabbtn" data-view="historico">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-      <span class="tab-label">Histórico</span>
-    </button>
-    <button class="tabbtn" data-view="relatorios">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
-      <span class="tab-label">Relatórios</span>
-    </button>
-    <button class="tabbtn" id="tabMais">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>
-      <span class="tab-label">Mais</span>
-      <span class="more-badge" id="maisBadge"></span>
-    </button>
+    <button class="tabbtn active" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Painel</span></button>
+    <button class="tabbtn" data-view="lancamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg><span>Produção</span></button>
+    <button class="tabbtn" data-view="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>Histórico</span></button>
+    <button class="tabbtn" data-view="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Relatórios</span></button>
+    <button class="tabbtn" data-view="produtos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg><span>Produtos</span></button>
   </nav>
 
-  <div class="sheet-overlay" id="sheetOverlay">
-    <div class="sheet" id="sheetBox">
-      <div class="sheet-handle"></div>
-      <div class="sheet-title">Mais opções</div>
-      <button class="sheet-item" data-view="comparacao">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20V10M12 20V4M17 20v-7"/></svg>
-        Comparação por período
-      </button>
-      <button class="sheet-item" data-view="produtos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg>
-        Produtos cadastrados
-      </button>
-      <button class="sheet-item" data-view="backup">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
-        Backup &amp; dados
-        <span class="sheet-item-extra"><span class="dot" id="sheetBackupDot"></span><span id="sheetBackupText"></span></span>
-      </button>
-      <div class="sheet-close-row">
-        <button class="btn btn-ghost btn-sm" id="btnFecharSheet">Fechar</button>
-      </div>
-    </div>
-  </div>
-
   <main class="content" id="mainContent">
-
-    <!-- ===================== DASHBOARD ===================== -->
-    <section class="view" id="view-dashboard">
+    
+    <!-- DASHBOARD -->
+    <section class="view active" id="view-dashboard">
       <div class="view-header">
-        <div>
-          <div class="eyebrow">Visão geral</div>
-          <div class="view-title">Painel de produção</div>
-          <div class="view-sub">Acompanhe telas, unidades e tendência de produção da padaria.</div>
-        </div>
-        <div class="tag-toggle" id="dashRangeToggle">
-          <button data-range="hoje" class="active">Hoje</button>
-          <button data-range="7">7 dias</button>
-          <button data-range="30">30 dias</button>
+        <div class="eyebrow">Visão Geral</div>
+        <div class="view-title">Desempenho</div>
+        <div style="margin-top:12px;">
+          <select id="dashRange" style="padding:8px; border-radius:8px; border:1px solid var(--border-strong); background:var(--panel);">
+            <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option>
+          </select>
         </div>
       </div>
-
       <div class="kpi-grid" id="dashKpis"></div>
-
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-title">Produção por produto</div>
-          <div class="panel-sub" id="dashBarSub">Unidades totais no período selecionado</div>
-          <div class="chart-wrap tall"><canvas id="chartProdutos"></canvas></div>
+          <div class="panel-title" style="margin-bottom:12px;">Massa Produzida (Kg)</div>
+          <div class="chart-wrap"><canvas id="chartKg"></canvas></div>
         </div>
         <div class="panel">
-          <div class="panel-title">Ranking do período</div>
-          <div class="panel-sub">Participação por produto</div>
-          <ul class="ranking-list" id="dashRanking"></ul>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="panel">
-          <div class="panel-title">Tendência diária</div>
-          <div class="panel-sub">Unidades produzidas — últimos 14 dias</div>
-          <div class="chart-wrap"><canvas id="chartTendencia"></canvas></div>
-        </div>
-        <div class="panel">
-          <div class="panel-title">Alertas &amp; observações</div>
-          <div class="panel-sub">Gerados a partir dos registros recentes</div>
-          <div id="dashAlerts"></div>
+          <div class="panel-title" style="margin-bottom:12px;">Unidades Produzidas</div>
+          <div class="chart-wrap"><canvas id="chartUnidades"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- ===================== LANÇAMENTO ===================== -->
+    <!-- LANÇAMENTO (Cartões) -->
     <section class="view" id="view-lancamento">
       <div class="view-header">
-        <div>
-          <div class="eyebrow">Registro</div>
-          <div class="view-title">Lançamento diário de produção</div>
-          <div class="view-sub">Preencha telas e unidades por tela — o total é calculado automaticamente.</div>
-        </div>
+        <div class="eyebrow">Produção</div>
+        <div class="view-title">Nova Produção</div>
+      </div>
+      
+      <div class="panel" style="background:var(--bg-soft); display:flex; align-items:center; gap:12px; margin-bottom:24px; padding:16px;">
+        <label for="lancData" style="font-weight:700;">Data:</label>
+        <input type="date" id="lancData" style="padding:8px 12px; flex:1; max-width:200px;">
+        <span id="lancStatusText" style="font-size:12px; font-weight:700; color:var(--ink-soft); margin-left:auto;"></span>
       </div>
 
-      <div class="panel">
-        <div class="field-row" style="margin-bottom:6px;">
-          <div class="field">
-            <label for="lancData">Data da produção</label>
-            <input type="date" id="lancData">
-          </div>
-          <div class="btn-row" style="margin-bottom:2px;">
-            <button class="btn btn-ghost btn-sm" id="btnLancHoje">Ir para hoje</button>
-            <span class="small-note" id="lancStatusNote" style="margin-top:0;"></span>
-          </div>
-        </div>
-        <div id="lancTablesWrap"></div>
-        <div class="divider"></div>
-        <div class="btn-row">
-          <button class="btn btn-primary" id="btnSalvarLancamento">Salvar lançamento do dia</button>
-          <button class="btn btn-ghost" id="btnLimparLancamento">Limpar campos</button>
-        </div>
-        <div class="small-note">Linhas com telas ou unidades por tela em branco/zero não são gravadas. Ao reabrir uma data já lançada, os valores existentes são carregados automaticamente para edição.</div>
+      <div id="lancCardsContainer"></div>
+
+      <div class="panel" style="margin-top:32px;text-align:center;background:var(--ink);color:#FFF;border:none;">
+        <h3 style="margin:0 0 8px;font-family:var(--font-display);">Finalizou os registros?</h3>
+        <p style="margin:0 0 16px;color:#CBBCA3;font-size:13px;">Os botões "+ Somar" já gravaram tudo no banco de dados.</p>
+        <button class="btn btn-accent" id="btnEncerrarDia" style="width:100%;">Encerrar Produção</button>
       </div>
     </section>
 
-    <!-- ===================== HISTÓRICO ===================== -->
+    <!-- HISTÓRICO -->
     <section class="view" id="view-historico">
       <div class="view-header">
-        <div>
-          <div class="eyebrow">Registros anteriores</div>
-          <div class="view-title">Histórico de produção</div>
-          <div class="view-sub">Consulte, edite ou remova dias já lançados.</div>
-        </div>
+        <div class="eyebrow">Consultas</div>
+        <div class="view-title">Histórico</div>
       </div>
       <div class="panel">
         <div class="field-row">
-          <div class="field"><label for="histInicio">De</label><input type="date" id="histInicio"></div>
-          <div class="field"><label for="histFim">Até</label><input type="date" id="histFim"></div>
-          <div class="field">
-            <label for="histCategoria">Categoria</label>
-            <select id="histCategoria">
-              <option value="todas">Todas</option>
-              <option value="balcao">Balcão de atendimento</option>
-              <option value="gondola">Gôndolas</option>
-            </select>
-          </div>
-          <div class="btn-row" style="margin-bottom:2px;">
-            <button class="btn btn-accent" id="btnFiltrarHistorico">Filtrar</button>
-            <button class="btn btn-ghost" id="btnHistUlt30">Últimos 30 dias</button>
-          </div>
+          <div class="field" style="flex:1;"><label>De</label><input type="date" id="histInicio"></div>
+          <div class="field" style="flex:1;"><label>Até</label><input type="date" id="histFim"></div>
+          <div class="btn-row" style="width:100%;"><button class="btn btn-primary" id="btnFiltrarHist" style="width:100%;">Buscar</button></div>
         </div>
-        <div id="histTableWrap"></div>
+        <div id="histTableWrap" style="margin-top:16px;"></div>
       </div>
     </section>
 
-    <!-- ===================== COMPARAÇÃO ===================== -->
-    <section class="view" id="view-comparacao">
-      <div class="view-header">
-        <div>
-          <div class="eyebrow">Análise</div>
-          <div class="view-title">Comparação por período</div>
-          <div class="view-sub">Compare a produção entre dois intervalos de datas.</div>
-        </div>
-      </div>
-      <div class="panel">
-        <div class="btn-row" style="margin-bottom:14px;">
-          <button class="btn btn-sm" data-preset="semana">Esta semana × anterior</button>
-          <button class="btn btn-sm" data-preset="mes">Este mês × anterior</button>
-          <button class="btn btn-sm" data-preset="30">Últimos 30 × 30 anteriores</button>
-        </div>
-        <div class="two-col">
-          <div>
-            <div class="section-caption" style="border-radius:9px;">Período A</div>
-            <div class="field-row" style="margin-top:12px;">
-              <div class="field"><label for="compAInicio">De</label><input type="date" id="compAInicio"></div>
-              <div class="field"><label for="compAFim">Até</label><input type="date" id="compAFim"></div>
-            </div>
-          </div>
-          <div>
-            <div class="section-caption" style="border-radius:9px;background:var(--accent);color:#241A0E;">Período B</div>
-            <div class="field-row" style="margin-top:12px;">
-              <div class="field"><label for="compBInicio">De</label><input type="date" id="compBInicio"></div>
-              <div class="field"><label for="compBFim">Até</label><input type="date" id="compBFim"></div>
-            </div>
-          </div>
-        </div>
-        <button class="btn btn-primary" id="btnComparar">Comparar períodos</button>
-      </div>
-
-      <div class="panel" id="compResultPanel" style="display:none;">
-        <div class="kpi-grid" id="compKpis" style="grid-template-columns:repeat(3,1fr);"></div>
-        <div class="chart-wrap tall"><canvas id="chartComparacao"></canvas></div>
-        <div class="divider"></div>
-        <div id="compTableWrap"></div>
-      </div>
-    </section>
-
-    <!-- ===================== RELATÓRIOS ===================== -->
+    <!-- RELATÓRIOS -->
     <section class="view" id="view-relatorios">
       <div class="view-header">
-        <div>
-          <div class="eyebrow">Exportação</div>
-          <div class="view-title">Relatórios</div>
-          <div class="view-sub">Gere PDFs no padrão da planilha original ou exporte os dados para Excel.</div>
-        </div>
+        <div class="eyebrow">Exportação</div>
+        <div class="view-title">Relatórios Agrupados</div>
+        <div class="view-sub">Os dados são separados automaticamente pelas famílias de massas (Doce, Francesa, etc).</div>
       </div>
 
-      <div class="two-col">
+      <div class="grid-2">
         <div class="panel">
-          <div class="panel-title">Relatório diário (PDF)</div>
-          <div class="panel-sub">Reproduz as duas tabelas — Balcão e Gôndolas — de um dia específico.</div>
+          <div class="panel-title">Relatório do Dia (PDF)</div>
+          <div class="panel-sub">Lista detalhada e agrupada de uma data.</div>
           <div class="field-row">
-            <div class="field"><label for="relDiaData">Data</label><input type="date" id="relDiaData"></div>
+            <div class="field" style="flex:1;"><label>Data</label><input type="date" id="relDiaData"></div>
           </div>
-          <button class="btn btn-accent" id="btnPdfDia">Gerar PDF do dia</button>
+          <button class="btn btn-accent" id="btnPdfDia" style="width:100%;">Baixar PDF Diário</button>
         </div>
         <div class="panel">
-          <div class="panel-title">Relatório de período (PDF)</div>
-          <div class="panel-sub">Resumo por produto e por dia dentro de um intervalo.</div>
+          <div class="panel-title">Relatório de Período (PDF)</div>
+          <div class="panel-sub">Resumo consolidado por família de massa.</div>
           <div class="field-row">
-            <div class="field"><label for="relPerInicio">De</label><input type="date" id="relPerInicio"></div>
-            <div class="field"><label for="relPerFim">Até</label><input type="date" id="relPerFim"></div>
+            <div class="field" style="flex:1;"><label>De</label><input type="date" id="relPerInicio"></div>
+            <div class="field" style="flex:1;"><label>Até</label><input type="date" id="relPerFim"></div>
           </div>
-          <button class="btn btn-accent" id="btnPdfPeriodo">Gerar PDF do período</button>
+          <button class="btn btn-accent" id="btnPdfPeriodo" style="width:100%;">Baixar PDF do Período</button>
         </div>
       </div>
 
       <div class="panel">
         <div class="panel-title">Exportar para Excel (.xlsx)</div>
-        <div class="panel-sub">Planilha com registros detalhados, resumo por produto e resumo diário.</div>
+        <div class="panel-sub">Planilha completa contendo os lançamentos e uma aba de Resumo por Massa.</div>
         <div class="field-row">
-          <div class="field"><label for="xlsInicio">De</label><input type="date" id="xlsInicio"></div>
-          <div class="field"><label for="xlsFim">Até</label><input type="date" id="xlsFim"></div>
+          <div class="field"><label>De</label><input type="date" id="xlsInicio"></div>
+          <div class="field"><label>Até</label><input type="date" id="xlsFim"></div>
         </div>
-        <button class="btn btn-accent" id="btnExportXlsx">Exportar Excel</button>
-        <div class="small-note">Deixe as datas em branco para exportar todo o histórico.</div>
+        <button class="btn btn-primary" id="btnExportXlsx">Baixar Planilha Excel</button>
       </div>
     </section>
 
-    <!-- ===================== PRODUTOS ===================== -->
+    <!-- PRODUTOS -->
     <section class="view" id="view-produtos">
-      <div class="view-header">
+      <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <div class="eyebrow">Configuração</div>
-          <div class="view-title">Produtos cadastrados</div>
-          <div class="view-sub">Adicione, edite ou desative produtos das tabelas de lançamento.</div>
+          <div class="view-title">Produtos</div>
         </div>
+        <button class="btn btn-primary btn-sm" onclick="abrirModalProduto()">+ Novo</button>
       </div>
-      <div class="panel">
-        <div class="panel-title">Novo produto</div>
-        <div class="field-row">
-          <div class="field" style="min-width:220px;"><label for="novoProdNome">Nome</label><input type="text" id="novoProdNome" placeholder="Ex.: Pão francês"></div>
-          <div class="field">
-            <label for="novoProdCategoria">Categoria</label>
-            <select id="novoProdCategoria">
-              <option value="balcao">Balcão de atendimento</option>
-              <option value="gondola">Gôndolas</option>
-            </select>
-          </div>
-          <div class="btn-row" style="margin-bottom:2px;"><button class="btn btn-primary" id="btnAddProduto">Adicionar produto</button></div>
-        </div>
-      </div>
-      <div class="panel">
+      <div class="panel" style="padding:0;">
         <div id="produtosTableWrap"></div>
-      </div>
-    </section>
-
-    <!-- ===================== BACKUP ===================== -->
-    <section class="view" id="view-backup">
-      <div class="view-header">
-        <div>
-          <div class="eyebrow">Sistema</div>
-          <div class="view-title">Backup &amp; dados</div>
-          <div class="view-sub">Seus dados ficam salvos neste navegador (IndexedDB). Faça backups como faria em um app do celular.</div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title">Status do backup</div>
-        <div class="status-card" id="backupStatusCard">
-          <span class="dot" id="backupStatusDot"></span>
-          <div class="main">
-            <div class="t" id="backupStatusTitle">Verificando…</div>
-            <div class="s" id="backupStatusSub"></div>
-          </div>
-        </div>
-        <div class="btn-row" style="margin-top:16px;">
-          <button class="btn btn-accent" id="btnCriarBackup">Criar backup agora (.json)</button>
-          <button class="btn" id="btnRestaurarBackup">Restaurar de um arquivo</button>
-          <input type="file" id="inputRestaurar" accept="application/json" style="display:none;">
-        </div>
-        <div class="small-note">O backup baixa um arquivo .json com todos os produtos e registros. Guarde-o no Google Drive, e-mail ou pen drive — assim como o backup de um app de celular.</div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title">Dados de exemplo</div>
-        <div class="panel-sub">Gere dados fictícios apenas se quiser testar o sistema. Nada é criado automaticamente.</div>
-        <div id="amostraInfo" class="small-note" style="margin-top:0;margin-bottom:12px;"></div>
-        <div class="btn-row">
-          <button class="btn" id="btnGerarAmostra">Gerar dados de exemplo (30 dias)</button>
-          <button class="btn btn-danger" id="btnRemoverAmostra">Remover dados de exemplo</button>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-title" style="color:var(--bad);">Zona de risco</div>
-        <div class="panel-sub">Apaga permanentemente os registros de produção deste navegador. Os produtos cadastrados são mantidos.</div>
-        <button class="btn btn-danger" id="btnApagarTudo">Apagar todos os registros</button>
       </div>
     </section>
 
   </main>
 </div>
 
+<!-- MODAL GERAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal" id="modalBox"></div>
 </div>
 <div class="toast-stack" id="toastStack"></div>
 
 <script>
-(function(){
 "use strict";
 
 /* =========================================================
    1. BANCO DE DADOS (IndexedDB)
    ========================================================= */
-const DB_NAME = "padariaProducaoDB";
-const DB_VERSION = 1;
+const DB_NAME = "padariaProducaoV5";
+const DB_VERSION = 2;
 let dbInstance = null;
 
 function abrirDB(){
@@ -686,1125 +274,738 @@ function abrirDB(){
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = (e)=>{
       const db = e.target.result;
-      if(!db.objectStoreNames.contains("produtos")){
-        const store = db.createObjectStore("produtos", {keyPath:"id"});
-        store.createIndex("categoria", "categoria", {unique:false});
-      }
+      if(!db.objectStoreNames.contains("produtos")) db.createObjectStore("produtos", {keyPath:"id"});
       if(!db.objectStoreNames.contains("registros")){
         const store = db.createObjectStore("registros", {keyPath:"id"});
         store.createIndex("data", "data", {unique:false});
-        store.createIndex("produtoId", "produtoId", {unique:false});
-        store.createIndex("dataProduto", ["data","produtoId"], {unique:true});
-        store.createIndex("amostra", "amostra", {unique:false});
       }
-      if(!db.objectStoreNames.contains("meta")){
-        db.createObjectStore("meta", {keyPath:"chave"});
-      }
+      if(!db.objectStoreNames.contains("dias")) db.createObjectStore("dias", {keyPath:"data"});
     };
     req.onsuccess = (e)=>{ dbInstance = e.target.result; resolve(dbInstance); };
     req.onerror = (e)=> reject(e.target.error);
   });
 }
-
-function tx(storeNames, mode){
-  return abrirDB().then(db=> db.transaction(storeNames, mode));
-}
-
-function reqToPromise(req){
-  return new Promise((resolve,reject)=>{
-    req.onsuccess = ()=> resolve(req.result);
-    req.onerror = ()=> reject(req.error);
-  });
-}
-
-async function dbGetAll(store){
-  const t = await tx([store], "readonly");
-  return reqToPromise(t.objectStore(store).getAll());
-}
-async function dbGet(store, key){
-  const t = await tx([store], "readonly");
-  return reqToPromise(t.objectStore(store).get(key));
-}
-async function dbPut(store, obj){
-  const t = await tx([store], "readwrite");
-  return reqToPromise(t.objectStore(store).put(obj));
-}
-async function dbBulkPut(store, arr){
-  const t = await tx([store], "readwrite");
-  const os = t.objectStore(store);
-  arr.forEach(o=> os.put(o));
-  return new Promise((resolve,reject)=>{ t.oncomplete=()=>resolve(); t.onerror=()=>reject(t.error); });
-}
-async function dbDelete(store, key){
-  const t = await tx([store], "readwrite");
-  return reqToPromise(t.objectStore(store).delete(key));
-}
-async function dbClear(store){
-  const t = await tx([store], "readwrite");
-  return reqToPromise(t.objectStore(store).clear());
-}
-async function dbGetByIndex(store, indexName, value){
-  const t = await tx([store], "readonly");
-  return reqToPromise(t.objectStore(store).index(indexName).getAll(value));
-}
-
-function uuid(){
-  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-}
+function tx(storeNames, mode){ return abrirDB().then(db=> db.transaction(storeNames, mode)); }
+function reqToPromise(req){ return new Promise((res,rej)=>{ req.onsuccess=()=>res(req.result); req.onerror=()=>rej(req.error); }); }
+async function dbGetAll(store){ const t = await tx([store], "readonly"); return reqToPromise(t.objectStore(store).getAll()); }
+async function dbPut(store, obj){ const t = await tx([store], "readwrite"); return reqToPromise(t.objectStore(store).put(obj)); }
+async function dbGetByIndex(store, indexName, value){ const t = await tx([store], "readonly"); return reqToPromise(t.objectStore(store).index(indexName).getAll(value)); }
+async function dbDelete(store, key){ const t = await tx([store], "readwrite"); return reqToPromise(t.objectStore(store).delete(key)); }
+async function dbGetOne(store, key){ const t = await tx([store], "readonly"); return reqToPromise(t.objectStore(store).get(key)); }
+async function diaEstaFechado(dataIso){ const d = await dbGetOne("dias", dataIso); return !!(d && d.fechado); }
+function uuid(){ return "id-"+Date.now()+"-"+Math.random().toString(16).slice(2); }
 
 /* =========================================================
-   2. DADOS PADRÃO / UTILITÁRIOS
+   2. ESTADO GLOBAL & HELPERS
    ========================================================= */
-const PRODUTOS_PADRAO = [
-  {nome:"Alagoas", categoria:"balcao"},
-  {nome:"Bolachão coco", categoria:"balcao"},
-  {nome:"Bolachão simples", categoria:"balcao"},
-  {nome:"Brioches", categoria:"balcao"},
-  {nome:"Carteira", categoria:"balcao"},
-  {nome:"Criolo", categoria:"balcao"},
-  {nome:"Doce coco", categoria:"balcao"},
-  {nome:"Doce coco Goiabada", categoria:"balcao"},
-  {nome:"Hambúrguer", categoria:"balcao"},
-  {nome:"Roberto", categoria:"balcao"},
-  {nome:"Seda", categoria:"balcao"},
-  {nome:"Pão recife", categoria:"gondola"},
-  {nome:"Hot Dog", categoria:"gondola"},
-  {nome:"Banquete", categoria:"gondola"},
-  {nome:"Pão de forma", categoria:"gondola"},
-];
-
-const CATEGORIA_LABEL = {balcao:"Pães para o balcão de atendimento", gondola:"Pães para gôndolas"};
-
+const state = { view: "dashboard", produtos: [], charts: {} };
+function hojeISO(){ const d=new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function addDiasISO(iso, dias){ const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+dias); return d.toISOString().slice(0,10); }
 function fmtInt(n){ return new Intl.NumberFormat("pt-BR").format(Math.round(n||0)); }
-function fmtData(iso){
-  if(!iso) return "—";
-  const [y,m,d] = iso.split("-");
-  return `${d}/${m}/${y}`;
-}
-function fmtDataHora(iso){
-  const d = new Date(iso);
-  return d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR", {hour:"2-digit",minute:"2-digit"});
-}
-function hojeISO(){
-  const d = new Date();
-  const off = d.getTimezoneOffset();
-  const local = new Date(d.getTime() - off*60000);
-  return local.toISOString().slice(0,10);
-}
-function addDiasISO(iso, dias){
-  const d = new Date(iso + "T00:00:00");
-  d.setDate(d.getDate() + dias);
-  return d.toISOString().slice(0,10);
-}
-function diffDias(isoA, isoB){
-  const a = new Date(isoA + "T00:00:00");
-  const b = new Date(isoB + "T00:00:00");
-  return Math.round((b - a) / 86400000);
-}
-function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+function fmtKg(n){ return new Intl.NumberFormat("pt-BR",{minimumFractionDigits:3,maximumFractionDigits:3}).format(n||0); }
+function fmtData(iso){ const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 
-/* =========================================================
-   3. ESTADO GLOBAL EM MEMÓRIA
-   ========================================================= */
-const state = {
-  view: "dashboard",
-  produtos: [],
-  dashRange: "hoje",
-  charts: {},
-};
+// Obtém as categorias dinâmicas presentes nos produtos, garantindo as básicas.
+function getCategoriasAtivas(){
+  const cats = new Set(["Massa Francesa", "Massa Doce"]);
+  state.produtos.forEach(p=> cats.add(p.categoria));
+  return Array.from(cats).sort();
+}
 
-function produtosAtivos(){ return state.produtos.filter(p=>p.ativo!==false).sort((a,b)=> (a.ordem-b.ordem)); }
-function produtosPorCategoria(cat){ return produtosAtivos().filter(p=>p.categoria===cat); }
-function produtoNome(id){ const p = state.produtos.find(p=>p.id===id); return p? p.nome : "(produto removido)"; }
-
-/* =========================================================
-   4. TOASTS & MODAL
-   ========================================================= */
-function toast(msg, type){
+function toast(msg, type="ok"){
   const stack = document.getElementById("toastStack");
   const el = document.createElement("div");
-  el.className = "toast" + (type? " "+type : "");
-  el.textContent = msg;
+  el.className = `toast ${type}`; el.textContent = msg;
   stack.appendChild(el);
-  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(),300); }, 3200);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(),300); }, 3000);
 }
 
 function abrirModal(html){
   document.getElementById("modalBox").innerHTML = html;
   document.getElementById("modalOverlay").classList.add("active");
 }
-function fecharModal(){
-  document.getElementById("modalOverlay").classList.remove("active");
-}
-document.getElementById("modalOverlay").addEventListener("click", (e)=>{
-  if(e.target.id === "modalOverlay") fecharModal();
-});
-
-function confirmarAcao(titulo, texto, textoBotao, onConfirm){
-  abrirModal(`
-    <div class="modal-head">
-      <div class="modal-title">${titulo}</div>
-      <button class="modal-close" onclick="window.__fecharModal()">&times;</button>
-    </div>
-    <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;">${texto}</p>
-    <div class="btn-row" style="margin-top:16px;justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="window.__fecharModal()">Cancelar</button>
-      <button class="btn btn-danger" id="modalConfirmBtn">${textoBotao}</button>
-    </div>
-  `);
-  document.getElementById("modalConfirmBtn").addEventListener("click", ()=>{
-    fecharModal();
-    onConfirm();
-  });
-}
-window.__fecharModal = fecharModal;
+function fecharModal(){ document.getElementById("modalOverlay").classList.remove("active"); }
+document.getElementById("modalOverlay").addEventListener("click", e=>{ if(e.target.id==="modalOverlay") fecharModal(); });
 
 /* =========================================================
-   5. NAVEGAÇÃO (topbar + navegação inferior + menu "Mais")
+   3. NAVEGAÇÃO
    ========================================================= */
-const TITULOS_VIEW = {
-  dashboard:"Painel de produção", lancamento:"Lançamento diário", historico:"Histórico",
-  comparacao:"Comparação por período", relatorios:"Relatórios", produtos:"Produtos", backup:"Backup & dados",
-};
-const VIEWS_NO_SHEET = ["comparacao","produtos","backup"];
-
 function irPara(view){
   state.view = view;
   document.querySelectorAll(".view").forEach(v=> v.classList.remove("active"));
-  document.getElementById("view-"+view).classList.add("active");
-  document.getElementById("mainContent").scrollTop = 0;
-
-  document.querySelectorAll(".tabbtn[data-view]").forEach(b=> b.classList.toggle("active", b.dataset.view===view));
-  document.getElementById("tabMais").classList.toggle("active", VIEWS_NO_SHEET.includes(view));
-  document.querySelectorAll(".sheet-item[data-view]").forEach(b=> b.classList.toggle("active", b.dataset.view===view));
-
-  document.getElementById("topbarTitle").textContent = TITULOS_VIEW[view] || "Painel de produção";
-  fecharSheet();
-  renderView(view);
-}
-
-document.getElementById("bottomnav").addEventListener("click", (e)=>{
-  const btn = e.target.closest(".tabbtn[data-view]");
-  if(btn){ irPara(btn.dataset.view); return; }
-  if(e.target.closest("#tabMais")) abrirSheet();
-});
-document.getElementById("sheetBox").addEventListener("click", (e)=>{
-  const item = e.target.closest(".sheet-item[data-view]");
-  if(item){ irPara(item.dataset.view); }
-});
-document.getElementById("btnFecharSheet").addEventListener("click", fecharSheet);
-document.getElementById("sheetOverlay").addEventListener("click", (e)=>{
-  if(e.target.id === "sheetOverlay") fecharSheet();
-});
-document.getElementById("topbarBackupBtn").addEventListener("click", ()=> irPara("backup"));
-
-function abrirSheet(){ document.getElementById("sheetOverlay").classList.add("active"); }
-function fecharSheet(){ document.getElementById("sheetOverlay").classList.remove("active"); }
-
-function renderView(view){
+  document.getElementById(`view-${view}`).classList.add("active");
+  document.querySelectorAll(".tabbtn").forEach(b=> b.classList.toggle("active", b.dataset.view===view));
+  window.scrollTo(0,0);
+  
   if(view==="dashboard") renderDashboard();
   else if(view==="lancamento") renderLancamento();
   else if(view==="historico") renderHistorico();
-  else if(view==="comparacao"){ /* aguarda ação do usuário */ }
-  else if(view==="relatorios"){ /* formulários estáticos */ }
-  else if(view==="produtos") renderProdutos();
-  else if(view==="backup") renderBackupView();
+  else if(view==="produtos") renderProdutosTabela();
+  else if(view==="relatorios") {
+    document.getElementById("relDiaData").value = hojeISO();
+    document.getElementById("relPerInicio").value = addDiasISO(hojeISO(), -7);
+    document.getElementById("relPerFim").value = hojeISO();
+  }
 }
-
-/* =========================================================
-   6. CÁLCULO / AGREGAÇÃO
-   ========================================================= */
-async function registrosNoIntervalo(inicioISO, fimISO){
-  const todos = await dbGetAll("registros");
-  return todos.filter(r=> r.data >= inicioISO && r.data <= fimISO);
-}
-
-function agregarPorProduto(registros){
-  const mapa = {};
-  registros.forEach(r=>{
-    if(!mapa[r.produtoId]) mapa[r.produtoId] = {produtoId:r.produtoId, telas:0, unidades:0};
-    mapa[r.produtoId].telas += r.telas;
-    mapa[r.produtoId].unidades += r.totalUnidades;
-  });
-  return Object.values(mapa);
-}
-function agregarPorDia(registros){
-  const mapa = {};
-  registros.forEach(r=>{
-    if(!mapa[r.data]) mapa[r.data] = {data:r.data, telas:0, unidades:0, produtos:new Set()};
-    mapa[r.data].telas += r.telas;
-    mapa[r.data].unidades += r.totalUnidades;
-    mapa[r.data].produtos.add(r.produtoId);
-  });
-  return Object.values(mapa).sort((a,b)=> a.data.localeCompare(b.data));
-}
-function totalUnidades(registros){ return registros.reduce((s,r)=> s+r.totalUnidades, 0); }
-function totalTelas(registros){ return registros.reduce((s,r)=> s+r.telas, 0); }
-
-/* =========================================================
-   7. DASHBOARD
-   ========================================================= */
-document.getElementById("dashRangeToggle").addEventListener("click", (e)=>{
-  const btn = e.target.closest("button");
-  if(!btn) return;
-  document.querySelectorAll("#dashRangeToggle button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  state.dashRange = btn.dataset.range;
-  renderDashboard();
+document.getElementById("bottomnav").addEventListener("click", e=>{
+  const btn = e.target.closest(".tabbtn"); if(btn) irPara(btn.dataset.view);
 });
 
-function destroyChart(id){
-  if(state.charts[id]){ state.charts[id].destroy(); delete state.charts[id]; }
-}
+/* =========================================================
+   4. DASHBOARD
+   ========================================================= */
+document.getElementById("dashRange").addEventListener("change", renderDashboard);
 
 async function renderDashboard(){
+  const range = document.getElementById("dashRange").value;
   const hoje = hojeISO();
-  let inicio, fim = hoje, diasPeriodo;
-  if(state.dashRange === "hoje"){ inicio = hoje; diasPeriodo = 1; }
-  else { diasPeriodo = parseInt(state.dashRange,10); inicio = addDiasISO(hoje, -(diasPeriodo-1)); }
+  let inicio = range==="hoje" ? hoje : addDiasISO(hoje, -(parseInt(range)-1));
+  
+  const registros = (await dbGetAll("registros")).filter(r=> r.data>=inicio && r.data<=hoje);
 
-  const registros = await registrosNoIntervalo(inicio, fim);
-  const inicioAnterior = addDiasISO(inicio, -diasPeriodo);
-  const fimAnterior = addDiasISO(inicio, -1);
-  const registrosAnteriores = await registrosNoIntervalo(inicioAnterior, fimAnterior);
-
-  const totalU = totalUnidades(registros);
-  const totalT = totalTelas(registros);
-  const totalUAnt = totalUnidades(registrosAnteriores);
-  const porProduto = agregarPorProduto(registros).sort((a,b)=> b.unidades-a.unidades);
-  const topProduto = porProduto[0];
-  const mediaDiaria = totalU / diasPeriodo;
-
-  const delta = totalUAnt>0 ? ((totalU-totalUAnt)/totalUAnt*100) : (totalU>0?100:0);
-  const deltaClasse = totalUAnt===0 && totalU===0 ? "flat" : (delta>0.5?"up":(delta<-0.5?"down":"flat"));
-  const deltaSeta = deltaClasse==="up"?"▲":(deltaClasse==="down"?"▼":"—");
+  let totKg=0, totUnid=0, totTelas=0;
+  const prodMap = {};
+  
+  registros.forEach(r=>{
+    totKg += (r.pesoKg || 0);
+    totUnid += (r.unidades || 0);
+    totTelas += (r.telas || 0);
+    if(!prodMap[r.produtoId]) prodMap[r.produtoId] = {kg:0, unid:0};
+    prodMap[r.produtoId].kg += (r.pesoKg || 0);
+    prodMap[r.produtoId].unid += (r.unidades || 0);
+  });
 
   document.getElementById("dashKpis").innerHTML = `
-    <div class="kpi">
-      <div class="kpi-label">Unidades produzidas</div>
-      <div class="kpi-value">${fmtInt(totalU)}</div>
-      <div class="kpi-delta ${deltaClasse}">${deltaSeta} ${Math.abs(delta).toFixed(1)}% vs período anterior</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Telas utilizadas</div>
-      <div class="kpi-value">${fmtInt(totalT)}</div>
-      <div class="kpi-delta flat">${totalT>0? (totalU/totalT).toFixed(1) : "0"} un. por tela (média)</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Produto destaque</div>
-      <div class="kpi-value" style="font-family:var(--font-display);font-size:19px;">${topProduto? produtoNome(topProduto.produtoId) : "—"}</div>
-      <div class="kpi-delta flat">${topProduto? fmtInt(topProduto.unidades)+" unidades" : "sem registros"}</div>
-    </div>
-    <div class="kpi">
-      <div class="kpi-label">Média diária</div>
-      <div class="kpi-value">${fmtInt(mediaDiaria)}</div>
-      <div class="kpi-delta flat">unidades / dia no período</div>
-    </div>
+    <div class="kpi"><div class="kpi-label">Total Massa (Kg)</div><div class="kpi-value">${fmtKg(totKg)}</div></div>
+    <div class="kpi"><div class="kpi-label">Unidades</div><div class="kpi-value">${fmtInt(totUnid)}</div></div>
+    <div class="kpi"><div class="kpi-label">Telas Utilizadas</div><div class="kpi-value">${fmtInt(totTelas)}</div></div>
   `;
 
-  document.getElementById("dashBarSub").textContent =
-    state.dashRange==="hoje" ? `Unidades produzidas hoje (${fmtData(hoje)})` : `Unidades totais nos últimos ${diasPeriodo} dias`;
-
-  // gráfico de barras por produto
-  destroyChart("produtos");
-  const ctxP = document.getElementById("chartProdutos").getContext("2d");
-  const labelsP = porProduto.map(p=>produtoNome(p.produtoId));
-  const dataP = porProduto.map(p=>p.unidades);
-  state.charts.produtos = new Chart(ctxP, {
-    type:"bar",
-    data:{ labels:labelsP.length?labelsP:["Sem dados"], datasets:[{ data:dataP.length?dataP:[0], backgroundColor:"#C68A2E", borderRadius:5, maxBarThickness:26 }] },
-    options:{
-      indexAxis:"y",
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=> fmtInt(c.parsed.x)+" unidades"}}},
-      scales:{ x:{beginAtZero:true, grid:{color:"#EFE6D2"}}, y:{grid:{display:false}} },
-      responsive:true, maintainAspectRatio:false,
-    }
+  const topKg = Object.entries(prodMap).sort((a,b)=>b[1].kg-a[1].kg).slice(0,5);
+  const labelsKg = topKg.map(x=> state.produtos.find(p=>p.id===x[0])?.nome || "Removido");
+  
+  if(state.charts.kg) state.charts.kg.destroy();
+  state.charts.kg = new Chart(document.getElementById("chartKg").getContext("2d"), {
+    type:"bar", data:{ labels:labelsKg, datasets:[{ data:topKg.map(x=>x[1].kg), backgroundColor:"#D88C22", borderRadius:4 }] },
+    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
   });
 
-  // ranking
-  const totalGeral = totalU || 1;
-  const rankHtml = porProduto.slice(0,8).map((p,i)=>{
-    const pct = (p.unidades/totalGeral*100);
-    return `<li class="ranking-item">
-      <span class="rank-num">${i+1}</span>
-      <div class="rank-item-full">
-        <div class="rank-info"><span>${produtoNome(p.produtoId)}</span><span class="rank-val">${fmtInt(p.unidades)} (${pct.toFixed(0)}%)</span></div>
-        <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${clamp(pct,2,100)}%"></div></div>
-      </div>
-    </li>`;
-  }).join("");
-  document.getElementById("dashRanking").innerHTML = rankHtml || `<div class="empty-state"><p>Nenhum registro no período.</p></div>`;
+  const topUnid = Object.entries(prodMap).sort((a,b)=>b[1].unid-a[1].unid).slice(0,5);
+  const labelsUnid = topUnid.map(x=> state.produtos.find(p=>p.id===x[0])?.nome || "Removido");
 
-  // tendência 14 dias
-  const inicioTend = addDiasISO(hoje, -13);
-  const registrosTend = await registrosNoIntervalo(inicioTend, hoje);
-  const porDia = agregarPorDia(registrosTend);
-  const mapaDia = {};
-  porDia.forEach(d=> mapaDia[d.data]=d.unidades);
-  const labelsT = [], dataT = [];
-  for(let i=13;i>=0;i--){ const iso = addDiasISO(hoje,-i); labelsT.push(fmtData(iso).slice(0,5)); dataT.push(mapaDia[iso]||0); }
-  destroyChart("tendencia");
-  const ctxT = document.getElementById("chartTendencia").getContext("2d");
-  state.charts.tendencia = new Chart(ctxT, {
-    type:"line",
-    data:{ labels:labelsT, datasets:[{ data:dataT, borderColor:"#9C6B1D", backgroundColor:"rgba(198,138,46,.15)", fill:true, tension:.3, pointRadius:3, pointBackgroundColor:"#9C6B1D" }] },
-    options:{ plugins:{legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtInt(c.parsed.y)+" unidades"}}}, scales:{ y:{beginAtZero:true, grid:{color:"#EFE6D2"}}, x:{grid:{display:false}} }, responsive:true, maintainAspectRatio:false }
+  if(state.charts.unid) state.charts.unid.destroy();
+  state.charts.unid = new Chart(document.getElementById("chartUnidades").getContext("2d"), {
+    type:"bar", data:{ labels:labelsUnid, datasets:[{ data:topUnid.map(x=>x[1].unid), backgroundColor:"#356A8E", borderRadius:4 }] },
+    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
   });
-
-  // alertas
-  const alertas = [];
-  if(registros.length===0){
-    alertas.push({tipo:"warn", texto:`Nenhum lançamento encontrado no período selecionado. <a href="#" onclick="window.__irLancamento();return false;">Lançar produção agora</a>.`});
-  } else {
-    if(deltaClasse==="down" && Math.abs(delta)>=10) alertas.push({tipo:"bad", texto:`Queda de ${Math.abs(delta).toFixed(1)}% na produção total em relação ao período anterior.`});
-    if(deltaClasse==="up" && delta>=10) alertas.push({tipo:"good", texto:`Alta de ${delta.toFixed(1)}% na produção total em relação ao período anterior.`});
-  }
-  if(state.dashRange!=="hoje"){
-    const registrosHoje = registros.filter(r=>r.data===hoje);
-    if(registrosHoje.length===0) alertas.push({tipo:"info", texto:"Ainda não há lançamento para hoje."});
-  }
-  const produtosSemRegistroPeriodo = produtosAtivos().filter(p=> !porProduto.find(x=>x.produtoId===p.id));
-  if(produtosSemRegistroPeriodo.length>0 && registros.length>0){
-    alertas.push({tipo:"warn", texto:`${produtosSemRegistroPeriodo.length} produto(s) sem produção registrada no período: ${produtosSemRegistroPeriodo.slice(0,4).map(p=>p.nome).join(", ")}${produtosSemRegistroPeriodo.length>4?"…":""}.`});
-  }
-  document.getElementById("dashAlerts").innerHTML = alertas.length
-    ? alertas.map(a=>`<div class="alert ${a.tipo}">${iconeAlerta(a.tipo)}<span>${a.texto}</span></div>`).join("")
-    : `<div class="alert good">${iconeAlerta("good")}<span>Tudo em ordem — sem alertas para o período.</span></div>`;
-}
-window.__irLancamento = ()=> irPara("lancamento");
-
-function iconeAlerta(tipo){
-  const paths = {
-    warn:'<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
-    bad:'<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
-    good:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
-    info:'<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5"/>',
-  };
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${paths[tipo]||paths.info}</svg>`;
 }
 
 /* =========================================================
-   8. LANÇAMENTO DIÁRIO
+   5. LANÇAMENTO (ACUMULAÇÃO CONTÍNUA)
    ========================================================= */
-function montarSecaoCategoria(categoria){
-  const produtos = produtosPorCategoria(categoria);
-  const linhas = produtos.map(p=>`
-    <div class="prod-row" data-produto="${p.id}">
-      <span class="prod-name">${p.nome}</span>
-      <div class="prod-inputs">
-        <div class="mini-field">
-          <label for="telas-${p.id}">Telas</label>
-          <input type="number" min="0" step="1" inputmode="numeric" class="tel-input" id="telas-${p.id}" data-campo="telas" data-produto="${p.id}" value="" placeholder="0">
-        </div>
-        <span class="mult-sign">×</span>
-        <div class="mini-field">
-          <label for="unid-${p.id}">Un./tela</label>
-          <input type="number" min="0" step="1" inputmode="numeric" class="tel-input" id="unid-${p.id}" data-campo="unid" data-produto="${p.id}" value="" placeholder="0">
-        </div>
-      </div>
-      <div class="prod-total" data-total-de="${p.id}">0<small>unidades</small></div>
-    </div>
-  `).join("");
-  return `
-    <div class="section-caption">${CATEGORIA_LABEL[categoria]}</div>
-    <div class="prod-list">
-      ${linhas || `<div class="prod-row" style="justify-content:center;color:var(--ink-faint);">Nenhum produto ativo nesta categoria.</div>`}
-    </div>
-    <div class="prod-list-foot">
-      <span class="foot-label">Total ${CATEGORIA_LABEL[categoria].toLowerCase()}</span>
-      <span class="foot-vals"><span>Telas: <b data-subtotal-telas="${categoria}">0</b></span><span>Unidades: <b data-subtotal-unid="${categoria}">0</b></span></span>
-    </div>
-  `;
-}
+document.getElementById("lancData").addEventListener("change", renderLancamento);
 
-function renderLancamento(){
-  const dataInput = document.getElementById("lancData");
+async function renderLancamento(){
+  let dataInput = document.getElementById("lancData");
   if(!dataInput.value) dataInput.value = hojeISO();
-  document.getElementById("lancTablesWrap").innerHTML =
-    montarSecaoCategoria("balcao") + montarSecaoCategoria("gondola");
-  ligarEventosLinhas();
-  carregarLancamentoData(dataInput.value);
-}
+  const dataIso = dataInput.value;
 
-function ligarEventosLinhas(){
-  document.querySelectorAll("#lancTablesWrap .tel-input").forEach(inp=>{
-    inp.addEventListener("input", recalcularLinha);
-  });
-}
+  const fechado = await diaEstaFechado(dataIso);
+  const registros = await dbGetByIndex("registros","data",dataIso);
+  const regMap = {}; registros.forEach(r=> regMap[r.produtoId] = r);
+  const btnEncerrar = document.getElementById("btnEncerrarDia");
 
-function recalcularLinha(e){
-  const produtoId = e.target.dataset.produto;
-  const linha = document.querySelector(`#lancTablesWrap .prod-row[data-produto="${produtoId}"]`);
-  const telas = parseFloat(linha.querySelector('[data-campo="telas"]').value) || 0;
-  const unid = parseFloat(linha.querySelector('[data-campo="unid"]').value) || 0;
-  const total = telas * unid;
-  const totalEl = linha.querySelector(`[data-total-de="${produtoId}"]`);
-  totalEl.innerHTML = `${fmtInt(total)}<small>unidades</small>`;
-  totalEl.classList.toggle("has-value", total>0);
-  recalcularSubtotais();
-}
+  document.getElementById("lancStatusText").textContent = fechado
+    ? "🔒 Produção encerrada"
+    : (registros.length ? `${registros.length} item(ns) tem lançamento` : `0 salvos`);
 
-function recalcularSubtotais(){
-  ["balcao","gondola"].forEach(cat=>{
-    let telasSum=0, unidSum=0;
-    produtosPorCategoria(cat).forEach(p=>{
-      const linha = document.querySelector(`#lancTablesWrap .prod-row[data-produto="${p.id}"]`);
-      if(!linha) return;
-      const telas = parseFloat(linha.querySelector('[data-campo="telas"]').value) || 0;
-      const unid = parseFloat(linha.querySelector('[data-campo="unid"]').value) || 0;
-      telasSum += telas;
-      unidSum += telas*unid;
-    });
-    const st = document.querySelector(`[data-subtotal-telas="${cat}"]`);
-    const su = document.querySelector(`[data-subtotal-unid="${cat}"]`);
-    if(st) st.textContent = fmtInt(telasSum);
-    if(su) su.textContent = fmtInt(unidSum);
-  });
-}
+  if(fechado){
+    const linhas = registros.map(r=>{
+      const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Produto Removido";
+      return `<tr><td>${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
+    }).join("");
 
-async function carregarLancamentoData(iso){
-  const registros = await dbGetByIndex("registros", "data", iso);
-  document.querySelectorAll("#lancTablesWrap .tel-input").forEach(inp=> inp.value = "");
-  document.querySelectorAll("#lancTablesWrap [data-total-de]").forEach(el=>{ el.innerHTML = "0<small>unidades</small>"; el.classList.remove("has-value"); });
-  registros.forEach(r=>{
-    const linha = document.querySelector(`#lancTablesWrap .prod-row[data-produto="${r.produtoId}"]`);
-    if(!linha) return;
-    linha.querySelector('[data-campo="telas"]').value = r.telas || "";
-    linha.querySelector('[data-campo="unid"]').value = r.unidadesPorTela || "";
-    const totalEl = linha.querySelector(`[data-total-de="${r.produtoId}"]`);
-    totalEl.innerHTML = `${fmtInt(r.totalUnidades)}<small>unidades</small>`;
-    totalEl.classList.toggle("has-value", r.totalUnidades>0);
-  });
-  recalcularSubtotais();
-  const nota = document.getElementById("lancStatusNote");
-  if(registros.length>0){
-    const amostra = registros.some(r=>r.amostra);
-    nota.textContent = `${registros.length} produto(s) já lançado(s) para ${fmtData(iso)}${amostra? " (contém dados de exemplo)":""}.`;
-  } else {
-    nota.textContent = `Nenhum lançamento para ${fmtData(iso)} ainda.`;
-  }
-}
-
-document.getElementById("lancData").addEventListener("change", (e)=> carregarLancamentoData(e.target.value));
-document.getElementById("btnLancHoje").addEventListener("click", ()=>{
-  document.getElementById("lancData").value = hojeISO();
-  carregarLancamentoData(hojeISO());
-});
-document.getElementById("btnLimparLancamento").addEventListener("click", ()=>{
-  document.querySelectorAll("#lancTablesWrap .tel-input").forEach(inp=> inp.value = "");
-  document.querySelectorAll("#lancTablesWrap [data-total-de]").forEach(el=>{ el.innerHTML = "0<small>unidades</small>"; el.classList.remove("has-value"); });
-  recalcularSubtotais();
-});
-
-document.getElementById("btnSalvarLancamento").addEventListener("click", async ()=>{
-  const iso = document.getElementById("lancData").value;
-  if(!iso){ toast("Selecione uma data.", "err"); return; }
-  const existentes = await dbGetByIndex("registros", "data", iso);
-  const existentesMap = {}; existentes.forEach(r=> existentesMap[r.produtoId]=r);
-  let gravados = 0;
-
-  for(const p of produtosAtivos()){
-    const linha = document.querySelector(`#lancTablesWrap .prod-row[data-produto="${p.id}"]`);
-    if(!linha) continue;
-    const telas = parseFloat(linha.querySelector('[data-campo="telas"]').value) || 0;
-    const unid = parseFloat(linha.querySelector('[data-campo="unid"]').value) || 0;
-    const total = telas*unid;
-    const existente = existentesMap[p.id];
-
-    if(total>0 || telas>0 || unid>0){
-      const reg = existente || {id:uuid(), data:iso, produtoId:p.id, criadoEm:new Date().toISOString()};
-      reg.categoria = p.categoria;
-      reg.telas = telas;
-      reg.unidadesPorTela = unid;
-      reg.totalUnidades = total;
-      reg.amostra = existente? !!existente.amostra : false;
-      reg.atualizadoEm = new Date().toISOString();
-      await dbPut("registros", reg);
-      gravados++;
-    } else if(existente){
-      await dbDelete("registros", existente.id);
-    }
-  }
-  toast(`Lançamento de ${fmtData(iso)} salvo — ${gravados} produto(s).`, "ok");
-  carregarLancamentoData(iso);
-  atualizarStatusBackupSidebar();
-});
-
-/* =========================================================
-   9. HISTÓRICO
-   ========================================================= */
-function defaultHistDatas(){
-  const fim = hojeISO();
-  const inicio = addDiasISO(fim, -29);
-  return {inicio, fim};
-}
-(function initHistDefaults(){
-  const {inicio, fim} = defaultHistDatas();
-  document.getElementById("histInicio").value = inicio;
-  document.getElementById("histFim").value = fim;
-})();
-document.getElementById("btnHistUlt30").addEventListener("click", ()=>{
-  const {inicio, fim} = defaultHistDatas();
-  document.getElementById("histInicio").value = inicio;
-  document.getElementById("histFim").value = fim;
-  document.getElementById("histCategoria").value = "todas";
-  renderHistorico();
-});
-document.getElementById("btnFiltrarHistorico").addEventListener("click", renderHistorico);
-
-async function renderHistorico(){
-  const inicio = document.getElementById("histInicio").value || defaultHistDatas().inicio;
-  const fim = document.getElementById("histFim").value || defaultHistDatas().fim;
-  const categoria = document.getElementById("histCategoria").value;
-  let registros = await registrosNoIntervalo(inicio, fim);
-  if(categoria!=="todas") registros = registros.filter(r=>r.categoria===categoria);
-  const porDia = agregarPorDia(registros).sort((a,b)=> b.data.localeCompare(a.data));
-
-  if(porDia.length===0){
-    document.getElementById("histTableWrap").innerHTML = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-        <p>Nenhum registro encontrado no período filtrado.</p>
-        <button class="btn btn-primary" onclick="window.__irLancamento()">Fazer um lançamento</button>
-      </div>`;
+    document.getElementById("lancCardsContainer").innerHTML = `
+      <div class="panel" style="background:var(--bad-soft);border-color:var(--bad);">
+        <div class="panel-title" style="color:var(--bad);">🔒 Esta produção está encerrada</div>
+        <div class="panel-sub" style="color:var(--ink);">Os lançamentos abaixo estão travados contra alterações. Clique em "Reabrir Produção" abaixo para editar novamente.</div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa (Kg)</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="4">Sem lançamentos neste dia</td></tr>'}</tbody>
+      </table></div>`;
+    btnEncerrar.textContent = "Reabrir Produção";
+    btnEncerrar.dataset.action = "reabrir";
     return;
   }
 
-  const linhas = porDia.map(d=>`
-    <tr>
-      <td>${fmtData(d.data)}</td>
-      <td class="num-cell">${fmtInt(d.telas)}</td>
-      <td class="num-cell">${fmtInt(d.unidades)}</td>
-      <td class="num-cell">${d.produtos.size}</td>
-      <td>
-        <div class="action-cell">
-          <button class="icon-btn" data-detalhe="${d.data}" title="Ver detalhe" aria-label="Ver detalhe">${ICONE_OLHO}</button>
-          <button class="icon-btn accent" data-editar="${d.data}" title="Editar dia" aria-label="Editar dia">${ICONE_EDITAR}</button>
-          <button class="icon-btn danger" data-excluir="${d.data}" title="Excluir dia" aria-label="Excluir dia">${ICONE_EXCLUIR}</button>
+  btnEncerrar.textContent = "Encerrar Produção";
+  btnEncerrar.dataset.action = "encerrar";
+
+  let html = "";
+  const categorias = getCategoriasAtivas();
+
+  categorias.forEach(cat=>{
+    const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo);
+    if(prods.length===0) return;
+    html += `<h3 style="font-family:var(--font-display); font-size:20px; margin:24px 0 12px; text-transform:capitalize;">Massa: ${cat}</h3><div class="cards-grid">`;
+    
+    prods.forEach(p=>{
+      const r = regMap[p.id];
+      // Campos de input vazios para permitir SOMAR novos valores
+      const tVal = "";
+      const uVal = p.pesoPadrao ? p.unidRendimento : "";
+      const kgVal = "";
+      
+      const jaSalvoKg = r ? r.pesoKg : 0;
+      const jaSalvoUnid = r ? r.unidades : 0;
+
+      html += `
+        <div class="prod-card" id="card-${p.id}">
+          <div class="card-header">
+            <h4>${p.nome}</h4>
+            <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Manual"}</span>
+          </div>
+          <div class="card-body">
+            <div class="card-input-group">
+              <label>Telas (+)</label>
+              <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" value="${tVal}" placeholder="0">
+            </div>
+            ${p.pesoPadrao ? `
+              <span class="multiply">×</span>
+              <div class="card-input-group">
+                <label>Unid/Tela</label>
+                <input type="number" min="0" id="inp-unid-${p.id}" value="${uVal}">
+              </div>
+            ` : `
+              <div class="card-input-group">
+                <label>Peso Kg (+)</label>
+                <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" value="${kgVal}" placeholder="0.0">
+              </div>
+            `}
+          </div>
+          <div class="card-footer">
+            <div class="card-totals">
+              <span class="kg" id="tot-kg-${p.id}">Já salvo: ${fmtKg(jaSalvoKg)} kg</span>
+              ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">Já salvo: ${fmtInt(jaSalvoUnid)} un.</span>` : ''}
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button class="btn btn-sm btn-ghost" style="padding:8px 10px;font-size:12px;" onclick="abrirCorrecao('${p.id}')" title="Substituir o total do dia, sem somar">Corrigir</button>
+              <button class="btn-save-item" onclick="salvarCard('${p.id}')">
+                + Somar
+              </button>
+            </div>
+          </div>
         </div>
+      `;
+    });
+    html += `</div>`;
+  });
+  
+  document.getElementById("lancCardsContainer").innerHTML = html || "<p style='padding:20px;'>Sem produtos cadastrados.</p>";
+}
+
+window.salvarCard = async function(pid){
+  const p = state.produtos.find(x=>x.id===pid);
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); renderLancamento(); return; }
+  const inputTelas = document.getElementById(`inp-telas-${pid}`);
+  const telasNovas = parseFloat(inputTelas.value)||0;
+  
+  if(telasNovas===0 && p.pesoPadrao){ toast("Informe as telas para somar!","err"); return; }
+  
+  if(telasNovas<0){ toast("Valor de Telas não pode ser negativo!","err"); return; }
+
+  let unidadesNovas=0, pesoKgNovo=0, unidTela=0;
+
+  if(p.pesoPadrao){
+    const inputUnid = document.getElementById(`inp-unid-${pid}`);
+    unidTela = parseFloat(inputUnid.value)||0;
+    if(unidTela<0){ toast("Valor de Unid/Tela não pode ser negativo!","err"); return; }
+    unidadesNovas = telasNovas * unidTela;
+    pesoKgNovo = p.unidRendimento > 0 ? (unidadesNovas / p.unidRendimento) * p.pesoCorte : 0;
+  } else {
+    const inputKg = document.getElementById(`inp-kg-${pid}`);
+    pesoKgNovo = parseFloat(inputKg.value)||0;
+    if(pesoKgNovo<0){ toast("Valor de Kg não pode ser negativo!","err"); return; }
+    if(pesoKgNovo===0 && telasNovas===0) { toast("Informe os Kg ou Telas!","err"); return; }
+    unidadesNovas = 0; 
+  }
+
+  const existentes = await dbGetByIndex("registros","data",dataIso);
+  let reg = existentes.find(r=>r.produtoId===pid);
+  
+  if(reg){
+    // LOGICA DE ACUMULAÇÃO (SOMA)
+    reg.telas += telasNovas;
+    reg.unidades += unidadesNovas;
+    reg.pesoKg += pesoKgNovo;
+    if(p.pesoPadrao) reg.unidTela = unidTela; // guarda a última proporção usada
+  } else {
+    reg = { id:uuid(), data:dataIso, produtoId:pid, categoria:p.categoria, telas:telasNovas, unidTela, unidades:unidadesNovas, pesoKg:pesoKgNovo };
+  }
+
+  await dbPut("registros", reg);
+  
+  // Limpa campos para nova entrada
+  inputTelas.value = "";
+  if(!p.pesoPadrao) document.getElementById(`inp-kg-${pid}`).value = "";
+  
+  // Atualiza label visual de quanto já tem no banco
+  document.getElementById(`tot-kg-${pid}`).textContent = `Já salvo: ${fmtKg(reg.pesoKg)} kg`;
+  if(p.pesoPadrao) document.getElementById(`tot-unid-${pid}`).textContent = `Já salvo: ${fmtInt(reg.unidades)} un.`;
+  
+  toast(`Adicionado! Total agora: ${fmtKg(reg.pesoKg)}kg`, "ok");
+};
+
+window.abrirCorrecao = async function(pid){
+  const p = state.produtos.find(x=>x.id===pid);
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para editar.","err"); return; }
+  const existentes = await dbGetByIndex("registros","data",dataIso);
+  const reg = existentes.find(r=>r.produtoId===pid);
+
+  const telasAtual = reg ? reg.telas : 0;
+  const unidTelaAtual = (reg && reg.unidTela) ? reg.unidTela : (p.pesoPadrao ? p.unidRendimento : 0);
+  const kgAtual = reg ? reg.pesoKg : 0;
+
+  abrirModal(`
+    <h3 style="margin:0 0 4px;font-family:var(--font-display);">Corrigir: ${p.nome}</h3>
+    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Isso substitui o total já salvo neste dia — não soma ao valor atual.</p>
+    ${p.pesoPadrao ? `
+      <div class="field-row">
+        <div class="field" style="flex:1;"><label>Telas (total do dia)</label><input type="number" min="0" step="0.5" id="corrTelas" value="${telasAtual}"></div>
+        <div class="field" style="flex:1;"><label>Unid/Tela</label><input type="number" min="0" id="corrUnidTela" value="${unidTelaAtual}"></div>
+      </div>
+    ` : `
+      <div class="field"><label>Peso Kg (total do dia)</label><input type="number" min="0" step="0.1" id="corrKg" value="${kgAtual}"></div>
+    `}
+    <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCorrecao('${pid}')">Salvar Correção</button>
+    </div>
+  `);
+};
+
+window.salvarCorrecao = async function(pid){
+  const p = state.produtos.find(x=>x.id===pid);
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para editar.","err"); fecharModal(); renderLancamento(); return; }
+
+  let telas=0, unidTela=0, unidades=0, pesoKg=0;
+
+  if(p.pesoPadrao){
+    telas = parseFloat(document.getElementById("corrTelas").value)||0;
+    unidTela = parseFloat(document.getElementById("corrUnidTela").value)||0;
+    if(telas<0 || unidTela<0) return toast("Valores não podem ser negativos!","err");
+    unidades = telas * unidTela;
+    pesoKg = p.unidRendimento > 0 ? (unidades / p.unidRendimento) * p.pesoCorte : 0;
+  } else {
+    pesoKg = parseFloat(document.getElementById("corrKg").value)||0;
+    if(pesoKg<0) return toast("Valor não pode ser negativo!","err");
+  }
+
+  const existentes = await dbGetByIndex("registros","data",dataIso);
+  let reg = existentes.find(r=>r.produtoId===pid);
+  if(reg){
+    reg.telas = telas; reg.unidTela = unidTela; reg.unidades = unidades; reg.pesoKg = pesoKg;
+  } else {
+    reg = { id:uuid(), data:dataIso, produtoId:pid, categoria:p.categoria, telas, unidTela, unidades, pesoKg };
+  }
+
+  await dbPut("registros", reg);
+  fecharModal();
+  toast("Correção salva!","ok");
+  renderLancamento();
+};
+
+document.getElementById("btnEncerrarDia").addEventListener("click", async ()=>{
+  const dataIso = document.getElementById("lancData").value;
+  const action = document.getElementById("btnEncerrarDia").dataset.action || "encerrar";
+  if(action === "encerrar"){
+    await dbPut("dias", {data:dataIso, fechado:true, fechadoEm:Date.now()});
+    toast("Produção encerrada! Lançamentos travados.", "ok");
+    setTimeout(()=> irPara("dashboard"), 800);
+  } else {
+    await dbPut("dias", {data:dataIso, fechado:false});
+    toast("Produção reaberta para edição.", "ok");
+    renderLancamento();
+  }
+});
+
+/* =========================================================
+   6. PRODUTOS & MODAL (Com Categorias Dinâmicas)
+   ========================================================= */
+function renderProdutosTabela(){
+  const categorias = getCategoriasAtivas();
+  let blocos = "";
+
+  categorias.forEach(cat=>{
+    const prods = state.produtos.filter(p=>p.categoria===cat);
+    if(prods.length===0) return;
+
+    const linhas = prods.map(p=>`
+      <tr>
+        <td style="font-weight:600;">${p.nome}</td>
+        <td>${p.pesoPadrao ? p.pesoCorte+' kg' : 'Manual'}</td>
+        <td>${p.ativo?'Ativo':'Inativo'}</td>
+        <td style="text-align:right;"><button class="btn btn-sm btn-ghost" onclick="abrirModalProduto('${p.id}')">Editar</button></td>
+      </tr>
+    `).join("");
+
+    blocos += `
+      <h3 style="font-family:var(--font-display); font-size:17px; margin:20px 16px 8px; text-transform:capitalize;">Massa: ${cat} <span style="font-family:var(--font-body); font-size:11px; font-weight:600; color:var(--ink-faint); text-transform:none;">(${prods.length})</span></h3>
+      <div class="table-wrap" style="border-left:none;border-right:none;border-radius:0;margin:0 0 8px;">
+        <table style="border:none;">
+          <thead><tr><th style="width:40%;">Produto</th><th>Peso kg</th><th>Status</th><th style="text-align:right;">Ação</th></tr></thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      </div>`;
+  });
+
+  document.getElementById("produtosTableWrap").innerHTML = blocos || '<p style="padding:20px;">Vazio</p>';
+}
+
+window.abrirModalProduto = async function(id = null){
+  const p = id ? state.produtos.find(x=>x.id===id) : {nome:"", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true};
+  
+  const categorias = getCategoriasAtivas();
+  let catOptions = categorias.map(c => `<option value="${c}" ${p.categoria===c?'selected':''}>${c}</option>`).join('');
+  catOptions += `<option value="OUTRA">+ Adicionar nova categoria...</option>`;
+
+  let temHistorico = false;
+  if(id){
+    const regs = await dbGetAll("registros");
+    temHistorico = regs.some(r=>r.produtoId===id);
+  }
+
+  abrirModal(`
+    <h3 style="margin:0 0 16px;font-family:var(--font-display);">${id?'Editar':'Novo'} Produto</h3>
+    
+    <div class="field" style="margin-bottom:12px;">
+      <label>Nome do Pão</label><input type="text" id="modNome" value="${p.nome}">
+    </div>
+    <div class="field" style="margin-bottom:20px;">
+      <label>Tipo de Massa (Categoria)</label>
+      <select id="modCat" onchange="document.getElementById('modNovaCat').style.display = this.value==='OUTRA'?'block':'none'">
+        ${catOptions}
+      </select>
+      <input type="text" id="modNovaCat" style="display:none; margin-top:8px;" placeholder="Nome da nova Massa (Ex: Massa Salgada)">
+    </div>
+
+    <div class="panel" style="background:var(--bg-soft);padding:16px;margin:0 0 20px;">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer;">
+        <input type="checkbox" id="modPadrao" ${p.pesoPadrao?'checked':''} style="width:18px;height:18px;flex-shrink:0;">
+        Possui Peso de Corte Padrão?
+      </label>
+      <div id="wrapCorte" style="display:${p.pesoPadrao?'grid':'none'}; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; align-items:flex-end;">
+        <div class="field"><label>Corte (Kg)</label><input type="number" step="0.001" id="modCorte" value="${p.pesoCorte}"></div>
+        <div class="field"><label>Rende (Un)</label><input type="number" id="modRend" value="${p.unidRendimento}"></div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:24px;">
+      <label>Status</label>
+      <select id="modAtivo"><option value="true" ${p.ativo?'selected':''}>Ativo</option><option value="false" ${!p.ativo?'selected':''}>Inativo (Oculto)</option></select>
+    </div>
+    
+    <div class="btn-row" style="justify-content:space-between;align-items:center;">
+      ${id ? `<button class="btn btn-sm" style="border-color:var(--bad);color:var(--bad);" ${temHistorico ? 'disabled title="Produto possui lançamentos no histórico — use Inativo em vez de excluir"' : ''} onclick="excluirProduto('${id}')">Excluir</button>` : `<span></span>`}
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
+        <button class="btn btn-primary" onclick="salvarProduto('${id||''}')">Salvar</button>
+      </div>
+    </div>
+    ${id && temHistorico ? `<p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);">Este produto tem lançamentos no histórico e não pode ser excluído — marque como Inativo para escondê-lo das telas de lançamento.</p>` : ''}
+  `);
+  
+  document.getElementById("modPadrao").addEventListener("change", e=>{
+    document.getElementById("wrapCorte").style.display = e.target.checked ? "grid" : "none";
+  });
+};
+
+window.salvarProduto = async function(id){
+  const nome = document.getElementById("modNome").value.trim();
+  if(!nome) return toast("Preencha o nome.","err");
+  
+  let categoria = document.getElementById("modCat").value;
+  if(categoria === 'OUTRA'){
+    categoria = document.getElementById("modNovaCat").value.trim();
+    if(!categoria) return toast("Preencha a nova categoria.","err");
+    // Evita criar categoria duplicada por diferença de maiúsculas/espaços (ex: "massa salgada" vs "Massa Salgada")
+    const existente = getCategoriasAtivas().find(c=> c.toLowerCase()===categoria.toLowerCase());
+    if(existente) categoria = existente;
+  }
+  
+  const prod = {
+    id: id || uuid(),
+    nome, categoria,
+    pesoPadrao: document.getElementById("modPadrao").checked,
+    pesoCorte: parseFloat(document.getElementById("modCorte").value)||0,
+    unidRendimento: parseInt(document.getElementById("modRend").value)||0,
+    ativo: document.getElementById("modAtivo").value === "true"
+  };
+  
+  await dbPut("produtos", prod);
+  
+  if(id) {
+    state.produtos = state.produtos.map(x=>x.id===id?prod:x);
+    fecharModal(); 
+  } else {
+    // Manter janela aberta para castros ágeis e limpar caixas
+    state.produtos.push(prod);
+    document.getElementById("modNome").value = "";
+    document.getElementById("modNome").focus();
+    // Atualiza a lista de select dinamicamente caso ele tenha criado categoria nova
+    if(document.getElementById("modCat").value === 'OUTRA'){
+       const categorias = getCategoriasAtivas();
+       let catOptions = categorias.map(c => `<option value="${c}" ${categoria===c?'selected':''}>${c}</option>`).join('');
+       catOptions += `<option value="OUTRA">+ Adicionar nova categoria...</option>`;
+       document.getElementById("modCat").innerHTML = catOptions;
+       document.getElementById("modNovaCat").style.display = "none";
+       document.getElementById("modNovaCat").value = "";
+    }
+  }
+  
+  toast("Produto salvo!","ok"); 
+  renderProdutosTabela();
+};
+
+window.excluirProduto = async function(id){
+  const regs = await dbGetAll("registros");
+  if(regs.some(r=>r.produtoId===id)){
+    toast("Produto possui lançamentos — use Inativo em vez de excluir.","err");
+    return;
+  }
+  const p = state.produtos.find(x=>x.id===id);
+  abrirModal(`
+    <h3 style="margin:0 0 10px;font-family:var(--font-display);color:var(--bad);">Excluir Produto</h3>
+    <p style="margin:0 0 20px;">Tem certeza que deseja excluir <strong>${p ? p.nome : 'este produto'}</strong> definitivamente? Esta ação não pode ser desfeita.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="confirmarExclusaoProduto('${id}')">Sim, excluir</button>
+    </div>
+  `);
+};
+
+window.confirmarExclusaoProduto = async function(id){
+  await dbDelete("produtos", id);
+  state.produtos = state.produtos.filter(x=>x.id!==id);
+  fecharModal();
+  toast("Produto excluído.","ok");
+  renderProdutosTabela();
+};
+
+/* =========================================================
+   7. HISTÓRICO 
+   ========================================================= */
+document.getElementById("histInicio").value = addDiasISO(hojeISO(),-7);
+document.getElementById("histFim").value = hojeISO();
+document.getElementById("btnFiltrarHist").addEventListener("click", renderHistorico);
+
+async function renderHistorico(){
+  const ini=document.getElementById("histInicio").value, fim=document.getElementById("histFim").value;
+  const regs = (await dbGetAll("registros")).filter(r=> r.data>=ini && r.data<=fim);
+  const diasFechados = new Set((await dbGetAll("dias")).filter(d=>d.fechado).map(d=>d.data));
+  
+  const porDia = {};
+  regs.forEach(r=>{
+    if(!porDia[r.data]) porDia[r.data]={data:r.data, kg:0, unid:0};
+    porDia[r.data].kg += r.pesoKg||0;
+    porDia[r.data].unid += r.unidades||0;
+  });
+  
+  const dias = Object.values(porDia).sort((a,b)=>b.data.localeCompare(a.data));
+  const linhas = dias.map(d=>`
+    <tr>
+      <td style="font-weight:600;">${fmtData(d.data)} ${diasFechados.has(d.data) ? '🔒' : ''}</td>
+      <td class="num-cell">${fmtKg(d.kg)}</td>
+      <td class="num-cell">${fmtInt(d.unid)}</td>
+      <td style="text-align:right;">
+        <button class="btn btn-sm btn-ghost" style="padding:4px 8px;" onclick="abrirDetalhesDia('${d.data}')">Ver Detalhes</button>
       </td>
     </tr>
   `).join("");
-
+  
   document.getElementById("histTableWrap").innerHTML = `
-    <div class="table-wrap" style="border-radius:10px;">
-      <table>
-        <thead><tr><th>Data</th><th style="text-align:right;">Telas</th><th style="text-align:right;">Unidades</th><th style="text-align:right;">Produtos</th><th>Ações</th></tr></thead>
-        <tbody>${linhas}</tbody>
-        <tfoot><tr><td>Total (${porDia.length} dia(s))</td><td class="num-cell">${fmtInt(totalTelas(registros))}</td><td class="num-cell">${fmtInt(totalUnidades(registros))}</td><td></td><td></td></tr></tfoot>
-      </table>
-    </div>
-  `;
-
-  document.querySelectorAll("[data-editar]").forEach(b=> b.addEventListener("click", ()=>{
-    document.getElementById("lancData").value = b.dataset.editar;
-    irPara("lancamento");
-  }));
-  document.querySelectorAll("[data-detalhe]").forEach(b=> b.addEventListener("click", ()=> abrirDetalheDia(b.dataset.detalhe)));
-  document.querySelectorAll("[data-excluir]").forEach(b=> b.addEventListener("click", ()=>{
-    confirmarAcao("Excluir dia", `Tem certeza que deseja excluir todos os registros de <b>${fmtData(b.dataset.excluir)}</b>? Esta ação não pode ser desfeita.`, "Excluir", async ()=>{
-      const regs = await dbGetByIndex("registros","data",b.dataset.excluir);
-      for(const r of regs) await dbDelete("registros", r.id);
-      toast("Registros excluídos.", "ok");
-      renderHistorico();
-    });
-  }));
+    <div class="table-wrap"><table style="border:none;">
+      <thead><tr><th>Data</th><th style="text-align:right">Total Kg</th><th style="text-align:right">Unid</th><th style="text-align:right">Ação</th></tr></thead>
+      <tbody>${linhas||'<tr><td colspan="4">Sem dados</td></tr>'}</tbody>
+    </table></div>`;
 }
 
-async function abrirDetalheDia(iso){
-  const regs = await dbGetByIndex("registros","data",iso);
-  regs.sort((a,b)=> produtoNome(a.produtoId).localeCompare(produtoNome(b.produtoId)));
-  const linhas = regs.map(r=>`
-    <tr><td>${produtoNome(r.produtoId)}</td><td><span class="badge ${r.categoria}">${r.categoria==="balcao"?"Balcão":"Gôndola"}</span></td>
-    <td class="num-cell">${fmtInt(r.telas)}</td><td class="num-cell">${fmtInt(r.unidadesPorTela)}</td><td class="num-cell">${fmtInt(r.totalUnidades)}</td></tr>
-  `).join("");
-  abrirModal(`
-    <div class="modal-head">
-      <div class="modal-title">Produção de ${fmtData(iso)}</div>
-      <button class="modal-close" onclick="window.__fecharModal()">&times;</button>
-    </div>
-    <div class="table-wrap" style="border-radius:10px;">
-      <table><thead><tr><th>Produto</th><th>Categoria</th><th style="text-align:right;">Telas</th><th style="text-align:right;">Un./tela</th><th style="text-align:right;">Total</th></tr></thead>
-      <tbody>${linhas || '<tr><td colspan="5">Sem registros.</td></tr>'}</tbody>
-      <tfoot><tr><td>Total</td><td></td><td class="num-cell">${fmtInt(totalTelas(regs))}</td><td></td><td class="num-cell">${fmtInt(totalUnidades(regs))}</td></tr></tfoot></table>
-    </div>
-    <div class="btn-row" style="margin-top:16px;justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="window.__fecharModal()">Fechar</button>
-      <button class="btn btn-primary" onclick="document.getElementById('lancData').value='${iso}'; window.__fecharModal(); window.__irLancamento();">Editar este dia</button>
-    </div>
-  `);
-}
-
-/* =========================================================
-   10. COMPARAÇÃO POR PERÍODO
-   ========================================================= */
-document.querySelectorAll("[data-preset]").forEach(b=> b.addEventListener("click", ()=>{
-  const hoje = hojeISO();
-  if(b.dataset.preset==="semana"){
-    const inicioSemana = addDiasISO(hoje, -(new Date(hoje+"T00:00:00").getDay()));
-    document.getElementById("compAInicio").value = inicioSemana;
-    document.getElementById("compAFim").value = hoje;
-    document.getElementById("compBInicio").value = addDiasISO(inicioSemana,-7);
-    document.getElementById("compBFim").value = addDiasISO(inicioSemana,-1);
-  } else if(b.dataset.preset==="mes"){
-    const d = new Date(hoje+"T00:00:00");
-    const inicioMes = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`;
-    const inicioMesAnt = new Date(d.getFullYear(), d.getMonth()-1, 1).toISOString().slice(0,10);
-    const fimMesAnt = addDiasISO(inicioMes, -1);
-    document.getElementById("compAInicio").value = inicioMes;
-    document.getElementById("compAFim").value = hoje;
-    document.getElementById("compBInicio").value = inicioMesAnt;
-    document.getElementById("compBFim").value = fimMesAnt;
-  } else if(b.dataset.preset==="30"){
-    document.getElementById("compAInicio").value = addDiasISO(hoje,-29);
-    document.getElementById("compAFim").value = hoje;
-    document.getElementById("compBInicio").value = addDiasISO(hoje,-59);
-    document.getElementById("compBFim").value = addDiasISO(hoje,-30);
-  }
-  compararPeriodos();
-}));
-
-document.getElementById("btnComparar").addEventListener("click", compararPeriodos);
-
-async function compararPeriodos(){
-  const aIni = document.getElementById("compAInicio").value;
-  const aFim = document.getElementById("compAFim").value;
-  const bIni = document.getElementById("compBInicio").value;
-  const bFim = document.getElementById("compBFim").value;
-  if(!aIni||!aFim||!bIni||!bFim){ toast("Preencha as quatro datas para comparar.", "err"); return; }
-
-  const regsA = await registrosNoIntervalo(aIni, aFim);
-  const regsB = await registrosNoIntervalo(bIni, bFim);
-  const totA = totalUnidades(regsA), totB = totalUnidades(regsB);
-  const delta = totB>0? ((totA-totB)/totB*100) : (totA>0?100:0);
-
-  document.getElementById("compResultPanel").style.display = "block";
-  document.getElementById("compKpis").innerHTML = `
-    <div class="kpi"><div class="kpi-label">Período A</div><div class="kpi-value">${fmtInt(totA)}</div><div class="kpi-delta flat">${fmtData(aIni)} – ${fmtData(aFim)}</div></div>
-    <div class="kpi"><div class="kpi-label">Período B</div><div class="kpi-value">${fmtInt(totB)}</div><div class="kpi-delta flat">${fmtData(bIni)} – ${fmtData(bFim)}</div></div>
-    <div class="kpi"><div class="kpi-label">Variação</div><div class="kpi-value">${delta>=0?"+":""}${delta.toFixed(1)}%</div><div class="kpi-delta ${delta>0.5?"up":(delta<-0.5?"down":"flat")}">A em relação a B</div></div>
-  `;
-
-  const agA = agregarPorProduto(regsA);
-  const agB = agregarPorProduto(regsB);
-  const idsProdutos = Array.from(new Set([...agA.map(x=>x.produtoId), ...agB.map(x=>x.produtoId)]))
-    .sort((x,y)=> produtoNome(x).localeCompare(produtoNome(y)));
-
-  destroyChart("comparacao");
-  const ctx = document.getElementById("chartComparacao").getContext("2d");
-  state.charts.comparacao = new Chart(ctx, {
-    type:"bar",
-    data:{
-      labels: idsProdutos.map(produtoNome),
-      datasets:[
-        {label:"Período A", data: idsProdutos.map(id=> (agA.find(x=>x.produtoId===id)||{unidades:0}).unidades), backgroundColor:"#C68A2E", borderRadius:5},
-        {label:"Período B", data: idsProdutos.map(id=> (agB.find(x=>x.produtoId===id)||{unidades:0}).unidades), backgroundColor:"#2A2019", borderRadius:5},
-      ]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, scales:{ y:{beginAtZero:true, grid:{color:"#EFE6D2"}}, x:{grid:{display:false}} }, plugins:{legend:{position:"bottom"}} }
-  });
-
-  const linhas = idsProdutos.map(id=>{
-    const a = (agA.find(x=>x.produtoId===id)||{unidades:0}).unidades;
-    const b = (agB.find(x=>x.produtoId===id)||{unidades:0}).unidades;
-    const d = b>0 ? ((a-b)/b*100) : (a>0?100:0);
-    const cor = d>0.5?"var(--good)":(d<-0.5?"var(--bad)":"var(--ink-faint)");
-    return `<tr><td>${produtoNome(id)}</td><td class="num-cell">${fmtInt(a)}</td><td class="num-cell">${fmtInt(b)}</td><td class="num-cell" style="color:${cor};font-weight:600;">${d>=0?"+":""}${d.toFixed(1)}%</td></tr>`;
+window.abrirDetalhesDia = async function(dataIso){
+  const regs = await dbGetByIndex("registros","data",dataIso);
+  let linhas = regs.map(r=>{
+    const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Produto Removido";
+    return `<tr><td>${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
   }).join("");
-  document.getElementById("compTableWrap").innerHTML = `
-    <div class="table-wrap" style="border-radius:10px;">
-      <table><thead><tr><th>Produto</th><th style="text-align:right;">Período A</th><th style="text-align:right;">Período B</th><th style="text-align:right;">Variação</th></tr></thead>
-      <tbody>${linhas || '<tr><td colspan="4">Sem dados nos períodos selecionados.</td></tr>'}</tbody></table>
+
+  abrirModal(`
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h3 style="margin:0;font-family:var(--font-display);">Detalhes: ${fmtData(dataIso)}</h3>
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('lancData').value='${dataIso}'; fecharModal(); irPara('lancamento');">Editar Lançamento</button>
     </div>
-  `;
-}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa (Kg)</th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="4">Vazio</td></tr>'}</tbody>
+    </table></div>
+    <div class="btn-row" style="justify-content:flex-end; margin-top:16px;"><button class="btn btn-primary" onclick="fecharModal()">Fechar</button></div>
+  `);
+};
 
 /* =========================================================
-   11. RELATÓRIOS — PDF
+   8. RELATÓRIOS (Agrupados por Massa/Categoria)
    ========================================================= */
-(function initRelatorioDefaults(){
-  document.getElementById("relDiaData").value = hojeISO();
-  document.getElementById("relPerInicio").value = addDiasISO(hojeISO(),-6);
-  document.getElementById("relPerFim").value = hojeISO();
-})();
-
-function novoPDF(){
-  const {jsPDF} = window.jspdf;
-  return new jsPDF({unit:"pt", format:"a4"});
-}
-function cabecalhoPDF(doc, titulo, subtitulo){
-  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor(42,32,25);
-  doc.text("Painel de Produção — Padaria", 40, 42);
-  doc.setFontSize(12); doc.text(titulo, 40, 62);
-  doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(107,93,77);
-  doc.text(subtitulo, 40, 78);
-  doc.text("Gerado em " + fmtDataHora(new Date().toISOString()), 40, 92);
-  doc.setDrawColor(198,138,46); doc.setLineWidth(1.4); doc.line(40,100,555,100);
-  return 118;
-}
+function obterNomeProduto(id){ return state.produtos.find(p=>p.id===id)?.nome || "Desconhecido"; }
+function obterCatProduto(id){ return state.produtos.find(p=>p.id===id)?.categoria || "Outros"; }
 
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
-  const iso = document.getElementById("relDiaData").value;
-  if(!iso){ toast("Selecione uma data.", "err"); return; }
-  const regs = await dbGetByIndex("registros","data",iso);
-  const doc = novoPDF();
-  let y = cabecalhoPDF(doc, `Relatório diário de produção — ${fmtData(iso)}`, "Detalhamento por categoria de produto");
+  const data = document.getElementById("relDiaData").value;
+  if(!data) return toast("Selecione uma data", "err");
+  
+  const regs = await dbGetByIndex("registros","data",data);
+  if(!regs.length) return toast("Nenhum dado neste dia.", "err");
 
-  ["balcao","gondola"].forEach(cat=>{
-    const linhas = regs.filter(r=>r.categoria===cat).sort((a,b)=>produtoNome(a.produtoId).localeCompare(produtoNome(b.produtoId)));
-    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(42,32,25);
-    doc.text(CATEGORIA_LABEL[cat].toUpperCase(), 40, y); y+=8;
-    const body = linhas.length
-      ? linhas.map(r=>[produtoNome(r.produtoId), fmtInt(r.telas), fmtInt(r.unidadesPorTela), fmtInt(r.totalUnidades)])
-      : [["Sem lançamentos nesta categoria","-","-","-"]];
-    const subT = linhas.reduce((s,r)=>s+r.telas,0);
-    const subU = linhas.reduce((s,r)=>s+r.totalUnidades,0);
-    body.push(["Total", fmtInt(subT), "", fmtInt(subU)]);
-    doc.autoTable({
-      startY:y+4, margin:{left:40,right:40},
-      head:[["Produto","Telas","Unid. por tela","Total unidades"]],
-      body, theme:"grid",
-      headStyles:{fillColor:[42,32,25], textColor:[247,242,230], fontSize:9.5},
-      bodyStyles:{fontSize:9.5, textColor:[42,32,25]},
-      columnStyles:{1:{halign:"right"},2:{halign:"right"},3:{halign:"right"}},
-      didParseCell:(d)=>{ if(d.row.index===body.length-1) d.cell.styles.fontStyle="bold"; }
+  const doc = new window.jspdf.jsPDF();
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário - ${fmtData(data)}`, 14, 20);
+  
+  let y = 30;
+  const categoriasPresentes = Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort();
+
+  categoriasPresentes.forEach(cat=>{
+    const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
+    if(!regsCat.length) return;
+    
+    doc.setFontSize(12); doc.setTextColor(216,140,34);
+    doc.text(`Massa: ${cat}`, 14, y); y += 4;
+    
+    let subKg = 0, subUnid = 0;
+    const body = regsCat.map(r=> {
+      subKg += r.pesoKg; subUnid += r.unidades;
+      return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)];
     });
-    y = doc.lastAutoTable.finalY + 22;
+    body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
+
+    doc.autoTable({
+      startY: y, head: [["Produto", "Telas", "Total Unid", "Massa (Kg)"]],
+      body: body, theme: "grid", headStyles: {fillColor:[44,36,27]}
+    });
+    y = doc.lastAutoTable.finalY + 12;
   });
 
-  doc.save(`relatorio-diario-${iso}.pdf`);
-  toast("PDF do dia gerado.", "ok");
+  doc.save(`Relatorio-Dia-${data}.pdf`);
+  toast("PDF Diário gerado!", "ok");
 });
 
 document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
   const ini = document.getElementById("relPerInicio").value;
   const fim = document.getElementById("relPerFim").value;
-  if(!ini||!fim){ toast("Selecione o período.", "err"); return; }
-  const regs = await registrosNoIntervalo(ini, fim);
-  const doc = novoPDF();
-  let y = cabecalhoPDF(doc, `Relatório de período — ${fmtData(ini)} a ${fmtData(fim)}`, `Total geral: ${fmtInt(totalUnidades(regs))} unidades em ${fmtInt(totalTelas(regs))} telas`);
+  if(!ini || !fim) return toast("Selecione o período", "err");
 
-  const porProduto = agregarPorProduto(regs).sort((a,b)=>b.unidades-a.unidades);
-  doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.text("RESUMO POR PRODUTO", 40, y); y+=6;
-  doc.autoTable({
-    startY:y+4, margin:{left:40,right:40},
-    head:[["Produto","Telas","Unidades","% do total"]],
-    body: porProduto.length ? porProduto.map(p=>[produtoNome(p.produtoId), fmtInt(p.telas), fmtInt(p.unidades), ((p.unidades/(totalUnidades(regs)||1))*100).toFixed(1)+"%"]) : [["Sem dados no período","-","-","-"]],
-    theme:"grid", headStyles:{fillColor:[42,32,25], textColor:[247,242,230], fontSize:9.5}, bodyStyles:{fontSize:9.5}, columnStyles:{1:{halign:"right"},2:{halign:"right"},3:{halign:"right"}}
+  const regs = (await dbGetAll("registros")).filter(r=> r.data>=ini && r.data<=fim);
+  if(!regs.length) return toast("Nenhum dado no período.", "err");
+
+  const doc = new window.jspdf.jsPDF();
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Resumo do Período: ${fmtData(ini)} a ${fmtData(fim)}`, 14, 20);
+  let y = 30;
+
+  const categoriasPresentes = Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort();
+
+  categoriasPresentes.forEach(cat=>{
+    const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
+    if(!regsCat.length) return;
+
+    const resumo = {};
+    regsCat.forEach(r=>{
+      if(!resumo[r.produtoId]) resumo[r.produtoId] = {telas:0, unid:0, kg:0};
+      resumo[r.produtoId].telas += r.telas||0;
+      resumo[r.produtoId].unid += r.unidades||0;
+      resumo[r.produtoId].kg += r.pesoKg||0;
+    });
+
+    let subKg = 0, subUnid = 0;
+    const body = Object.keys(resumo).map(id=> {
+      subKg += resumo[id].kg; subUnid += resumo[id].unid;
+      return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)];
+    });
+    body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
+
+    doc.setFontSize(12); doc.setTextColor(216,140,34);
+    doc.text(`Massa: ${cat}`, 14, y); y += 4;
+    doc.autoTable({
+      startY: y, head: [["Produto", "Telas", "Unid. Totais", "Massa (Kg)"]],
+      body: body, theme: "grid", headStyles: {fillColor:[44,36,27]}
+    });
+    y = doc.lastAutoTable.finalY + 12;
   });
-  y = doc.lastAutoTable.finalY + 22;
 
-  const porDia = agregarPorDia(regs);
-  doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.text("RESUMO DIÁRIO", 40, y); y+=6;
-  doc.autoTable({
-    startY:y+4, margin:{left:40,right:40},
-    head:[["Data","Telas","Unidades","Produtos lançados"]],
-    body: porDia.length ? porDia.map(d=>[fmtData(d.data), fmtInt(d.telas), fmtInt(d.unidades), String(d.produtos.size)]) : [["Sem dados no período","-","-","-"]],
-    theme:"grid", headStyles:{fillColor:[42,32,25], textColor:[247,242,230], fontSize:9.5}, bodyStyles:{fontSize:9.5}, columnStyles:{1:{halign:"right"},2:{halign:"right"},3:{halign:"right"}}
-  });
-
-  doc.save(`relatorio-periodo-${ini}_a_${fim}.pdf`);
-  toast("PDF do período gerado.", "ok");
+  doc.save(`Resumo-Periodo-${ini}-a-${fim}.pdf`);
+  toast("PDF de Período gerado!", "ok");
 });
 
-/* =========================================================
-   12. EXPORTAÇÃO XLSX
-   ========================================================= */
 document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
   const ini = document.getElementById("xlsInicio").value;
   const fim = document.getElementById("xlsFim").value;
-  const todos = await dbGetAll("registros");
-  const regs = (ini&&fim) ? todos.filter(r=> r.data>=ini && r.data<=fim) : todos;
-  if(regs.length===0){ toast("Nenhum registro para exportar.", "err"); return; }
+  let regs = await dbGetAll("registros");
+  
+  if(ini && fim) regs = regs.filter(r=> r.data>=ini && r.data<=fim);
+  if(!regs.length) return toast("Nenhum dado para exportar.", "err");
 
   const wb = XLSX.utils.book_new();
 
-  const detalhado = regs.sort((a,b)=>a.data.localeCompare(b.data)).map(r=>({
-    Data:fmtData(r.data), Categoria:CATEGORIA_LABEL[r.categoria]||r.categoria, Produto:produtoNome(r.produtoId),
-    Telas:r.telas, "Unidades por tela":r.unidadesPorTela, "Total unidades":r.totalUnidades, "Dado de exemplo":r.amostra?"Sim":"Não"
+  // Aba 1: Lançamentos Detalhados
+  const detalhes = regs.map(r=>({
+    "Data": fmtData(r.data),
+    "Tipo de Massa": obterCatProduto(r.produtoId),
+    "Produto": obterNomeProduto(r.produtoId),
+    "Telas": r.telas,
+    "Unid. Total": r.unidades,
+    "Massa (Kg)": parseFloat(r.pesoKg.toFixed(3))
   }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalhado), "Registros");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalhes), "Lançamentos");
 
-  const porProduto = agregarPorProduto(regs).sort((a,b)=>b.unidades-a.unidades).map(p=>({
-    Produto:produtoNome(p.produtoId), "Total telas":p.telas, "Total unidades":p.unidades
+  // Aba 2: Resumo por Massa (Categoria)
+  const resumoMassa = {};
+  regs.forEach(r=>{
+    const cat = obterCatProduto(r.produtoId);
+    if(!resumoMassa[cat]) resumoMassa[cat] = {kg:0, unid:0};
+    resumoMassa[cat].kg += r.pesoKg;
+    resumoMassa[cat].unid += r.unidades;
+  });
+  const resMassArr = Object.keys(resumoMassa).map(cat=>({
+    "Tipo de Massa": cat, "Unidades Produzidas": resumoMassa[cat].unid, "Massa Processada (Kg)": parseFloat(resumoMassa[cat].kg.toFixed(3))
   }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(porProduto), "Resumo por produto");
-
-  const porDia = agregarPorDia(regs).map(d=>({
-    Data:fmtData(d.data), "Total telas":d.telas, "Total unidades":d.unidades, "Produtos lançados":d.produtos.size
-  }));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(porDia), "Resumo diário");
-
-  const nomeArq = `producao-padaria${ini&&fim? "-"+ini+"_a_"+fim : "-completo"}.xlsx`;
-  XLSX.writeFile(wb, nomeArq);
-  toast("Excel exportado.", "ok");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resMassArr), "Resumo por Massa");
+  
+  XLSX.writeFile(wb, `Exportacao-Padaria.xlsx`);
+  toast("Excel gerado com sucesso!", "ok");
 });
 
 /* =========================================================
-   13. PRODUTOS (cadastro)
+   9. INIT
    ========================================================= */
-document.getElementById("btnAddProduto").addEventListener("click", async ()=>{
-  const nome = document.getElementById("novoProdNome").value.trim();
-  const categoria = document.getElementById("novoProdCategoria").value;
-  if(!nome){ toast("Informe o nome do produto.", "err"); return; }
-  const ordem = state.produtos.length;
-  const novo = {id: uuid(), nome, categoria, ativo:true, ordem};
-  await dbPut("produtos", novo);
-  state.produtos.push(novo);
-  document.getElementById("novoProdNome").value = "";
-  toast("Produto adicionado.", "ok");
-  renderProdutos();
-});
-
-const ICONE_EDITAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-const ICONE_TOGGLE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.8 0"/></svg>';
-const ICONE_TOGGLE_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>';
-const ICONE_EXCLUIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/><path d="M10 11v6M14 11v6"/></svg>';
-const ICONE_OLHO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
-
-function renderProdutos(){
-  const linhas = state.produtos.slice().sort((a,b)=>a.ordem-b.ordem).map(p=>`
-    <tr>
-      <td>${p.nome}</td>
-      <td><span class="badge ${p.categoria}">${p.categoria==="balcao"?"Balcão":"Gôndola"}</span></td>
-      <td>${p.ativo===false? '<span class="badge" style="background:#EEE;color:#888;">Inativo</span>' : '<span class="badge" style="background:var(--good-soft);color:#2F4F3E;">Ativo</span>'}</td>
-      <td>
-        <div class="action-cell">
-          <button class="icon-btn accent" data-editar="${p.id}" title="Editar produto" aria-label="Editar produto">${ICONE_EDITAR}</button>
-          <button class="icon-btn" data-toggle="${p.id}" title="${p.ativo===false?"Reativar":"Desativar"}" aria-label="${p.ativo===false?"Reativar":"Desativar"}">${p.ativo===false?ICONE_TOGGLE_ON:ICONE_TOGGLE_OFF}</button>
-          <button class="icon-btn danger" data-del="${p.id}" title="Excluir produto" aria-label="Excluir produto">${ICONE_EXCLUIR}</button>
-        </div>
-      </td>
-    </tr>
-  `).join("");
-  document.getElementById("produtosTableWrap").innerHTML = `
-    <div class="table-wrap" style="border-radius:10px;">
-      <table><thead><tr><th>Produto</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead><tbody>${linhas}</tbody></table>
-    </div>
-    <div class="small-note">Desativar um produto o remove das tabelas de lançamento, mas preserva o histórico já registrado. Excluir remove o cadastro definitivamente (o histórico permanece, exibido como "produto removido").</div>
-  `;
-  document.querySelectorAll("[data-editar]").forEach(b=> b.addEventListener("click", ()=> abrirModalEditarProduto(b.dataset.editar)));
-  document.querySelectorAll("[data-toggle]").forEach(b=> b.addEventListener("click", async ()=>{
-    const p = state.produtos.find(x=>x.id===b.dataset.toggle);
-    p.ativo = p.ativo===false ? true : false;
-    await dbPut("produtos", p);
-    toast(p.ativo? "Produto reativado.":"Produto desativado.", "ok");
-    renderProdutos();
-  }));
-  document.querySelectorAll("[data-del]").forEach(b=> b.addEventListener("click", ()=>{
-    const p = state.produtos.find(x=>x.id===b.dataset.del);
-    confirmarAcao("Excluir produto", `Excluir <b>${p.nome}</b> do cadastro? O histórico de produção já lançado será mantido.`, "Excluir", async ()=>{
-      await dbDelete("produtos", p.id);
-      state.produtos = state.produtos.filter(x=>x.id!==p.id);
-      toast("Produto excluído.", "ok");
-      renderProdutos();
-    });
-  }));
-}
-
-function abrirModalEditarProduto(produtoId){
-  const p = state.produtos.find(x=>x.id===produtoId);
-  if(!p) return;
-  abrirModal(`
-    <div class="modal-head">
-      <div class="modal-title">Editar produto</div>
-      <button class="modal-close" onclick="window.__fecharModal()">&times;</button>
-    </div>
-    <div class="field-row" style="margin-bottom:6px;">
-      <div class="field" style="flex:1;min-width:200px;">
-        <label for="editProdNome">Nome</label>
-        <input type="text" id="editProdNome" value="${p.nome.replace(/"/g,'&quot;')}">
-      </div>
-      <div class="field">
-        <label for="editProdCategoria">Categoria</label>
-        <select id="editProdCategoria">
-          <option value="balcao" ${p.categoria==="balcao"?"selected":""}>Balcão de atendimento</option>
-          <option value="gondola" ${p.categoria==="gondola"?"selected":""}>Gôndolas</option>
-        </select>
-      </div>
-    </div>
-    <div class="small-note">Alterar a categoria move o produto para a outra seção nas tabelas de lançamento. O histórico já lançado é mantido.</div>
-    <div class="btn-row" style="margin-top:16px;justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="window.__fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" id="btnSalvarEdicaoProduto">Salvar alterações</button>
-    </div>
-  `);
-  document.getElementById("btnSalvarEdicaoProduto").addEventListener("click", async ()=>{
-    const nome = document.getElementById("editProdNome").value.trim();
-    const categoria = document.getElementById("editProdCategoria").value;
-    if(!nome){ toast("Informe o nome do produto.", "err"); return; }
-    p.nome = nome;
-    p.categoria = categoria;
-    await dbPut("produtos", p);
-    fecharModal();
-    toast("Produto atualizado.", "ok");
-    renderProdutos();
-  });
-}
-
-/* =========================================================
-   14. BACKUP / RESTAURAÇÃO / DADOS DE EXEMPLO
-   ========================================================= */
-async function getMeta(chave){ const r = await dbGet("meta", chave); return r? r.valor : null; }
-async function setMeta(chave, valor){ await dbPut("meta", {chave, valor}); }
-
-async function atualizarStatusBackupSidebar(){
-  const ultimo = await getMeta("ultimoBackup");
-  const topDot = document.getElementById("topbarBackupDot");
-  const topTxt = document.getElementById("topbarBackupText");
-  const sheetDot = document.getElementById("sheetBackupDot");
-  const sheetTxt = document.getElementById("sheetBackupText");
-  const maisTab = document.getElementById("tabMais");
-
-  let classe, texto, alerta;
-  if(!ultimo){ classe="dot bad"; texto="Nenhum backup"; alerta=true; }
-  else {
-    const dias = diffDias(ultimo.slice(0,10), hojeISO());
-    if(dias<=3){ classe="dot ok"; texto="Backup em dia"; alerta=false; }
-    else if(dias<=7){ classe="dot warn"; texto=`Backup há ${dias}d`; alerta=true; }
-    else { classe="dot bad"; texto=`Sem backup há ${dias}d`; alerta=true; }
-  }
-  if(topDot){ topDot.className = classe; topTxt.textContent = texto; }
-  if(sheetDot){ sheetDot.className = classe; sheetTxt.textContent = texto; }
-  if(maisTab) maisTab.classList.toggle("has-alert", alerta);
-}
-
-async function renderBackupView(){
-  const ultimo = await getMeta("ultimoBackup");
-  const dot = document.getElementById("backupStatusDot");
-  const titulo = document.getElementById("backupStatusTitle");
-  const sub = document.getElementById("backupStatusSub");
-  if(!ultimo){
-    dot.className="dot bad"; titulo.textContent="Nenhum backup foi feito ainda";
-    sub.textContent="Recomendado criar um backup após os primeiros lançamentos.";
-  } else {
-    const dias = diffDias(ultimo.slice(0,10), hojeISO());
-    if(dias<=3){ dot.className="dot ok"; titulo.textContent="Backup em dia"; }
-    else if(dias<=7){ dot.className="dot warn"; titulo.textContent="Backup recomendado"; }
-    else { dot.className="dot bad"; titulo.textContent="Backup atrasado"; }
-    sub.textContent = `Último backup: ${fmtDataHora(ultimo)} (${dias===0?"hoje":dias+" dia(s) atrás"})`;
-  }
-
-  const todosRegs = await dbGetAll("registros");
-  const amostraCount = todosRegs.filter(r=>r.amostra).length;
-  document.getElementById("amostraInfo").textContent = amostraCount>0
-    ? `${amostraCount} registro(s) de exemplo presentes no sistema.`
-    : "Nenhum dado de exemplo presente no momento.";
-}
-
-document.getElementById("btnCriarBackup").addEventListener("click", async ()=>{
-  const produtos = await dbGetAll("produtos");
-  const registros = await dbGetAll("registros");
-  const backup = {
-    app:"painel-producao-padaria", versao:1, exportadoEm:new Date().toISOString(),
-    produtos, registros
-  };
-  const blob = new Blob([JSON.stringify(backup,null,2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const agora = new Date();
-  const nome = `padaria-backup-${agora.toISOString().slice(0,10)}-${String(agora.getHours()).padStart(2,"0")}${String(agora.getMinutes()).padStart(2,"0")}.json`;
-  a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
-  URL.revokeObjectURL(url);
-  await setMeta("ultimoBackup", new Date().toISOString());
-  toast("Backup criado e baixado.", "ok");
-  renderBackupView();
-  atualizarStatusBackupSidebar();
-});
-
-document.getElementById("btnRestaurarBackup").addEventListener("click", ()=> document.getElementById("inputRestaurar").click());
-document.getElementById("inputRestaurar").addEventListener("change", async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  try{
-    const texto = await file.text();
-    const dados = JSON.parse(texto);
-    if(!dados.produtos || !dados.registros) throw new Error("Arquivo de backup inválido.");
-    confirmarAcao("Restaurar backup", `Este arquivo contém ${dados.produtos.length} produto(s) e ${dados.registros.length} registro(s), exportado em ${dados.exportadoEm? fmtDataHora(dados.exportadoEm):"data desconhecida"}. Isso substituirá todos os dados atuais deste navegador. Deseja continuar?`, "Restaurar e substituir", async ()=>{
-      await dbClear("produtos");
-      await dbClear("registros");
-      await dbBulkPut("produtos", dados.produtos);
-      await dbBulkPut("registros", dados.registros);
-      state.produtos = await dbGetAll("produtos");
-      toast("Backup restaurado com sucesso.", "ok");
-      renderBackupView();
-      renderView(state.view);
-      atualizarStatusBackupSidebar();
-    });
-  } catch(err){
-    toast("Não foi possível ler o arquivo de backup.", "err");
-  }
-  e.target.value = "";
-});
-
-function nomeAleatorio(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-document.getElementById("btnGerarAmostra").addEventListener("click", ()=>{
-  confirmarAcao("Gerar dados de exemplo", "Serão criados registros fictícios para os últimos 30 dias, para todos os produtos ativos. Você pode remover esses dados a qualquer momento pelo botão abaixo. Deseja continuar?", "Gerar dados", async ()=>{
-    const hoje = hojeISO();
-    const novos = [];
-    for(let i=29;i>=0;i--){
-      const iso = addDiasISO(hoje, -i);
-      const diaSemana = new Date(iso+"T00:00:00").getDay();
-      const fatorFimDeSemana = (diaSemana===0||diaSemana===6) ? 1.3 : 1;
-      produtosAtivos().forEach(p=>{
-        if(Math.random()<0.08) return; // simula dia sem produção de um item
-        const baseTelas = 3 + Math.floor(Math.random()*10);
-        const telas = Math.max(1, Math.round(baseTelas*fatorFimDeSemana));
-        const unidPorTela = p.categoria==="balcao" ? (16+Math.floor(Math.random()*14)) : (8+Math.floor(Math.random()*10));
-        novos.push({
-          id:uuid(), data:iso, produtoId:p.id, categoria:p.categoria,
-          telas, unidadesPorTela:unidPorTela, totalUnidades:telas*unidPorTela,
-          amostra:true, criadoEm:new Date().toISOString(), atualizadoEm:new Date().toISOString()
-        });
-      });
-    }
-    await dbBulkPut("registros", novos);
-    toast(`${novos.length} registro(s) de exemplo gerados.`, "ok");
-    renderBackupView();
-    renderView(state.view);
-  });
-});
-
-document.getElementById("btnRemoverAmostra").addEventListener("click", ()=>{
-  confirmarAcao("Remover dados de exemplo", "Todos os registros marcados como dados de exemplo serão excluídos. Registros reais lançados por você não serão afetados.", "Remover", async ()=>{
-    const amostras = await dbGetByIndex("registros","amostra",true);
-    for(const r of amostras) await dbDelete("registros", r.id);
-    toast(`${amostras.length} registro(s) de exemplo removidos.`, "ok");
-    renderBackupView();
-    renderView(state.view);
-  });
-});
-
-document.getElementById("btnApagarTudo").addEventListener("click", ()=>{
-  confirmarAcao("Apagar todos os registros", "Isso removerá permanentemente <b>todos</b> os registros de produção (reais e de exemplo). Os produtos cadastrados serão mantidos. Recomendamos criar um backup antes. Deseja continuar?", "Apagar tudo", async ()=>{
-    await dbClear("registros");
-    toast("Todos os registros foram apagados.", "ok");
-    renderBackupView();
-    renderView(state.view);
-  });
-});
-
-/* =========================================================
-   15. INICIALIZAÇÃO
-   ========================================================= */
-async function seedProdutosPadrao(){
-  const existentes = await dbGetAll("produtos");
-  if(existentes.length>0){ state.produtos = existentes; return; }
-  const padrao = PRODUTOS_PADRAO.map((p,i)=> ({id:uuid(), nome:p.nome, categoria:p.categoria, ativo:true, ordem:i}));
-  await dbBulkPut("produtos", padrao);
-  state.produtos = padrao;
-}
-
 async function init(){
   await abrirDB();
-  await seedProdutosPadrao();
-  atualizarStatusBackupSidebar();
+  const prods = await dbGetAll("produtos");
+  if(prods.length===0){
+    const padroes = [
+      {id:uuid(), nome:"Pão Francês", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true},
+      {id:uuid(), nome:"Pão Doce", categoria:"Massa Doce", pesoPadrao:true, pesoCorte:2.500, unidRendimento:35, ativo:true}
+    ];
+    for(const p of padroes) await dbPut("produtos", p);
+    state.produtos = padroes;
+  } else {
+    state.produtos = prods.map(p=>({
+      ...p,
+      categoria: p.categoria === 'balcao' || p.categoria === 'gondola' ? 'Massa Francesa' : p.categoria,
+      pesoCorte: p.pesoCorte || (p.pesoGrama ? (p.pesoGrama*30)/1000 : 2.2),
+      unidRendimento: p.unidRendimento || 30
+    }));
+  }
   irPara("dashboard");
 }
 init();
-
-})();
 </script>
 </body>
 </html>
