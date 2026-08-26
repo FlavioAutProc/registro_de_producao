@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Painel de Produção — Padaria (Soma Contínua)</title>
+<title>Painel de Produção — Padaria (App Style)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,116 +12,132 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-:root{
-  --bg:#F4F1EA; --bg-soft:#EAE4D8; --panel:#FFFFFF;
-  --ink:#2C241B; --ink-soft:#685A4A; --ink-faint:#9A8D7C;
-  --border:#DFD5C4; --border-strong:#CBBCA3;
-  --accent:#D88C22; --accent-dark:#A66812; --accent-soft:#F8E7CD;
-  --good:#3D7A55; --good-soft:#D5ECD9;
-  --bad:#B94235; --bad-soft:#F8D7D4;
-  --info:#356A8E; --info-soft:#D5E7F3;
-  --radius-sm:10px; --radius-md:16px; --radius-lg:24px;
-  --shadow-sm:0 2px 8px rgba(44,36,27,.05); --shadow-md:0 12px 32px rgba(44,36,27,.12);
-  --font-display:'Fraunces', serif; --font-body:'Inter', sans-serif; --font-mono:'IBM Plex Mono', monospace;
+:root {
+  --bg: #F8F9FA; --bg-soft: #E9ECEF; --panel: #FFFFFF;
+  --ink: #212529; --ink-soft: #495057; --ink-faint: #ADB5BD;
+  --border: #DEE2E6; --border-strong: #CED4DA;
+  --accent: #E67E22; --accent-dark: #D35400; --accent-soft: #FDEBD0;
+  --good: #2E865F; --good-soft: #D1E7DD;
+  --bad: #DC3545; --bad-soft: #F8D7DA;
+  --info: #0D6EFD; --info-soft: #CFE2FF;
+  
+  /* BORDAS MAIS RETAS (DESIGN DE APP) */
+  --radius-sm: 4px; --radius-md: 6px; --radius-lg: 10px;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08); 
+  --shadow-md: 0 4px 12px rgba(0,0,0,.12);
+  
+  --font-display: 'Inter', sans-serif; /* Trocado para Inter para visual mais técnico/app */
+  --font-body: 'Inter', sans-serif; 
+  --font-mono: 'IBM Plex Mono', monospace;
 }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased;}
 
-#app{display:flex;flex-direction:column;min-height:100vh;}
-.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--ink);color:#F4F1EA;}
-.brand-mark{width:26px;height:26px;flex-shrink:0;}
-.topbar-title{flex:1;min-width:0;}
-.topbar-title .t1{font-family:var(--font-display);font-weight:600;font-size:16px;line-height:1.2;color:#FFF;}
-.topbar-title .t2{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:#CBBCA3;}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 
-nav.bottomnav{
-  position:fixed;left:0;right:0;bottom:0;z-index:999;
-  display:flex;justify-content:space-evenly;align-items:center;
-  background:var(--panel);border-top:1px solid var(--border);
-  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
-  box-shadow:0 -4px 20px rgba(0,0,0,.08);
+#app { display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--panel); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+.brand-mark { width: 24px; height: 24px; flex-shrink: 0; }
+.topbar-title { flex: 1; min-width: 0; }
+.topbar-title .t1 { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--ink); }
+.topbar-title .t2 { font-size: 11px; font-weight: 500; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.5px; }
+
+nav.bottomnav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 999;
+  display: flex; justify-content: space-evenly; align-items: center;
+  background: var(--panel); border-top: 1px solid var(--border);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
 }
-.tabbtn{
-  flex:1;min-width:0; display:flex;flex-direction:column;align-items:center;gap:4px;
-  border:none;background:transparent;color:var(--ink-faint);
-  padding:8px 2px;border-radius:12px;font-size:10.5px;font-weight:600; transition:.2s;
+.tabbtn {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  border: none; background: transparent; color: var(--ink-faint);
+  padding: 8px 2px; border-radius: var(--radius-sm); font-size: 10.5px; font-weight: 600; transition: .2s; cursor: pointer;
 }
-.tabbtn svg{width:22px;height:22px;stroke-width:1.8;flex-shrink:0;}
-.tabbtn.active{color:var(--accent-dark);background:var(--accent-soft);}
-.tabbtn.active svg{stroke-width:2.2;}
-@media (max-width: 420px) { .tabbtn span { display:none; } .tabbtn svg { width: 26px; height: 26px; } }
+.tabbtn svg { width: 22px; height: 22px; stroke-width: 2; flex-shrink: 0; }
+.tabbtn.active { color: var(--accent-dark); }
+.tabbtn.active svg { stroke-width: 2.5; }
+@media (max-width: 420px) { .tabbtn span { display: none; } .tabbtn svg { width: 24px; height: 24px; } }
 
-main.content{flex:1;width:100%;padding:20px 16px 120px;max-width:1200px;margin:0 auto;}
-.view{display:none;} .view.active{display:block;animation:fadein .3s ease;}
-@keyframes fadein{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px; margin: 0 auto; }
+.view { display: none; } .view.active { display: block; animation: fadein .2s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-.view-header{margin-bottom:24px;}
-.eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-dark);font-weight:700;margin-bottom:6px;}
-.view-title{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--ink);line-height:1.1;}
-.view-sub{color:var(--ink-soft);font-size:13.5px;margin-top:6px;}
+.view-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+.eyebrow { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-dark); font-weight: 700; margin-bottom: 4px; }
+.view-title { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.1; margin: 0; }
 
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow-sm);margin-bottom:20px;}
-.panel-title{font-family:var(--font-display);font-size:17px;font-weight:600;margin:0 0 4px;}
-.panel-sub{color:var(--ink-soft);font-size:12.5px;margin:0 0 14px;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;margin-bottom:20px;}
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;box-shadow:var(--shadow-sm);}
-.kpi-label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
-.kpi-value{font-family:var(--font-mono);font-size:26px;font-weight:600;margin-top:8px;color:var(--ink);}
-.chart-wrap { position: relative; height: 260px; width: 100%; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 16px; }
+.panel-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+.panel-sub { color: var(--ink-soft); font-size: 12.5px; margin: 0 0 16px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; }
+.kpi-label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; font-weight: 600; }
+.kpi-value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--ink); }
+.chart-wrap { position: relative; height: 240px; width: 100%; }
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--border-strong);background:var(--panel);color:var(--ink);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;transition:.15s; cursor:pointer;}
-.btn-primary{background:var(--ink);color:#FFF;border-color:var(--ink);}
-.btn-accent{background:var(--accent);color:#241A0E;border-color:var(--accent-dark);}
-.btn-ghost{border-color:transparent;background:transparent;}
-.btn-sm{padding:8px 14px;font-size:13px;}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
-.field{display:flex;flex-direction:column;gap:6px; min-width:0;}
-.field label{font-size:11.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;}
-.field input, .field select{border:1.5px solid var(--border-strong);border-radius:10px;padding:12px 14px;font-size:14px;background:var(--panel);color:var(--ink); width: 100%;}
-.field input:focus, .field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
-.field-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;}
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--ink); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; transition: .15s; cursor: pointer; }
+.btn:active { transform: scale(0.98); background: var(--bg-soft); }
+.btn-primary { background: var(--ink); color: #FFF; border-color: var(--ink); }
+.btn-primary:active { background: var(--ink-soft); }
+.btn-accent { background: var(--accent); color: #FFF; border-color: var(--accent-dark); }
+.btn-accent:active { background: var(--accent-dark); }
+.btn-ghost { border-color: transparent; background: transparent; color: var(--info); }
+.btn-ghost:active { background: var(--info-soft); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-block { width: 100%; }
 
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;}
-.prod-card{background:var(--panel);border:2px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:all .2s ease;display:flex;flex-direction:column;}
-.card-header{padding:14px 16px;background:var(--bg-soft);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.card-header h4{margin:0;font-size:15px;font-weight:700;}
-.card-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:var(--panel);color:var(--ink-soft);}
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font-size: 11px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; }
+.field input, .field select { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; background: var(--panel); color: var(--ink); width: 100%; font-family: var(--font-body); }
+.field input:focus, .field select:focus { outline: none; border-color: var(--info); box-shadow: 0 0 0 3px var(--info-soft); }
+.field-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
 
-.card-body{padding:16px;display:flex;gap:12px;align-items:flex-end;}
-.card-input-group{flex:1;display:flex;flex-direction:column;gap:4px; min-width:0;}
-.card-input-group label{font-size:10px;font-weight:700;color:var(--ink-faint);text-transform:uppercase;}
-.card-input-group input{width:100%;font-size:18px;font-family:var(--font-mono);font-weight:600;padding:10px;text-align:center;border:1.5px solid var(--border-strong);border-radius:8px;}
-.multiply{color:var(--ink-faint);font-size:18px;font-weight:700;padding-bottom:10px;}
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.prod-card { background: var(--panel); border: 1px solid var(--border-strong); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; }
+.card-header { padding: 12px 16px; background: var(--bg-soft); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.card-header h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--ink); }
+.card-badge { font-size: 10px; font-weight: 700; background: var(--panel); border: 1px solid var(--border); padding: 4px 6px; border-radius: var(--radius-sm); color: var(--ink-soft); }
 
-.card-footer{padding:14px 16px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;background:#FAFAFA;}
-.card-totals .kg{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--good);display:block;}
-.card-totals .unid{font-size:11px;color:var(--ink-soft);font-weight:600;display:block;}
-.btn-save-item{padding:8px 14px;font-size:13px;border-radius:8px;background:var(--ink);border:none;font-weight:700;color:#FFF; cursor:pointer;}
-.btn-save-item:active{transform:scale(0.96);}
+.card-body { padding: 16px; display: flex; gap: 10px; align-items: flex-end; }
+.card-input-group { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.card-input-group label { font-size: 10.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; }
+.card-input-group input { width: 100%; font-size: 16px; font-family: var(--font-mono); font-weight: 600; padding: 10px; text-align: center; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
+.multiply { color: var(--ink-faint); font-size: 18px; font-weight: 700; padding-bottom: 8px; }
 
-.table-wrap{border:1px solid var(--border);border-radius:var(--radius-md);overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;} 
-th{text-align:left;font-size:11px;text-transform:uppercase;font-weight:700;padding:12px 10px;background:var(--bg-soft); word-wrap: break-word;}
-td{padding:12px 10px;border-bottom:1px solid var(--border); word-wrap: break-word;}
-.num-cell{font-family:var(--font-mono);text-align:right;}
+.card-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #FAFAFA; }
+.card-totals .kg { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--good); display: block; }
+.card-totals .unid { font-size: 11px; color: var(--ink-soft); font-weight: 600; display: block; margin-top: 2px; }
 
-.modal-overlay{position:fixed;inset:0;background:rgba(20,15,10,.6);display:none;align-items:center;justify-content:center;z-index:1000;padding:16px;backdrop-filter:blur(3px);}
-.modal-overlay.active{display:flex;}
-.modal{background:var(--panel);border-radius:var(--radius-lg);width:100%;max-width:520px;padding:24px;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto;}
-.toast-stack{position:fixed;bottom:90px;right:16px;left:16px;display:flex;flex-direction:column;gap:10px;z-index:1100;pointer-events:none;align-items:center;}
-.toast{background:var(--ink);color:#FFF;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-md);animation:toastin .3s ease;}
-.toast.ok{background:var(--good);} .toast.err{background:var(--bad);}
-@keyframes toastin{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-@media(max-width:768px){ .grid-2{grid-template-columns:1fr;} }
+.table-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow-x: auto; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; } 
+th { text-align: left; font-size: 11px; text-transform: uppercase; font-weight: 600; padding: 12px; background: var(--bg-soft); color: var(--ink-soft); }
+td { padding: 12px; border-bottom: 1px solid var(--border); }
+.num-cell { font-family: var(--font-mono); text-align: right; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; backdrop-filter: blur(2px); }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--panel); border-radius: var(--radius-md); width: 100%; max-width: 480px; padding: 24px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
+
+.calc-box { background: var(--info-soft); border: 1px solid #A6C8FF; border-radius: var(--radius-sm); padding: 16px; margin-top: 16px; }
+.calc-result-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--info); margin: 0 0 8px; }
+.calc-result-val { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--ink); }
+
+.toast-stack { position: fixed; bottom: 80px; right: 16px; left: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 1100; pointer-events: none; align-items: center; }
+.toast { background: var(--ink); color: #FFF; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-md); animation: toastin .2s ease; }
+.toast.ok { background: var(--good); } .toast.err { background: var(--bad); }
+@keyframes toastin { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+@media(max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <div id="app">
   <header class="topbar">
-    <svg class="brand-mark" viewBox="0 0 40 40" fill="none"><rect x="2" y="10" width="36" height="24" rx="4" stroke="#D88C22" stroke-width="2.4"/><circle cx="11" cy="19" r="3" fill="#D88C22"/><circle cx="20" cy="19" r="3" fill="#D88C22"/><circle cx="29" cy="19" r="3" fill="#D88C22"/><circle cx="15.5" cy="27" r="3" fill="#D88C22"/><circle cx="24.5" cy="27" r="3" fill="#D88C22"/></svg>
-    <div class="topbar-title"><div class="t1">Sistema de Produção</div><div class="t2">Controle de Rendimento</div></div>
+    <svg class="brand-mark" viewBox="0 0 40 40" fill="none"><rect x="2" y="10" width="36" height="24" rx="4" stroke="#E67E22" stroke-width="2.5"/><circle cx="11" cy="19" r="3" fill="#E67E22"/><circle cx="20" cy="19" r="3" fill="#E67E22"/><circle cx="29" cy="19" r="3" fill="#E67E22"/><circle cx="15.5" cy="27" r="3" fill="#E67E22"/><circle cx="24.5" cy="27" r="3" fill="#E67E22"/></svg>
+    <div class="topbar-title"><div class="t1">Padaria OS</div><div class="t2">Controle de Produção</div></div>
   </header>
 
   <nav class="bottomnav" id="bottomnav">
@@ -137,60 +153,68 @@ td{padding:12px 10px;border-bottom:1px solid var(--border); word-wrap: break-wor
     <!-- DASHBOARD -->
     <section class="view active" id="view-dashboard">
       <div class="view-header">
-        <div class="eyebrow">Visão Geral</div>
-        <div class="view-title">Desempenho</div>
-        <div style="margin-top:12px;">
-          <select id="dashRange" style="padding:8px; border-radius:8px; border:1px solid var(--border-strong); background:var(--panel);">
-            <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option>
-          </select>
+        <div>
+          <div class="eyebrow">Visão Geral</div>
+          <h2 class="view-title">Desempenho</h2>
         </div>
+        <select id="dashRange" style="padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); font-size:13px; font-weight:600;">
+          <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option>
+        </select>
       </div>
       <div class="kpi-grid" id="dashKpis"></div>
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-title" style="margin-bottom:12px;">Massa Produzida (Kg)</div>
+          <div class="panel-title">Massa Produzida (Kg)</div>
           <div class="chart-wrap"><canvas id="chartKg"></canvas></div>
         </div>
         <div class="panel">
-          <div class="panel-title" style="margin-bottom:12px;">Unidades Produzidas</div>
+          <div class="panel-title">Unidades Produzidas</div>
           <div class="chart-wrap"><canvas id="chartUnidades"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- LANÇAMENTO (Cartões) -->
+    <!-- LANÇAMENTO / PRODUÇÃO -->
     <section class="view" id="view-lancamento">
       <div class="view-header">
-        <div class="eyebrow">Produção</div>
-        <div class="view-title">Nova Produção</div>
+        <div>
+          <div class="eyebrow">Lançamentos</div>
+          <h2 class="view-title">Linha de Produção</h2>
+        </div>
+        <button class="btn btn-primary" style="background:var(--info); border-color:var(--info);" onclick="abrirCalculadoraLotes()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg>
+          Calc. Lote Perfeito
+        </button>
       </div>
       
-      <div class="panel" style="background:var(--bg-soft); display:flex; align-items:center; gap:12px; margin-bottom:24px; padding:16px;">
-        <label for="lancData" style="font-weight:700;">Data:</label>
-        <input type="date" id="lancData" style="padding:8px 12px; flex:1; max-width:200px;">
-        <span id="lancStatusText" style="font-size:12px; font-weight:700; color:var(--ink-soft); margin-left:auto;"></span>
+      <div class="panel" style="background:var(--panel); display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 16px;">
+        <label for="lancData" style="font-weight:600; font-size:13px;">Data Base:</label>
+        <input type="date" id="lancData" style="padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); flex:1; max-width:200px; font-family:var(--font-body);">
+        <span id="lancStatusText" style="font-size:12px; font-weight:600; color:var(--ink-soft); margin-left:auto; background:var(--bg-soft); padding:4px 8px; border-radius:var(--radius-sm);"></span>
       </div>
 
       <div id="lancCardsContainer"></div>
 
-      <div class="panel" style="margin-top:32px;text-align:center;background:var(--ink);color:#FFF;border:none;">
-        <h3 style="margin:0 0 8px;font-family:var(--font-display);">Finalizou os registros?</h3>
-        <p style="margin:0 0 16px;color:#CBBCA3;font-size:13px;">Os botões "+ Somar" já gravaram tudo no banco de dados.</p>
-        <button class="btn btn-accent" id="btnEncerrarDia" style="width:100%;">Encerrar Produção</button>
+      <div class="panel" style="margin-top:24px;text-align:center;background:var(--bg-soft);border:1px solid var(--border-strong);">
+        <h3 style="margin:0 0 8px; font-size:16px; font-weight:700;">Finalizou a produção do dia?</h3>
+        <p style="margin:0 0 16px;color:var(--ink-soft);font-size:13px;">Os botões "+ Somar" gravam os dados automaticamente.</p>
+        <button class="btn btn-primary btn-block" id="btnEncerrarDia">Encerrar Produção</button>
       </div>
     </section>
 
     <!-- HISTÓRICO -->
     <section class="view" id="view-historico">
       <div class="view-header">
-        <div class="eyebrow">Consultas</div>
-        <div class="view-title">Histórico</div>
+        <div>
+          <div class="eyebrow">Consultas</div>
+          <h2 class="view-title">Histórico de Fechamento</h2>
+        </div>
       </div>
       <div class="panel">
         <div class="field-row">
-          <div class="field" style="flex:1;"><label>De</label><input type="date" id="histInicio"></div>
-          <div class="field" style="flex:1;"><label>Até</label><input type="date" id="histFim"></div>
-          <div class="btn-row" style="width:100%;"><button class="btn btn-primary" id="btnFiltrarHist" style="width:100%;">Buscar</button></div>
+          <div class="field" style="flex:1;"><label>Data Inicial</label><input type="date" id="histInicio"></div>
+          <div class="field" style="flex:1;"><label>Data Final</label><input type="date" id="histFim"></div>
+          <div class="btn-row" style="width:100%;"><button class="btn btn-primary btn-block" id="btnFiltrarHist">Buscar Registros</button></div>
         </div>
         <div id="histTableWrap" style="margin-top:16px;"></div>
       </div>
@@ -199,50 +223,49 @@ td{padding:12px 10px;border-bottom:1px solid var(--border); word-wrap: break-wor
     <!-- RELATÓRIOS -->
     <section class="view" id="view-relatorios">
       <div class="view-header">
-        <div class="eyebrow">Exportação</div>
-        <div class="view-title">Relatórios Agrupados</div>
-        <div class="view-sub">Os dados são separados automaticamente pelas famílias de massas (Doce, Francesa, etc).</div>
+        <div>
+          <div class="eyebrow">Exportação</div>
+          <h2 class="view-title">Gerar Relatórios</h2>
+        </div>
       </div>
 
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-title">Relatório do Dia (PDF)</div>
-          <div class="panel-sub">Lista detalhada e agrupada de uma data.</div>
-          <div class="field-row">
-            <div class="field" style="flex:1;"><label>Data</label><input type="date" id="relDiaData"></div>
-          </div>
-          <button class="btn btn-accent" id="btnPdfDia" style="width:100%;">Baixar PDF Diário</button>
+          <div class="panel-title">Fechamento Diário (PDF)</div>
+          <div class="panel-sub">Lista completa agrupada por família de massa.</div>
+          <div class="field" style="margin-bottom:16px;"><label>Data</label><input type="date" id="relDiaData"></div>
+          <button class="btn btn-primary btn-block" id="btnPdfDia">Gerar PDF</button>
         </div>
         <div class="panel">
-          <div class="panel-title">Relatório de Período (PDF)</div>
-          <div class="panel-sub">Resumo consolidado por família de massa.</div>
-          <div class="field-row">
+          <div class="panel-title">Resumo por Período (PDF)</div>
+          <div class="panel-sub">Soma total de produção num intervalo de dias.</div>
+          <div class="field-row" style="margin-bottom:0;">
             <div class="field" style="flex:1;"><label>De</label><input type="date" id="relPerInicio"></div>
             <div class="field" style="flex:1;"><label>Até</label><input type="date" id="relPerFim"></div>
           </div>
-          <button class="btn btn-accent" id="btnPdfPeriodo" style="width:100%;">Baixar PDF do Período</button>
+          <button class="btn btn-primary btn-block" id="btnPdfPeriodo" style="margin-top:16px;">Gerar PDF</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Exportar para Excel (.xlsx)</div>
-        <div class="panel-sub">Planilha completa contendo os lançamentos e uma aba de Resumo por Massa.</div>
+        <div class="panel-title">Auditoria em Planilha (.xlsx)</div>
+        <div class="panel-sub">Planilha completa em Excel com abas de lançamento bruto e resumo de rendimento.</div>
         <div class="field-row">
           <div class="field"><label>De</label><input type="date" id="xlsInicio"></div>
           <div class="field"><label>Até</label><input type="date" id="xlsFim"></div>
         </div>
-        <button class="btn btn-primary" id="btnExportXlsx">Baixar Planilha Excel</button>
+        <button class="btn btn-primary" style="background:var(--good); border-color:var(--good);" id="btnExportXlsx">Baixar Excel</button>
       </div>
     </section>
 
     <!-- PRODUTOS -->
     <section class="view" id="view-produtos">
-      <div class="view-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="view-header">
         <div>
-          <div class="eyebrow">Configuração</div>
-          <div class="view-title">Produtos</div>
+          <div class="eyebrow">Gestão</div>
+          <h2 class="view-title">Catálogo de Pães</h2>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="abrirModalProduto()">+ Novo</button>
+        <button class="btn btn-primary" onclick="abrirModalProduto()">+ Novo Produto</button>
       </div>
       <div class="panel" style="padding:0;">
         <div id="produtosTableWrap"></div>
@@ -262,7 +285,7 @@ td{padding:12px 10px;border-bottom:1px solid var(--border); word-wrap: break-wor
 "use strict";
 
 /* =========================================================
-   1. BANCO DE DADOS (IndexedDB)
+   1. BANCO DE DADOS (IndexedDB) - Intocado para manter dados
    ========================================================= */
 const DB_NAME = "padariaProducaoV5";
 const DB_VERSION = 2;
@@ -305,7 +328,6 @@ function fmtInt(n){ return new Intl.NumberFormat("pt-BR").format(Math.round(n||0
 function fmtKg(n){ return new Intl.NumberFormat("pt-BR",{minimumFractionDigits:3,maximumFractionDigits:3}).format(n||0); }
 function fmtData(iso){ const [y,m,d]=iso.split("-"); return `${d}/${m}/${y}`; }
 
-// Obtém as categorias dinâmicas presentes nos produtos, garantindo as básicas.
 function getCategoriasAtivas(){
   const cats = new Set(["Massa Francesa", "Massa Doce"]);
   state.produtos.forEach(p=> cats.add(p.categoria));
@@ -317,7 +339,7 @@ function toast(msg, type="ok"){
   const el = document.createElement("div");
   el.className = `toast ${type}`; el.textContent = msg;
   stack.appendChild(el);
-  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .3s"; setTimeout(()=>el.remove(),300); }, 3000);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .2s"; setTimeout(()=>el.remove(),200); }, 3000);
 }
 
 function abrirModal(html){
@@ -378,7 +400,7 @@ async function renderDashboard(){
   document.getElementById("dashKpis").innerHTML = `
     <div class="kpi"><div class="kpi-label">Total Massa (Kg)</div><div class="kpi-value">${fmtKg(totKg)}</div></div>
     <div class="kpi"><div class="kpi-label">Unidades</div><div class="kpi-value">${fmtInt(totUnid)}</div></div>
-    <div class="kpi"><div class="kpi-label">Telas Utilizadas</div><div class="kpi-value">${fmtInt(totTelas)}</div></div>
+    <div class="kpi"><div class="kpi-label">Telas Usadas</div><div class="kpi-value">${fmtInt(totTelas)}</div></div>
   `;
 
   const topKg = Object.entries(prodMap).sort((a,b)=>b[1].kg-a[1].kg).slice(0,5);
@@ -386,7 +408,7 @@ async function renderDashboard(){
   
   if(state.charts.kg) state.charts.kg.destroy();
   state.charts.kg = new Chart(document.getElementById("chartKg").getContext("2d"), {
-    type:"bar", data:{ labels:labelsKg, datasets:[{ data:topKg.map(x=>x[1].kg), backgroundColor:"#D88C22", borderRadius:4 }] },
+    type:"bar", data:{ labels:labelsKg, datasets:[{ data:topKg.map(x=>x[1].kg), backgroundColor:"#E67E22", borderRadius:4 }] },
     options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
   });
 
@@ -395,13 +417,78 @@ async function renderDashboard(){
 
   if(state.charts.unid) state.charts.unid.destroy();
   state.charts.unid = new Chart(document.getElementById("chartUnidades").getContext("2d"), {
-    type:"bar", data:{ labels:labelsUnid, datasets:[{ data:topUnid.map(x=>x[1].unid), backgroundColor:"#356A8E", borderRadius:4 }] },
+    type:"bar", data:{ labels:labelsUnid, datasets:[{ data:topUnid.map(x=>x[1].unid), backgroundColor:"#212529", borderRadius:4 }] },
     options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
   });
 }
 
 /* =========================================================
-   5. LANÇAMENTO (ACUMULAÇÃO CONTÍNUA)
+   5. CALCULADORA DE LOTE PERFEITO (MMC)
+   ========================================================= */
+// Função auxiliar de Máximo Divisor Comum e Mínimo Múltiplo Comum
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+function lcm(a, b) { return (a * b) / gcd(a, b); }
+
+window.abrirCalculadoraLotes = function() {
+  abrirModal(`
+    <h3 style="margin:0 0 4px;font-family:var(--font-display);font-size:18px;">Calculadora de Lote Perfeito</h3>
+    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Descubra a quantidade exata para não sobrar nenhum pão solto na bancada.</p>
+    
+    <div class="field-row">
+      <div class="field" style="flex:1;">
+        <label>Corte da Máquina</label>
+        <input type="number" id="calcCorte" oninput="executarCalculoLote()" value="30" min="1">
+      </div>
+      <div class="field" style="flex:1;">
+        <label>Capacidade da Tela</label>
+        <input type="number" id="calcTela" oninput="executarCalculoLote()" value="25" min="1">
+      </div>
+    </div>
+    <div class="field">
+      <label>Peso do Corte Completo (Kg)</label>
+      <input type="number" id="calcPeso" oninput="executarCalculoLote()" step="0.001" value="1.800" min="0.1">
+    </div>
+
+    <div id="calcResultBox" class="calc-box" style="display:none;"></div>
+
+    <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
+      <button class="btn btn-primary" onclick="fecharModal()">Entendido</button>
+    </div>
+  `);
+  executarCalculoLote();
+};
+
+window.executarCalculoLote = function() {
+  const corte = parseInt(document.getElementById("calcCorte").value) || 0;
+  const tela = parseInt(document.getElementById("calcTela").value) || 0;
+  const peso = parseFloat(document.getElementById("calcPeso").value) || 0;
+  const box = document.getElementById("calcResultBox");
+
+  if(corte <= 0 || tela <= 0 || peso <= 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  // O Total de Unidades Perfeitas é o Mínimo Múltiplo Comum (MMC)
+  const totalUnidades = lcm(corte, tela);
+  const qtdCortes = totalUnidades / corte;
+  const qtdTelas = totalUnidades / tela;
+  const pesoTotal = qtdCortes * peso;
+
+  box.style.display = "block";
+  box.innerHTML = `
+    <div class="calc-result-title">O Lote Ideal Exige:</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <div><span class="calc-result-val">${qtdCortes}</span> cortes na máquina</div>
+      <div><span class="calc-result-val">${qtdTelas}</span> telas cheias exatas</div>
+      <div><span class="calc-result-val">${fmtKg(pesoTotal)} kg</span> de massa processada</div>
+      <div style="margin-top:8px; font-size:12px; font-weight:600; color:var(--ink-soft);">Total gerado: ${totalUnidades} unidades (Nenhuma sobra).</div>
+    </div>
+  `;
+};
+
+/* =========================================================
+   6. LANÇAMENTO (PRODUÇÃO)
    ========================================================= */
 document.getElementById("lancData").addEventListener("change", renderLancamento);
 
@@ -416,31 +503,32 @@ async function renderLancamento(){
   const btnEncerrar = document.getElementById("btnEncerrarDia");
 
   document.getElementById("lancStatusText").textContent = fechado
-    ? "🔒 Produção encerrada"
-    : (registros.length ? `${registros.length} item(ns) tem lançamento` : `0 salvos`);
+    ? "🔒 Encerrado" : (registros.length ? `${registros.length} salvos` : `Aberto`);
 
   if(fechado){
     const linhas = registros.map(r=>{
-      const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Produto Removido";
-      return `<tr><td>${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
+      const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Removido";
+      return `<tr><td style="font-weight:600;">${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
     }).join("");
 
     document.getElementById("lancCardsContainer").innerHTML = `
-      <div class="panel" style="background:var(--bad-soft);border-color:var(--bad);">
-        <div class="panel-title" style="color:var(--bad);">🔒 Esta produção está encerrada</div>
-        <div class="panel-sub" style="color:var(--ink);">Os lançamentos abaixo estão travados contra alterações. Clique em "Reabrir Produção" abaixo para editar novamente.</div>
+      <div class="panel" style="background:var(--bad-soft);border:none;">
+        <div class="panel-title" style="color:var(--bad); font-size:15px;">🔒 Produção Encerrada</div>
+        <div class="panel-sub" style="color:var(--ink-soft); margin-bottom:0;">Edições bloqueadas. Clique abaixo para reabrir o dia.</div>
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa (Kg)</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="4">Sem lançamentos neste dia</td></tr>'}</tbody>
+      <div class="table-wrap" style="margin-bottom:24px;"><table>
+        <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa Kg</th></tr></thead>
+        <tbody>${linhas || '<tr><td colspan="4">Sem lançamentos</td></tr>'}</tbody>
       </table></div>`;
     btnEncerrar.textContent = "Reabrir Produção";
     btnEncerrar.dataset.action = "reabrir";
+    btnEncerrar.className = "btn btn-ghost btn-block";
     return;
   }
 
-  btnEncerrar.textContent = "Encerrar Produção";
+  btnEncerrar.textContent = "Encerrar Produção Diária";
   btnEncerrar.dataset.action = "encerrar";
+  btnEncerrar.className = "btn btn-primary btn-block";
 
   let html = "";
   const categorias = getCategoriasAtivas();
@@ -448,15 +536,11 @@ async function renderLancamento(){
   categorias.forEach(cat=>{
     const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo);
     if(prods.length===0) return;
-    html += `<h3 style="font-family:var(--font-display); font-size:20px; margin:24px 0 12px; text-transform:capitalize;">Massa: ${cat}</h3><div class="cards-grid">`;
+    html += `<h3 style="font-size:15px; font-weight:700; color:var(--ink-soft); margin:24px 0 12px; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); padding-bottom:6px;">${cat}</h3><div class="cards-grid">`;
     
     prods.forEach(p=>{
       const r = regMap[p.id];
-      // Campos de input vazios para permitir SOMAR novos valores
-      const tVal = "";
       const uVal = p.pesoPadrao ? p.unidRendimento : "";
-      const kgVal = "";
-      
       const jaSalvoKg = r ? r.pesoKg : 0;
       const jaSalvoUnid = r ? r.unidades : 0;
 
@@ -464,12 +548,12 @@ async function renderLancamento(){
         <div class="prod-card" id="card-${p.id}">
           <div class="card-header">
             <h4>${p.nome}</h4>
-            <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Manual"}</span>
+            <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Peso Manual"}</span>
           </div>
           <div class="card-body">
             <div class="card-input-group">
               <label>Telas (+)</label>
-              <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" value="${tVal}" placeholder="0">
+              <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" placeholder="0">
             </div>
             ${p.pesoPadrao ? `
               <span class="multiply">×</span>
@@ -479,21 +563,19 @@ async function renderLancamento(){
               </div>
             ` : `
               <div class="card-input-group">
-                <label>Peso Kg (+)</label>
-                <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" value="${kgVal}" placeholder="0.0">
+                <label>Massa Kg (+)</label>
+                <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" placeholder="0.0">
               </div>
             `}
           </div>
           <div class="card-footer">
             <div class="card-totals">
-              <span class="kg" id="tot-kg-${p.id}">Já salvo: ${fmtKg(jaSalvoKg)} kg</span>
-              ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">Já salvo: ${fmtInt(jaSalvoUnid)} un.</span>` : ''}
+              <span class="kg" id="tot-kg-${p.id}">${fmtKg(jaSalvoKg)} kg salvos</span>
+              ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">(${fmtInt(jaSalvoUnid)} unid)</span>` : ''}
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <button class="btn btn-sm btn-ghost" style="padding:8px 10px;font-size:12px;" onclick="abrirCorrecao('${p.id}')" title="Substituir o total do dia, sem somar">Corrigir</button>
-              <button class="btn-save-item" onclick="salvarCard('${p.id}')">
-                + Somar
-              </button>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-sm btn-ghost" onclick="abrirCorrecao('${p.id}')" title="Corrigir total do dia">Corrigir</button>
+              <button class="btn btn-sm btn-primary" onclick="salvarCard('${p.id}')">+ Somar</button>
             </div>
           </div>
         </div>
@@ -502,32 +584,32 @@ async function renderLancamento(){
     html += `</div>`;
   });
   
-  document.getElementById("lancCardsContainer").innerHTML = html || "<p style='padding:20px;'>Sem produtos cadastrados.</p>";
+  document.getElementById("lancCardsContainer").innerHTML = html || "<p style='padding:20px; text-align:center;'>Nenhum produto ativo cadastrado.</p>";
 }
 
 window.salvarCard = async function(pid){
   const p = state.produtos.find(x=>x.id===pid);
   const dataIso = document.getElementById("lancData").value;
   if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); renderLancamento(); return; }
+  
   const inputTelas = document.getElementById(`inp-telas-${pid}`);
   const telasNovas = parseFloat(inputTelas.value)||0;
   
   if(telasNovas===0 && p.pesoPadrao){ toast("Informe as telas para somar!","err"); return; }
-  
-  if(telasNovas<0){ toast("Valor de Telas não pode ser negativo!","err"); return; }
+  if(telasNovas<0){ toast("Valor de Telas inválido!","err"); return; }
 
   let unidadesNovas=0, pesoKgNovo=0, unidTela=0;
 
   if(p.pesoPadrao){
     const inputUnid = document.getElementById(`inp-unid-${pid}`);
     unidTela = parseFloat(inputUnid.value)||0;
-    if(unidTela<0){ toast("Valor de Unid/Tela não pode ser negativo!","err"); return; }
+    if(unidTela<0){ toast("Valor de Unid/Tela inválido!","err"); return; }
     unidadesNovas = telasNovas * unidTela;
     pesoKgNovo = p.unidRendimento > 0 ? (unidadesNovas / p.unidRendimento) * p.pesoCorte : 0;
   } else {
     const inputKg = document.getElementById(`inp-kg-${pid}`);
     pesoKgNovo = parseFloat(inputKg.value)||0;
-    if(pesoKgNovo<0){ toast("Valor de Kg não pode ser negativo!","err"); return; }
+    if(pesoKgNovo<0){ toast("Valor de Kg inválido!","err"); return; }
     if(pesoKgNovo===0 && telasNovas===0) { toast("Informe os Kg ou Telas!","err"); return; }
     unidadesNovas = 0; 
   }
@@ -536,26 +618,21 @@ window.salvarCard = async function(pid){
   let reg = existentes.find(r=>r.produtoId===pid);
   
   if(reg){
-    // LOGICA DE ACUMULAÇÃO (SOMA)
-    reg.telas += telasNovas;
-    reg.unidades += unidadesNovas;
-    reg.pesoKg += pesoKgNovo;
-    if(p.pesoPadrao) reg.unidTela = unidTela; // guarda a última proporção usada
+    reg.telas += telasNovas; reg.unidades += unidadesNovas; reg.pesoKg += pesoKgNovo;
+    if(p.pesoPadrao) reg.unidTela = unidTela;
   } else {
     reg = { id:uuid(), data:dataIso, produtoId:pid, categoria:p.categoria, telas:telasNovas, unidTela, unidades:unidadesNovas, pesoKg:pesoKgNovo };
   }
 
   await dbPut("registros", reg);
   
-  // Limpa campos para nova entrada
   inputTelas.value = "";
   if(!p.pesoPadrao) document.getElementById(`inp-kg-${pid}`).value = "";
   
-  // Atualiza label visual de quanto já tem no banco
-  document.getElementById(`tot-kg-${pid}`).textContent = `Já salvo: ${fmtKg(reg.pesoKg)} kg`;
-  if(p.pesoPadrao) document.getElementById(`tot-unid-${pid}`).textContent = `Já salvo: ${fmtInt(reg.unidades)} un.`;
+  document.getElementById(`tot-kg-${pid}`).textContent = `${fmtKg(reg.pesoKg)} kg salvos`;
+  if(p.pesoPadrao) document.getElementById(`tot-unid-${pid}`).textContent = `(${fmtInt(reg.unidades)} unid)`;
   
-  toast(`Adicionado! Total agora: ${fmtKg(reg.pesoKg)}kg`, "ok");
+  toast(`Adicionado!`, "ok");
 };
 
 window.abrirCorrecao = async function(pid){
@@ -570,19 +647,19 @@ window.abrirCorrecao = async function(pid){
   const kgAtual = reg ? reg.pesoKg : 0;
 
   abrirModal(`
-    <h3 style="margin:0 0 4px;font-family:var(--font-display);">Corrigir: ${p.nome}</h3>
-    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Isso substitui o total já salvo neste dia — não soma ao valor atual.</p>
+    <h3 style="margin:0 0 4px;font-family:var(--font-display); font-size:18px;">Corrigir: ${p.nome}</h3>
+    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Atenção: Isso substitui o total final, apagando a soma anterior deste dia.</p>
     ${p.pesoPadrao ? `
       <div class="field-row">
-        <div class="field" style="flex:1;"><label>Telas (total do dia)</label><input type="number" min="0" step="0.5" id="corrTelas" value="${telasAtual}"></div>
-        <div class="field" style="flex:1;"><label>Unid/Tela</label><input type="number" min="0" id="corrUnidTela" value="${unidTelaAtual}"></div>
+        <div class="field" style="flex:1;"><label>Telas Totais do Dia</label><input type="number" min="0" step="0.5" id="corrTelas" value="${telasAtual}"></div>
+        <div class="field" style="flex:1;"><label>Unid/Tela (Média)</label><input type="number" min="0" id="corrUnidTela" value="${unidTelaAtual}"></div>
       </div>
     ` : `
-      <div class="field"><label>Peso Kg (total do dia)</label><input type="number" min="0" step="0.1" id="corrKg" value="${kgAtual}"></div>
+      <div class="field"><label>Peso Kg Total do Dia</label><input type="number" min="0" step="0.1" id="corrKg" value="${kgAtual}"></div>
     `}
     <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
       <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCorrecao('${pid}')">Salvar Correção</button>
+      <button class="btn btn-primary" onclick="salvarCorrecao('${pid}')">Salvar Substituição</button>
     </div>
   `);
 };
@@ -590,19 +667,19 @@ window.abrirCorrecao = async function(pid){
 window.salvarCorrecao = async function(pid){
   const p = state.produtos.find(x=>x.id===pid);
   const dataIso = document.getElementById("lancData").value;
-  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para editar.","err"); fecharModal(); renderLancamento(); return; }
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada!","err"); fecharModal(); renderLancamento(); return; }
 
   let telas=0, unidTela=0, unidades=0, pesoKg=0;
 
   if(p.pesoPadrao){
     telas = parseFloat(document.getElementById("corrTelas").value)||0;
     unidTela = parseFloat(document.getElementById("corrUnidTela").value)||0;
-    if(telas<0 || unidTela<0) return toast("Valores não podem ser negativos!","err");
+    if(telas<0 || unidTela<0) return toast("Valores inválidos!","err");
     unidades = telas * unidTela;
     pesoKg = p.unidRendimento > 0 ? (unidades / p.unidRendimento) * p.pesoCorte : 0;
   } else {
     pesoKg = parseFloat(document.getElementById("corrKg").value)||0;
-    if(pesoKg<0) return toast("Valor não pode ser negativo!","err");
+    if(pesoKg<0) return toast("Valor inválido!","err");
   }
 
   const existentes = await dbGetByIndex("registros","data",dataIso);
@@ -614,9 +691,7 @@ window.salvarCorrecao = async function(pid){
   }
 
   await dbPut("registros", reg);
-  fecharModal();
-  toast("Correção salva!","ok");
-  renderLancamento();
+  fecharModal(); toast("Correção aplicada!","ok"); renderLancamento();
 };
 
 document.getElementById("btnEncerrarDia").addEventListener("click", async ()=>{
@@ -624,17 +699,17 @@ document.getElementById("btnEncerrarDia").addEventListener("click", async ()=>{
   const action = document.getElementById("btnEncerrarDia").dataset.action || "encerrar";
   if(action === "encerrar"){
     await dbPut("dias", {data:dataIso, fechado:true, fechadoEm:Date.now()});
-    toast("Produção encerrada! Lançamentos travados.", "ok");
-    setTimeout(()=> irPara("dashboard"), 800);
+    toast("Produção travada com sucesso!", "ok");
+    setTimeout(()=> irPara("dashboard"), 600);
   } else {
     await dbPut("dias", {data:dataIso, fechado:false});
-    toast("Produção reaberta para edição.", "ok");
+    toast("Produção reaberta.", "ok");
     renderLancamento();
   }
 });
 
 /* =========================================================
-   6. PRODUTOS & MODAL (Com Categorias Dinâmicas)
+   7. PRODUTOS & MODAL
    ========================================================= */
 function renderProdutosTabela(){
   const categorias = getCategoriasAtivas();
@@ -646,77 +721,68 @@ function renderProdutosTabela(){
 
     const linhas = prods.map(p=>`
       <tr>
-        <td style="font-weight:600;">${p.nome}</td>
+        <td style="font-weight:600; color:${p.ativo?'var(--ink)':'var(--ink-faint)'};">${p.nome}</td>
         <td>${p.pesoPadrao ? p.pesoCorte+' kg' : 'Manual'}</td>
-        <td>${p.ativo?'Ativo':'Inativo'}</td>
+        <td><span style="font-size:10px; font-weight:700; padding:4px 6px; border-radius:4px; background:var(--${p.ativo?'good':'border'}); color:var(--${p.ativo?'panel':'ink-soft'});">${p.ativo?'Ativo':'Inativo'}</span></td>
         <td style="text-align:right;"><button class="btn btn-sm btn-ghost" onclick="abrirModalProduto('${p.id}')">Editar</button></td>
       </tr>
     `).join("");
 
     blocos += `
-      <h3 style="font-family:var(--font-display); font-size:17px; margin:20px 16px 8px; text-transform:capitalize;">Massa: ${cat} <span style="font-family:var(--font-body); font-size:11px; font-weight:600; color:var(--ink-faint); text-transform:none;">(${prods.length})</span></h3>
-      <div class="table-wrap" style="border-left:none;border-right:none;border-radius:0;margin:0 0 8px;">
-        <table style="border:none;">
-          <thead><tr><th style="width:40%;">Produto</th><th>Peso kg</th><th>Status</th><th style="text-align:right;">Ação</th></tr></thead>
-          <tbody>${linhas}</tbody>
-        </table>
-      </div>`;
+      <div style="background:var(--bg-soft); padding:8px 12px; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--ink-soft);">${cat}</div>
+      <table style="border:none; margin-bottom:16px;">
+        <tbody>${linhas}</tbody>
+      </table>`;
   });
 
-  document.getElementById("produtosTableWrap").innerHTML = blocos || '<p style="padding:20px;">Vazio</p>';
+  document.getElementById("produtosTableWrap").innerHTML = blocos || '<p style="padding:20px; text-align:center;">Nenhum produto.</p>';
 }
 
 window.abrirModalProduto = async function(id = null){
   const p = id ? state.produtos.find(x=>x.id===id) : {nome:"", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true};
-  
   const categorias = getCategoriasAtivas();
   let catOptions = categorias.map(c => `<option value="${c}" ${p.categoria===c?'selected':''}>${c}</option>`).join('');
-  catOptions += `<option value="OUTRA">+ Adicionar nova categoria...</option>`;
+  catOptions += `<option value="OUTRA">+ Nova categoria...</option>`;
 
   let temHistorico = false;
-  if(id){
-    const regs = await dbGetAll("registros");
-    temHistorico = regs.some(r=>r.produtoId===id);
-  }
+  if(id) temHistorico = (await dbGetAll("registros")).some(r=>r.produtoId===id);
 
   abrirModal(`
-    <h3 style="margin:0 0 16px;font-family:var(--font-display);">${id?'Editar':'Novo'} Produto</h3>
+    <h3 style="margin:0 0 16px;font-family:var(--font-display); font-size:20px;">${id?'Editar':'Novo'} Produto</h3>
     
     <div class="field" style="margin-bottom:12px;">
-      <label>Nome do Pão</label><input type="text" id="modNome" value="${p.nome}">
+      <label>Nome do Produto</label>
+      <input type="text" id="modNome" value="${p.nome}">
     </div>
     <div class="field" style="margin-bottom:20px;">
-      <label>Tipo de Massa (Categoria)</label>
-      <select id="modCat" onchange="document.getElementById('modNovaCat').style.display = this.value==='OUTRA'?'block':'none'">
-        ${catOptions}
-      </select>
-      <input type="text" id="modNovaCat" style="display:none; margin-top:8px;" placeholder="Nome da nova Massa (Ex: Massa Salgada)">
+      <label>Família / Categoria</label>
+      <select id="modCat" onchange="document.getElementById('modNovaCat').style.display = this.value==='OUTRA'?'block':'none'">${catOptions}</select>
+      <input type="text" id="modNovaCat" style="display:none; margin-top:8px;" placeholder="Digite a nova Categoria">
     </div>
 
-    <div class="panel" style="background:var(--bg-soft);padding:16px;margin:0 0 20px;">
-      <label style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;cursor:pointer;">
+    <div class="panel" style="background:var(--bg-soft); border:none; padding:16px; margin:0 0 20px;">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px;cursor:pointer; color:var(--ink);">
         <input type="checkbox" id="modPadrao" ${p.pesoPadrao?'checked':''} style="width:18px;height:18px;flex-shrink:0;">
-        Possui Peso de Corte Padrão?
+        Produto tem corte na máquina? (Peso Padrão)
       </label>
-      <div id="wrapCorte" style="display:${p.pesoPadrao?'grid':'none'}; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; align-items:flex-end;">
-        <div class="field"><label>Corte (Kg)</label><input type="number" step="0.001" id="modCorte" value="${p.pesoCorte}"></div>
-        <div class="field"><label>Rende (Un)</label><input type="number" id="modRend" value="${p.unidRendimento}"></div>
+      <div id="wrapCorte" style="display:${p.pesoPadrao?'grid':'none'}; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <div class="field"><label>Peso do Corte (Kg)</label><input type="number" step="0.001" id="modCorte" value="${p.pesoCorte}"></div>
+        <div class="field"><label>Rende (Unidades)</label><input type="number" id="modRend" value="${p.unidRendimento}"></div>
       </div>
     </div>
 
     <div class="field" style="margin-bottom:24px;">
-      <label>Status</label>
-      <select id="modAtivo"><option value="true" ${p.ativo?'selected':''}>Ativo</option><option value="false" ${!p.ativo?'selected':''}>Inativo (Oculto)</option></select>
+      <label>Status Operacional</label>
+      <select id="modAtivo"><option value="true" ${p.ativo?'selected':''}>Ativo (Visível na Produção)</option><option value="false" ${!p.ativo?'selected':''}>Inativo (Oculto)</option></select>
     </div>
     
     <div class="btn-row" style="justify-content:space-between;align-items:center;">
-      ${id ? `<button class="btn btn-sm" style="border-color:var(--bad);color:var(--bad);" ${temHistorico ? 'disabled title="Produto possui lançamentos no histórico — use Inativo em vez de excluir"' : ''} onclick="excluirProduto('${id}')">Excluir</button>` : `<span></span>`}
+      ${id ? `<button class="btn btn-sm" style="border-color:var(--bad);color:var(--bad); background:transparent;" ${temHistorico ? 'disabled title="Produto possui histórico — inative-o em vez de excluir"' : ''} onclick="excluirProduto('${id}')">Excluir</button>` : `<span></span>`}
       <div class="btn-row">
-        <button class="btn btn-ghost" onclick="fecharModal()">Fechar</button>
+        <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
         <button class="btn btn-primary" onclick="salvarProduto('${id||''}')">Salvar</button>
       </div>
     </div>
-    ${id && temHistorico ? `<p style="margin:10px 0 0;font-size:11.5px;color:var(--ink-faint);">Este produto tem lançamentos no histórico e não pode ser excluído — marque como Inativo para escondê-lo das telas de lançamento.</p>` : ''}
   `);
   
   document.getElementById("modPadrao").addEventListener("change", e=>{
@@ -732,14 +798,12 @@ window.salvarProduto = async function(id){
   if(categoria === 'OUTRA'){
     categoria = document.getElementById("modNovaCat").value.trim();
     if(!categoria) return toast("Preencha a nova categoria.","err");
-    // Evita criar categoria duplicada por diferença de maiúsculas/espaços (ex: "massa salgada" vs "Massa Salgada")
     const existente = getCategoriasAtivas().find(c=> c.toLowerCase()===categoria.toLowerCase());
     if(existente) categoria = existente;
   }
   
   const prod = {
-    id: id || uuid(),
-    nome, categoria,
+    id: id || uuid(), nome, categoria,
     pesoPadrao: document.getElementById("modPadrao").checked,
     pesoCorte: parseFloat(document.getElementById("modCorte").value)||0,
     unidRendimento: parseInt(document.getElementById("modRend").value)||0,
@@ -747,57 +811,24 @@ window.salvarProduto = async function(id){
   };
   
   await dbPut("produtos", prod);
-  
-  if(id) {
-    state.produtos = state.produtos.map(x=>x.id===id?prod:x);
-    fecharModal(); 
-  } else {
-    // Manter janela aberta para castros ágeis e limpar caixas
+  if(id) { state.produtos = state.produtos.map(x=>x.id===id?prod:x); fecharModal(); } 
+  else {
     state.produtos.push(prod);
-    document.getElementById("modNome").value = "";
-    document.getElementById("modNome").focus();
-    // Atualiza a lista de select dinamicamente caso ele tenha criado categoria nova
-    if(document.getElementById("modCat").value === 'OUTRA'){
-       const categorias = getCategoriasAtivas();
-       let catOptions = categorias.map(c => `<option value="${c}" ${categoria===c?'selected':''}>${c}</option>`).join('');
-       catOptions += `<option value="OUTRA">+ Adicionar nova categoria...</option>`;
-       document.getElementById("modCat").innerHTML = catOptions;
-       document.getElementById("modNovaCat").style.display = "none";
-       document.getElementById("modNovaCat").value = "";
-    }
+    document.getElementById("modNome").value = ""; document.getElementById("modNome").focus();
   }
-  
-  toast("Produto salvo!","ok"); 
-  renderProdutosTabela();
+  toast("Produto salvo!","ok"); renderProdutosTabela();
 };
 
 window.excluirProduto = async function(id){
   const regs = await dbGetAll("registros");
-  if(regs.some(r=>r.produtoId===id)){
-    toast("Produto possui lançamentos — use Inativo em vez de excluir.","err");
-    return;
-  }
-  const p = state.produtos.find(x=>x.id===id);
-  abrirModal(`
-    <h3 style="margin:0 0 10px;font-family:var(--font-display);color:var(--bad);">Excluir Produto</h3>
-    <p style="margin:0 0 20px;">Tem certeza que deseja excluir <strong>${p ? p.nome : 'este produto'}</strong> definitivamente? Esta ação não pode ser desfeita.</p>
-    <div class="btn-row" style="justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="confirmarExclusaoProduto('${id}')">Sim, excluir</button>
-    </div>
-  `);
-};
-
-window.confirmarExclusaoProduto = async function(id){
+  if(regs.some(r=>r.produtoId===id)){ toast("Produto tem histórico, use Inativo.","err"); return; }
   await dbDelete("produtos", id);
   state.produtos = state.produtos.filter(x=>x.id!==id);
-  fecharModal();
-  toast("Produto excluído.","ok");
-  renderProdutosTabela();
+  fecharModal(); toast("Excluído.","ok"); renderProdutosTabela();
 };
 
 /* =========================================================
-   7. HISTÓRICO 
+   8. HISTÓRICO 
    ========================================================= */
 document.getElementById("histInicio").value = addDiasISO(hojeISO(),-7);
 document.getElementById("histFim").value = hojeISO();
@@ -811,8 +842,7 @@ async function renderHistorico(){
   const porDia = {};
   regs.forEach(r=>{
     if(!porDia[r.data]) porDia[r.data]={data:r.data, kg:0, unid:0};
-    porDia[r.data].kg += r.pesoKg||0;
-    porDia[r.data].unid += r.unidades||0;
+    porDia[r.data].kg += r.pesoKg||0; porDia[r.data].unid += r.unidades||0;
   });
   
   const dias = Object.values(porDia).sort((a,b)=>b.data.localeCompare(a.data));
@@ -821,33 +851,27 @@ async function renderHistorico(){
       <td style="font-weight:600;">${fmtData(d.data)} ${diasFechados.has(d.data) ? '🔒' : ''}</td>
       <td class="num-cell">${fmtKg(d.kg)}</td>
       <td class="num-cell">${fmtInt(d.unid)}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-sm btn-ghost" style="padding:4px 8px;" onclick="abrirDetalhesDia('${d.data}')">Ver Detalhes</button>
-      </td>
+      <td style="text-align:right;"><button class="btn btn-sm btn-ghost" onclick="abrirDetalhesDia('${d.data}')">Ver</button></td>
     </tr>
   `).join("");
   
   document.getElementById("histTableWrap").innerHTML = `
     <div class="table-wrap"><table style="border:none;">
-      <thead><tr><th>Data</th><th style="text-align:right">Total Kg</th><th style="text-align:right">Unid</th><th style="text-align:right">Ação</th></tr></thead>
-      <tbody>${linhas||'<tr><td colspan="4">Sem dados</td></tr>'}</tbody>
+      <thead><tr><th>Data</th><th style="text-align:right">Tot. Kg</th><th style="text-align:right">Unid</th><th style="text-align:right"></th></tr></thead>
+      <tbody>${linhas||'<tr><td colspan="4">Sem dados no período</td></tr>'}</tbody>
     </table></div>`;
 }
 
 window.abrirDetalhesDia = async function(dataIso){
   const regs = await dbGetByIndex("registros","data",dataIso);
-  let linhas = regs.map(r=>{
-    const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Produto Removido";
-    return `<tr><td>${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
-  }).join("");
-
+  let linhas = regs.map(r=>`<tr><td style="font-weight:600;">${state.produtos.find(x=>x.id===r.produtoId)?.nome||"Deletado"}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)}</td></tr>`).join("");
   abrirModal(`
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-      <h3 style="margin:0;font-family:var(--font-display);">Detalhes: ${fmtData(dataIso)}</h3>
-      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('lancData').value='${dataIso}'; fecharModal(); irPara('lancamento');">Editar Lançamento</button>
+      <h3 style="margin:0;font-family:var(--font-display);font-size:18px;">${fmtData(dataIso)}</h3>
+      <button class="btn btn-sm btn-ghost" onclick="document.getElementById('lancData').value='${dataIso}'; fecharModal(); irPara('lancamento');">Editar Data</button>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa (Kg)</th></tr></thead>
+      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Kg</th></tr></thead>
       <tbody>${linhas || '<tr><td colspan="4">Vazio</td></tr>'}</tbody>
     </table></div>
     <div class="btn-row" style="justify-content:flex-end; margin-top:16px;"><button class="btn btn-primary" onclick="fecharModal()">Fechar</button></div>
@@ -855,154 +879,90 @@ window.abrirDetalhesDia = async function(dataIso){
 };
 
 /* =========================================================
-   8. RELATÓRIOS (Agrupados por Massa/Categoria)
+   9. RELATÓRIOS (PDF e Excel)
    ========================================================= */
-function obterNomeProduto(id){ return state.produtos.find(p=>p.id===id)?.nome || "Desconhecido"; }
+function obterNomeProduto(id){ return state.produtos.find(p=>p.id===id)?.nome || "Excluído"; }
 function obterCatProduto(id){ return state.produtos.find(p=>p.id===id)?.categoria || "Outros"; }
 
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const data = document.getElementById("relDiaData").value;
   if(!data) return toast("Selecione uma data", "err");
-  
   const regs = await dbGetByIndex("registros","data",data);
-  if(!regs.length) return toast("Nenhum dado neste dia.", "err");
+  if(!regs.length) return toast("Sem dados.", "err");
 
   const doc = new window.jspdf.jsPDF();
   doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário - ${fmtData(data)}`, 14, 20);
-  
   let y = 30;
-  const categoriasPresentes = Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort();
 
-  categoriasPresentes.forEach(cat=>{
+  Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort().forEach(cat=>{
     const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
     if(!regsCat.length) return;
     
-    doc.setFontSize(12); doc.setTextColor(216,140,34);
-    doc.text(`Massa: ${cat}`, 14, y); y += 4;
-    
+    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(`Massa: ${cat}`, 14, y); y += 4;
     let subKg = 0, subUnid = 0;
-    const body = regsCat.map(r=> {
-      subKg += r.pesoKg; subUnid += r.unidades;
-      return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)];
-    });
+    const body = regsCat.map(r=> { subKg += r.pesoKg; subUnid += r.unidades; return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)]; });
     body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.autoTable({
-      startY: y, head: [["Produto", "Telas", "Total Unid", "Massa (Kg)"]],
-      body: body, theme: "grid", headStyles: {fillColor:[44,36,27]}
-    });
+    doc.autoTable({ startY: y, head: [["Produto", "Telas", "Total Unid", "Massa (Kg)"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
     y = doc.lastAutoTable.finalY + 12;
   });
-
-  doc.save(`Relatorio-Dia-${data}.pdf`);
-  toast("PDF Diário gerado!", "ok");
+  doc.save(`Relatorio-${data}.pdf`); toast("PDF gerado!", "ok");
 });
 
 document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
-  const ini = document.getElementById("relPerInicio").value;
-  const fim = document.getElementById("relPerFim").value;
+  const ini = document.getElementById("relPerInicio").value, fim = document.getElementById("relPerFim").value;
   if(!ini || !fim) return toast("Selecione o período", "err");
-
   const regs = (await dbGetAll("registros")).filter(r=> r.data>=ini && r.data<=fim);
-  if(!regs.length) return toast("Nenhum dado no período.", "err");
+  if(!regs.length) return toast("Sem dados.", "err");
 
   const doc = new window.jspdf.jsPDF();
-  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Resumo do Período: ${fmtData(ini)} a ${fmtData(fim)}`, 14, 20);
-  let y = 30;
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Resumo: ${fmtData(ini)} a ${fmtData(fim)}`, 14, 20); let y = 30;
 
-  const categoriasPresentes = Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort();
-
-  categoriasPresentes.forEach(cat=>{
+  Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort().forEach(cat=>{
     const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
     if(!regsCat.length) return;
-
     const resumo = {};
-    regsCat.forEach(r=>{
-      if(!resumo[r.produtoId]) resumo[r.produtoId] = {telas:0, unid:0, kg:0};
-      resumo[r.produtoId].telas += r.telas||0;
-      resumo[r.produtoId].unid += r.unidades||0;
-      resumo[r.produtoId].kg += r.pesoKg||0;
-    });
+    regsCat.forEach(r=>{ if(!resumo[r.produtoId]) resumo[r.produtoId] = {telas:0, unid:0, kg:0}; resumo[r.produtoId].telas += r.telas||0; resumo[r.produtoId].unid += r.unidades||0; resumo[r.produtoId].kg += r.pesoKg||0; });
 
     let subKg = 0, subUnid = 0;
-    const body = Object.keys(resumo).map(id=> {
-      subKg += resumo[id].kg; subUnid += resumo[id].unid;
-      return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)];
-    });
+    const body = Object.keys(resumo).map(id=> { subKg += resumo[id].kg; subUnid += resumo[id].unid; return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)]; });
     body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.setFontSize(12); doc.setTextColor(216,140,34);
-    doc.text(`Massa: ${cat}`, 14, y); y += 4;
-    doc.autoTable({
-      startY: y, head: [["Produto", "Telas", "Unid. Totais", "Massa (Kg)"]],
-      body: body, theme: "grid", headStyles: {fillColor:[44,36,27]}
-    });
+    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(`Massa: ${cat}`, 14, y); y += 4;
+    doc.autoTable({ startY: y, head: [["Produto", "Telas", "Unid. Totais", "Massa (Kg)"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
     y = doc.lastAutoTable.finalY + 12;
   });
-
-  doc.save(`Resumo-Periodo-${ini}-a-${fim}.pdf`);
-  toast("PDF de Período gerado!", "ok");
+  doc.save(`Resumo-Periodo.pdf`); toast("PDF gerado!", "ok");
 });
 
 document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
-  const ini = document.getElementById("xlsInicio").value;
-  const fim = document.getElementById("xlsFim").value;
+  const ini = document.getElementById("xlsInicio").value, fim = document.getElementById("xlsFim").value;
   let regs = await dbGetAll("registros");
-  
   if(ini && fim) regs = regs.filter(r=> r.data>=ini && r.data<=fim);
-  if(!regs.length) return toast("Nenhum dado para exportar.", "err");
+  if(!regs.length) return toast("Sem dados.", "err");
 
   const wb = XLSX.utils.book_new();
-
-  // Aba 1: Lançamentos Detalhados
-  const detalhes = regs.map(r=>({
-    "Data": fmtData(r.data),
-    "Tipo de Massa": obterCatProduto(r.produtoId),
-    "Produto": obterNomeProduto(r.produtoId),
-    "Telas": r.telas,
-    "Unid. Total": r.unidades,
-    "Massa (Kg)": parseFloat(r.pesoKg.toFixed(3))
-  }));
+  const detalhes = regs.map(r=>({"Data": fmtData(r.data), "Tipo de Massa": obterCatProduto(r.produtoId), "Produto": obterNomeProduto(r.produtoId), "Telas": r.telas, "Unid. Total": r.unidades, "Massa (Kg)": parseFloat(r.pesoKg.toFixed(3))}));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalhes), "Lançamentos");
 
-  // Aba 2: Resumo por Massa (Categoria)
   const resumoMassa = {};
-  regs.forEach(r=>{
-    const cat = obterCatProduto(r.produtoId);
-    if(!resumoMassa[cat]) resumoMassa[cat] = {kg:0, unid:0};
-    resumoMassa[cat].kg += r.pesoKg;
-    resumoMassa[cat].unid += r.unidades;
-  });
-  const resMassArr = Object.keys(resumoMassa).map(cat=>({
-    "Tipo de Massa": cat, "Unidades Produzidas": resumoMassa[cat].unid, "Massa Processada (Kg)": parseFloat(resumoMassa[cat].kg.toFixed(3))
-  }));
+  regs.forEach(r=>{ const cat = obterCatProduto(r.produtoId); if(!resumoMassa[cat]) resumoMassa[cat] = {kg:0, unid:0}; resumoMassa[cat].kg += r.pesoKg; resumoMassa[cat].unid += r.unidades; });
+  const resMassArr = Object.keys(resumoMassa).map(cat=>({"Tipo de Massa": cat, "Unidades Produzidas": resumoMassa[cat].unid, "Massa (Kg)": parseFloat(resumoMassa[cat].kg.toFixed(3))}));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resMassArr), "Resumo por Massa");
   
-  XLSX.writeFile(wb, `Exportacao-Padaria.xlsx`);
-  toast("Excel gerado com sucesso!", "ok");
+  XLSX.writeFile(wb, `Planilha-Padaria.xlsx`); toast("Excel gerado!", "ok");
 });
 
 /* =========================================================
-   9. INIT
+   10. INICIALIZAÇÃO
    ========================================================= */
 async function init(){
   await abrirDB();
   const prods = await dbGetAll("produtos");
   if(prods.length===0){
-    const padroes = [
-      {id:uuid(), nome:"Pão Francês", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true},
-      {id:uuid(), nome:"Pão Doce", categoria:"Massa Doce", pesoPadrao:true, pesoCorte:2.500, unidRendimento:35, ativo:true}
-    ];
-    for(const p of padroes) await dbPut("produtos", p);
-    state.produtos = padroes;
-  } else {
-    state.produtos = prods.map(p=>({
-      ...p,
-      categoria: p.categoria === 'balcao' || p.categoria === 'gondola' ? 'Massa Francesa' : p.categoria,
-      pesoCorte: p.pesoCorte || (p.pesoGrama ? (p.pesoGrama*30)/1000 : 2.2),
-      unidRendimento: p.unidRendimento || 30
-    }));
-  }
+    const padroes = [ {id:uuid(), nome:"Pão Francês", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true} ];
+    for(const p of padroes) await dbPut("produtos", p); state.produtos = padroes;
+  } else { state.produtos = prods; }
   irPara("dashboard");
 }
 init();
