@@ -32,6 +32,20 @@
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
+html[data-theme="dark"] {
+  --bg: #16181B; --bg-soft: #1F2226; --panel: #202327;
+  --ink: #EDEEF0; --ink-soft: #ABB1B9; --ink-faint: #6B7178;
+  --border: #33373D; --border-strong: #40454C;
+  --accent: #E67E22; --accent-dark: #F2984A; --accent-soft: #3A2A17;
+  --good: #3FBE84; --good-soft: #123326;
+  --bad: #F1606E; --bad-soft: #3A1519;
+  --info: #4C93FF; --info-soft: #142544;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.35);
+  --shadow-md: 0 4px 14px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] .toast { color: #16181B; }
+html[data-theme="dark"] .toast.ok, html[data-theme="dark"] .toast.err { color: #FFF; }
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 
@@ -56,7 +70,18 @@ nav.bottomnav {
 .tabbtn svg { width: 22px; height: 22px; stroke-width: 2; flex-shrink: 0; }
 .tabbtn.active { color: var(--accent-dark); }
 .tabbtn.active svg { stroke-width: 2.5; }
-@media (max-width: 420px) { .tabbtn span { display: none; } .tabbtn svg { width: 24px; height: 24px; } }
+@media (max-width: 420px) { .tabbtn span { display: none; } .tabbtn svg { width: 24px; height: 24px; } .tabbtn-fab span:last-child { display: block; } }
+
+.tabbtn-fab { color: var(--accent-dark); margin-top: -22px; }
+.fab-circle {
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--accent); border: 3px solid var(--panel);
+  box-shadow: var(--shadow-md); margin-bottom: 2px;
+}
+.fab-circle svg { width: 22px; height: 22px; stroke: #FFF; stroke-width: 2.5; }
+.tabbtn-fab span:last-child { font-weight: 700; }
+@media (max-width: 420px) { .fab-circle { width: 42px; height: 42px; } .fab-circle svg { width: 20px; height: 20px; } }
 
 main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px; margin: 0 auto; }
 .view { display: none; } .view.active { display: block; animation: fadein .2s ease; }
@@ -70,10 +95,16 @@ main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px
 .panel-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; margin: 0 0 6px; }
 .panel-sub { color: var(--ink-soft); font-size: 12.5px; margin: 0 0 16px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; }
-.kpi-label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; font-weight: 600; }
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; min-width: 0; }
+.kpi-label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .kpi-value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--ink); }
+@media (max-width: 480px) {
+  .kpi-grid { gap: 8px; }
+  .kpi { padding: 10px 8px; text-align: center; }
+  .kpi-label { font-size: 9px; letter-spacing: 0.2px; }
+  .kpi-value { font-size: 16px; margin-top: 4px; }
+}
 .chart-wrap { position: relative; height: 240px; width: 100%; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--ink); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; transition: .15s; cursor: pointer; }
@@ -142,10 +173,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 
   <nav class="bottomnav" id="bottomnav">
     <button class="tabbtn active" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Painel</span></button>
-    <button class="tabbtn" data-view="lancamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg><span>Produção</span></button>
     <button class="tabbtn" data-view="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>Histórico</span></button>
+    <button class="tabbtn tabbtn-fab" data-view="lancamento"><span class="fab-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg></span><span>Produção</span></button>
     <button class="tabbtn" data-view="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Relatórios</span></button>
-    <button class="tabbtn" data-view="produtos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg><span>Produtos</span></button>
+    <button class="tabbtn" data-view="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Config.</span></button>
   </nav>
 
   <main class="content" id="mainContent">
@@ -162,13 +193,18 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </select>
       </div>
       <div class="kpi-grid" id="dashKpis"></div>
+      <div class="panel">
+        <div class="panel-title">Evolução da Produção no Período</div>
+        <div class="panel-sub" style="margin-bottom:0;">Massa (Kg) e Unidades produzidas por dia.</div>
+        <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+      </div>
       <div class="grid-2">
         <div class="panel">
-          <div class="panel-title">Massa Produzida (Kg)</div>
+          <div class="panel-title">Top Produtos — Massa (Kg)</div>
           <div class="chart-wrap"><canvas id="chartKg"></canvas></div>
         </div>
         <div class="panel">
-          <div class="panel-title">Unidades Produzidas</div>
+          <div class="panel-title">Top Produtos — Unidades</div>
           <div class="chart-wrap"><canvas id="chartUnidades"></canvas></div>
         </div>
       </div>
@@ -258,9 +294,37 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </div>
     </section>
 
-    <!-- PRODUTOS -->
-    <section class="view" id="view-produtos">
+    <!-- CONFIGURAÇÕES -->
+    <section class="view" id="view-config">
       <div class="view-header">
+        <div>
+          <div class="eyebrow">Sistema</div>
+          <h2 class="view-title">Configurações</h2>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Aparência</div>
+          <div class="panel-sub">Escolha o tema visual do sistema.</div>
+          <div class="btn-row">
+            <button class="btn" id="btnTemaClaro" onclick="definirTema('light')">☀ Tema Claro</button>
+            <button class="btn" id="btnTemaEscuro" onclick="definirTema('dark')">☾ Tema Escuro</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Backup dos Dados</div>
+          <div class="panel-sub">Exporte um arquivo .json com todos os produtos e lançamentos, ou restaure a partir de um backup.</div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="exportarBackupJSON()">⭳ Baixar Backup (.json)</button>
+            <button class="btn" onclick="document.getElementById('inputImportarBackup').click()">⭱ Importar Backup</button>
+            <input type="file" id="inputImportarBackup" accept="application/json" style="display:none;">
+          </div>
+        </div>
+      </div>
+
+      <div class="view-header" style="margin-top:8px;">
         <div>
           <div class="eyebrow">Gestão</div>
           <h2 class="view-title">Catálogo de Pães</h2>
@@ -342,6 +406,25 @@ function toast(msg, type="ok"){
   setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .2s"; setTimeout(()=>el.remove(),200); }, 3000);
 }
 
+/* =========================================================
+   2b. TEMA (CLARO / ESCURO)
+   ========================================================= */
+function definirTema(modo){
+  localStorage.setItem("padariaTema", modo);
+  document.documentElement.setAttribute("data-theme", modo);
+  aplicarEstadoTema();
+  if(state.charts.kg || state.charts.unid || state.charts.evolucao) renderDashboard();
+}
+window.definirTema = definirTema;
+function aplicarEstadoTema(){
+  const atual = localStorage.getItem("padariaTema") || "light";
+  const bClaro = document.getElementById("btnTemaClaro"), bEscuro = document.getElementById("btnTemaEscuro");
+  if(!bClaro || !bEscuro) return;
+  bClaro.className = atual==="light" ? "btn btn-primary" : "btn";
+  bEscuro.className = atual==="dark" ? "btn btn-primary" : "btn";
+}
+(function(){ document.documentElement.setAttribute("data-theme", localStorage.getItem("padariaTema") || "light"); })();
+
 function abrirModal(html){
   document.getElementById("modalBox").innerHTML = html;
   document.getElementById("modalOverlay").classList.add("active");
@@ -362,7 +445,7 @@ function irPara(view){
   if(view==="dashboard") renderDashboard();
   else if(view==="lancamento") renderLancamento();
   else if(view==="historico") renderHistorico();
-  else if(view==="produtos") renderProdutosTabela();
+  else if(view==="config") { renderProdutosTabela(); aplicarEstadoTema(); }
   else if(view==="relatorios") {
     document.getElementById("relDiaData").value = hojeISO();
     document.getElementById("relPerInicio").value = addDiasISO(hojeISO(), -7);
@@ -378,6 +461,8 @@ document.getElementById("bottomnav").addEventListener("click", e=>{
    ========================================================= */
 document.getElementById("dashRange").addEventListener("change", renderDashboard);
 
+function corTema(varName){ return getComputedStyle(document.documentElement).getPropertyValue(varName).trim(); }
+
 async function renderDashboard(){
   const range = document.getElementById("dashRange").value;
   const hoje = hojeISO();
@@ -387,6 +472,7 @@ async function renderDashboard(){
 
   let totKg=0, totUnid=0, totTelas=0;
   const prodMap = {};
+  const diaMap = {};
   
   registros.forEach(r=>{
     totKg += (r.pesoKg || 0);
@@ -395,6 +481,9 @@ async function renderDashboard(){
     if(!prodMap[r.produtoId]) prodMap[r.produtoId] = {kg:0, unid:0};
     prodMap[r.produtoId].kg += (r.pesoKg || 0);
     prodMap[r.produtoId].unid += (r.unidades || 0);
+    if(!diaMap[r.data]) diaMap[r.data] = {kg:0, unid:0};
+    diaMap[r.data].kg += (r.pesoKg || 0);
+    diaMap[r.data].unid += (r.unidades || 0);
   });
 
   document.getElementById("dashKpis").innerHTML = `
@@ -403,13 +492,43 @@ async function renderDashboard(){
     <div class="kpi"><div class="kpi-label">Telas Usadas</div><div class="kpi-value">${fmtInt(totTelas)}</div></div>
   `;
 
+  const corAccent = corTema("--accent") || "#E67E22";
+  const corInk = corTema("--ink") || "#212529";
+  const corInkSoft = corTema("--ink-soft") || "#495057";
+  const corBorder = corTema("--border") || "#DEE2E6";
+
+  // Evolução diária no período
+  const diasOrdenados = [];
+  for(let d=inicio; d<=hoje; d=addDiasISO(d,1)) diasOrdenados.push(d);
+  const labelsDias = diasOrdenados.map(d=> fmtData(d).slice(0,5));
+  const serieKgDia = diasOrdenados.map(d=> diaMap[d]?.kg || 0);
+  const serieUnidDia = diasOrdenados.map(d=> diaMap[d]?.unid || 0);
+
+  if(state.charts.evolucao) state.charts.evolucao.destroy();
+  state.charts.evolucao = new Chart(document.getElementById("chartEvolucao").getContext("2d"), {
+    type:"line",
+    data:{ labels:labelsDias, datasets:[
+      { label:"Massa (Kg)", data:serieKgDia, borderColor:corAccent, backgroundColor:corAccent+"33", fill:true, tension:.25, yAxisID:"y" },
+      { label:"Unidades", data:serieUnidDia, borderColor:corInk, backgroundColor:corInk+"22", fill:false, tension:.25, yAxisID:"y1" }
+    ]},
+    options:{ maintainAspectRatio:false, interaction:{mode:"index", intersect:false},
+      plugins:{ legend:{ display:true, labels:{ color:corInkSoft, boxWidth:12, font:{size:11} } } },
+      scales:{
+        x:{ ticks:{ color:corInkSoft, maxRotation:0, autoSkip:true }, grid:{ color:corBorder } },
+        y:{ position:"left", ticks:{ color:corInkSoft }, grid:{ color:corBorder }, title:{display:true,text:"Kg",color:corInkSoft} },
+        y1:{ position:"right", ticks:{ color:corInkSoft }, grid:{ display:false }, title:{display:true,text:"Unid",color:corInkSoft} }
+      }
+    }
+  });
+
   const topKg = Object.entries(prodMap).sort((a,b)=>b[1].kg-a[1].kg).slice(0,5);
   const labelsKg = topKg.map(x=> state.produtos.find(p=>p.id===x[0])?.nome || "Removido");
   
   if(state.charts.kg) state.charts.kg.destroy();
   state.charts.kg = new Chart(document.getElementById("chartKg").getContext("2d"), {
-    type:"bar", data:{ labels:labelsKg, datasets:[{ data:topKg.map(x=>x[1].kg), backgroundColor:"#E67E22", borderRadius:4 }] },
-    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
+    type:"bar", data:{ labels:labelsKg, datasets:[{ data:topKg.map(x=>x[1].kg), backgroundColor:corAccent, borderRadius:4 }] },
+    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false,
+      scales:{ x:{ ticks:{color:corInkSoft}, grid:{color:corBorder} }, y:{ ticks:{color:corInkSoft}, grid:{display:false} } } }
   });
 
   const topUnid = Object.entries(prodMap).sort((a,b)=>b[1].unid-a[1].unid).slice(0,5);
@@ -417,8 +536,9 @@ async function renderDashboard(){
 
   if(state.charts.unid) state.charts.unid.destroy();
   state.charts.unid = new Chart(document.getElementById("chartUnidades").getContext("2d"), {
-    type:"bar", data:{ labels:labelsUnid, datasets:[{ data:topUnid.map(x=>x[1].unid), backgroundColor:"#212529", borderRadius:4 }] },
-    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false }
+    type:"bar", data:{ labels:labelsUnid, datasets:[{ data:topUnid.map(x=>x[1].unid), backgroundColor:corInk, borderRadius:4 }] },
+    options:{ indexAxis:"y", plugins:{legend:{display:false}}, maintainAspectRatio:false,
+      scales:{ x:{ ticks:{color:corInkSoft}, grid:{color:corBorder} }, y:{ ticks:{color:corInkSoft}, grid:{display:false} } } }
   });
 }
 
@@ -841,24 +961,25 @@ async function renderHistorico(){
   
   const porDia = {};
   regs.forEach(r=>{
-    if(!porDia[r.data]) porDia[r.data]={data:r.data, kg:0, unid:0};
-    porDia[r.data].kg += r.pesoKg||0; porDia[r.data].unid += r.unidades||0;
+    if(!porDia[r.data]) porDia[r.data]={data:r.data, kg:0, unid:0, telas:0};
+    porDia[r.data].kg += r.pesoKg||0; porDia[r.data].unid += r.unidades||0; porDia[r.data].telas += r.telas||0;
   });
   
   const dias = Object.values(porDia).sort((a,b)=>b.data.localeCompare(a.data));
   const linhas = dias.map(d=>`
     <tr>
       <td style="font-weight:600;">${fmtData(d.data)} ${diasFechados.has(d.data) ? '🔒' : ''}</td>
-      <td class="num-cell">${fmtKg(d.kg)}</td>
+      <td class="num-cell">${fmtInt(d.telas)}</td>
       <td class="num-cell">${fmtInt(d.unid)}</td>
+      <td class="num-cell" style="font-weight:700;">${fmtKg(d.kg)}</td>
       <td style="text-align:right;"><button class="btn btn-sm btn-ghost" onclick="abrirDetalhesDia('${d.data}')">Ver</button></td>
     </tr>
   `).join("");
   
   document.getElementById("histTableWrap").innerHTML = `
     <div class="table-wrap"><table style="border:none;">
-      <thead><tr><th>Data</th><th style="text-align:right">Tot. Kg</th><th style="text-align:right">Unid</th><th style="text-align:right"></th></tr></thead>
-      <tbody>${linhas||'<tr><td colspan="4">Sem dados no período</td></tr>'}</tbody>
+      <thead><tr><th>Data</th><th style="text-align:right">Tot. Telas</th><th style="text-align:right">Tot. Unid</th><th style="text-align:right">Tot. Kg</th><th style="text-align:right"></th></tr></thead>
+      <tbody>${linhas||'<tr><td colspan="5">Sem dados no período</td></tr>'}</tbody>
     </table></div>`;
 }
 
@@ -952,6 +1073,69 @@ document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
   
   XLSX.writeFile(wb, `Planilha-Padaria.xlsx`); toast("Excel gerado!", "ok");
 });
+
+/* =========================================================
+   9b. BACKUP / IMPORTAÇÃO (JSON)
+   ========================================================= */
+window.exportarBackupJSON = async function(){
+  const backup = {
+    app: "Padaria OS", versao: DB_VERSION, geradoEm: new Date().toISOString(),
+    produtos: await dbGetAll("produtos"),
+    registros: await dbGetAll("registros"),
+    dias: await dbGetAll("dias")
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `backup-padaria-${hojeISO()}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast("Backup gerado!", "ok");
+};
+
+document.getElementById("inputImportarBackup").addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  try{
+    const texto = await file.text();
+    const dados = JSON.parse(texto);
+    if(!dados || (!dados.produtos && !dados.registros)) throw new Error("Formato inválido");
+
+    window._backupPendente = dados;
+    const resumo = `Produtos: ${dados.produtos?.length||0} · Registros: ${dados.registros?.length||0} · Dias fechados: ${dados.dias?.length||0}`;
+    abrirModal(`
+      <h3 style="margin:0 0 4px;font-family:var(--font-display);font-size:18px;">Restaurar Backup</h3>
+      <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">${resumo}</p>
+      <div class="panel" style="background:var(--bad-soft); border:none; padding:12px 16px; margin-bottom:16px;">
+        <strong style="color:var(--bad);">Atenção:</strong> isso substitui todos os dados atuais do sistema (produtos, lançamentos e fechamentos). Essa ação não pode ser desfeita.
+      </div>
+      <div class="btn-row" style="justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-primary" style="background:var(--bad); border-color:var(--bad);" onclick="executarRestauracao()">Confirmar Restauração</button>
+      </div>
+    `);
+  } catch(err){
+    toast("Arquivo de backup inválido.", "err");
+  } finally {
+    e.target.value = "";
+  }
+});
+
+window.executarRestauracao = async function(){
+  const dados = window._backupPendente;
+  if(!dados) return;
+  const db = await abrirDB();
+  const t = db.transaction(["produtos","registros","dias"], "readwrite");
+  t.objectStore("produtos").clear(); t.objectStore("registros").clear(); t.objectStore("dias").clear();
+  (dados.produtos||[]).forEach(p=> t.objectStore("produtos").put(p));
+  (dados.registros||[]).forEach(r=> t.objectStore("registros").put(r));
+  (dados.dias||[]).forEach(d=> t.objectStore("dias").put(d));
+  await new Promise((res,rej)=>{ t.oncomplete=res; t.onerror=()=>rej(t.error); });
+  state.produtos = await dbGetAll("produtos");
+  window._backupPendente = null;
+  fecharModal(); toast("Backup restaurado com sucesso!", "ok");
+  irPara("dashboard");
+};
 
 /* =========================================================
    10. INICIALIZAÇÃO
