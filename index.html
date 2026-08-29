@@ -189,7 +189,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <h2 class="view-title">Desempenho</h2>
         </div>
         <select id="dashRange" style="padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); font-size:13px; font-weight:600;">
-          <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option>
+          <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="all">Todo o período</option>
         </select>
       </div>
       <div class="kpi-grid" id="dashKpis"></div>
@@ -466,9 +466,15 @@ function corTema(varName){ return getComputedStyle(document.documentElement).get
 async function renderDashboard(){
   const range = document.getElementById("dashRange").value;
   const hoje = hojeISO();
-  let inicio = range==="hoje" ? hoje : addDiasISO(hoje, -(parseInt(range)-1));
-  
-  const registros = (await dbGetAll("registros")).filter(r=> r.data>=inicio && r.data<=hoje);
+  const todosRegistros = await dbGetAll("registros");
+
+  let inicio;
+  if(range==="hoje") inicio = hoje;
+  else if(range==="all") {
+    inicio = todosRegistros.reduce((min,r)=> (r.data < min ? r.data : min), hoje);
+  } else inicio = addDiasISO(hoje, -(parseInt(range)-1));
+
+  const registros = todosRegistros.filter(r=> r.data>=inicio && r.data<=hoje);
 
   let totKg=0, totUnid=0, totTelas=0;
   const prodMap = {};
@@ -497,12 +503,31 @@ async function renderDashboard(){
   const corInkSoft = corTema("--ink-soft") || "#495057";
   const corBorder = corTema("--border") || "#DEE2E6";
 
-  // Evolução diária no período
+  // Evolução no período — agrupa por dia (períodos curtos) ou por semana (períodos longos, pra não poluir o eixo X)
   const diasOrdenados = [];
   for(let d=inicio; d<=hoje; d=addDiasISO(d,1)) diasOrdenados.push(d);
-  const labelsDias = diasOrdenados.map(d=> fmtData(d).slice(0,5));
-  const serieKgDia = diasOrdenados.map(d=> diaMap[d]?.kg || 0);
-  const serieUnidDia = diasOrdenados.map(d=> diaMap[d]?.unid || 0);
+  const agruparPorSemana = diasOrdenados.length > 45;
+
+  let labelsDias, serieKgDia, serieUnidDia;
+  if(!agruparPorSemana){
+    labelsDias = diasOrdenados.map(d=> fmtData(d).slice(0,5));
+    serieKgDia = diasOrdenados.map(d=> diaMap[d]?.kg || 0);
+    serieUnidDia = diasOrdenados.map(d=> diaMap[d]?.unid || 0);
+  } else {
+    const semanas = {};
+    diasOrdenados.forEach(d=>{
+      const dt = new Date(d+"T00:00:00");
+      const seg = new Date(dt); seg.setDate(dt.getDate() - ((dt.getDay()+6)%7)); // segunda-feira da semana
+      const chave = seg.toISOString().slice(0,10);
+      if(!semanas[chave]) semanas[chave] = {kg:0, unid:0};
+      semanas[chave].kg += diaMap[d]?.kg || 0;
+      semanas[chave].unid += diaMap[d]?.unid || 0;
+    });
+    const chaves = Object.keys(semanas).sort();
+    labelsDias = chaves.map(c=> "sem. "+fmtData(c).slice(0,5));
+    serieKgDia = chaves.map(c=> semanas[c].kg);
+    serieUnidDia = chaves.map(c=> semanas[c].unid);
+  }
 
   if(state.charts.evolucao) state.charts.evolucao.destroy();
   state.charts.evolucao = new Chart(document.getElementById("chartEvolucao").getContext("2d"), {
