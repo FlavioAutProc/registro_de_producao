@@ -666,6 +666,66 @@ window.executarCalculoInteligente = function() {
    ========================================================= */
 document.getElementById("lancData").addEventListener("change", renderLancamento);
 
+function montarCardProduto(p, regMap){
+  const r = regMap[p.id];
+  const uVal = p.pesoPadrao ? p.unidRendimento : "";
+  const jaSalvoKg = r ? r.pesoKg : 0;
+  const jaSalvoUnid = r ? r.unidades : 0;
+
+  return `
+    <div class="prod-card" id="card-${p.id}">
+      <div class="card-header">
+        <h4>${p.nome}</h4>
+        <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Peso Manual"}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-input-group">
+          <label>Telas (+)</label>
+          <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" placeholder="0">
+        </div>
+        ${p.pesoPadrao ? `
+          <span class="multiply">×</span>
+          <div class="card-input-group">
+            <label>Unid/Tela</label>
+            <input type="number" min="0" id="inp-unid-${p.id}" value="${uVal}">
+          </div>
+        ` : `
+          <div class="card-input-group">
+            <label>Massa Kg (+)</label>
+            <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" placeholder="0.0">
+          </div>
+        `}
+      </div>
+      <div class="card-footer">
+        <div class="card-totals">
+          <span class="kg" id="tot-kg-${p.id}">${fmtKg(jaSalvoKg)} kg salvos</span>
+          ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">(${fmtInt(jaSalvoUnid)} unid)</span>` : ''}
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm btn-ghost" onclick="abrirCorrecao('${p.id}')" title="Corrigir total do dia">Corrigir</button>
+          <button class="btn btn-sm btn-primary" onclick="salvarCard('${p.id}')">+ Somar</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function montarTabelaFechada(regs, titulo){
+  if(!regs.length) return "";
+  let subKg=0, subUnid=0, subTelas=0;
+  const linhas = regs.map(r=>{
+    const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Removido";
+    subKg += r.pesoKg||0; subUnid += r.unidades||0; subTelas += r.telas||0;
+    return `<tr><td style="font-weight:600;">${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
+  }).join("");
+  return `
+    <div style="font-size:12px; font-weight:700; text-transform:uppercase; color:var(--ink-soft); margin:16px 0 6px;">${titulo}</div>
+    <div class="table-wrap" style="margin-bottom:16px;"><table>
+      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa Kg</th></tr></thead>
+      <tbody>${linhas}<tr style="font-weight:700;background:var(--bg-soft);"><td>SUBTOTAL</td><td class="num-cell">${fmtInt(subTelas)}</td><td class="num-cell">${fmtInt(subUnid)}</td><td class="num-cell">${fmtKg(subKg)} kg</td></tr></tbody>
+    </table></div>`;
+}
+
 async function renderLancamento(){
   let dataInput = document.getElementById("lancData");
   if(!dataInput.value) dataInput.value = hojeISO();
@@ -680,20 +740,18 @@ async function renderLancamento(){
     ? "🔒 Encerrado" : (registros.length ? `${registros.length} salvos` : `Aberto`);
 
   if(fechado){
-    const linhas = registros.map(r=>{
-      const pNome = state.produtos.find(x=>x.id===r.produtoId)?.nome || "Removido";
-      return `<tr><td style="font-weight:600;">${pNome}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)} kg</td></tr>`;
-    }).join("");
+    const regsAtendimento = registros.filter(r=> obterLocalProduto(r.produtoId) !== "gondola");
+    const regsGondola = registros.filter(r=> obterLocalProduto(r.produtoId) === "gondola");
 
     document.getElementById("lancCardsContainer").innerHTML = `
       <div class="panel" style="background:var(--bad-soft);border:none;">
         <div class="panel-title" style="color:var(--bad); font-size:15px;">🔒 Produção Encerrada</div>
         <div class="panel-sub" style="color:var(--ink-soft); margin-bottom:0;">Edições bloqueadas. Clique abaixo para reabrir o dia.</div>
       </div>
-      <div class="table-wrap" style="margin-bottom:24px;"><table>
-        <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Massa Kg</th></tr></thead>
-        <tbody>${linhas || '<tr><td colspan="4">Sem lançamentos</td></tr>'}</tbody>
-      </table></div>`;
+      ${montarTabelaFechada(regsAtendimento, "Atendimento (Balcão)")}
+      ${montarTabelaFechada(regsGondola, "🛒 Gôndolas / Prateleiras")}
+      ${(!regsAtendimento.length && !regsGondola.length) ? '<p style="padding:16px;text-align:center;">Sem lançamentos</p>' : ''}
+    `;
     btnEncerrar.textContent = "Reabrir Produção";
     btnEncerrar.dataset.action = "reabrir";
     btnEncerrar.className = "btn btn-ghost btn-block";
@@ -708,57 +766,46 @@ async function renderLancamento(){
   const categorias = getCategoriasAtivas();
 
   categorias.forEach(cat=>{
-    const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo);
+    const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo && (p.local||"atendimento")==="atendimento");
     if(prods.length===0) return;
     html += `<h3 style="font-size:15px; font-weight:700; color:var(--ink-soft); margin:24px 0 12px; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); padding-bottom:6px;">${cat}</h3><div class="cards-grid">`;
-    
-    prods.forEach(p=>{
-      const r = regMap[p.id];
-      const uVal = p.pesoPadrao ? p.unidRendimento : "";
-      const jaSalvoKg = r ? r.pesoKg : 0;
-      const jaSalvoUnid = r ? r.unidades : 0;
-
-      html += `
-        <div class="prod-card" id="card-${p.id}">
-          <div class="card-header">
-            <h4>${p.nome}</h4>
-            <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Peso Manual"}</span>
-          </div>
-          <div class="card-body">
-            <div class="card-input-group">
-              <label>Telas (+)</label>
-              <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" placeholder="0">
-            </div>
-            ${p.pesoPadrao ? `
-              <span class="multiply">×</span>
-              <div class="card-input-group">
-                <label>Unid/Tela</label>
-                <input type="number" min="0" id="inp-unid-${p.id}" value="${uVal}">
-              </div>
-            ` : `
-              <div class="card-input-group">
-                <label>Massa Kg (+)</label>
-                <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" placeholder="0.0">
-              </div>
-            `}
-          </div>
-          <div class="card-footer">
-            <div class="card-totals">
-              <span class="kg" id="tot-kg-${p.id}">${fmtKg(jaSalvoKg)} kg salvos</span>
-              ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">(${fmtInt(jaSalvoUnid)} unid)</span>` : ''}
-            </div>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-sm btn-ghost" onclick="abrirCorrecao('${p.id}')" title="Corrigir total do dia">Corrigir</button>
-              <button class="btn btn-sm btn-primary" onclick="salvarCard('${p.id}')">+ Somar</button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
+    prods.forEach(p=> html += montarCardProduto(p, regMap));
     html += `</div>`;
   });
-  
+
+  // Bloco separado: produção para Gôndolas/Prateleiras (fora das categorias acima, é linha à parte)
+  const prodsGondola = state.produtos.filter(p=> p.ativo && (p.local||"atendimento")==="gondola");
+  if(prodsGondola.length){
+    let kgGondolaTotal = 0;
+    prodsGondola.forEach(p=>{ const r = regMap[p.id]; if(r) kgGondolaTotal += (r.pesoKg||0); });
+
+    html += `
+      <div class="panel" style="margin-top:32px; border:2px dashed var(--accent); background:var(--accent-soft);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <div class="eyebrow" style="margin-bottom:2px;">Produção Separada</div>
+            <h3 style="margin:0; font-size:16px; font-weight:700;">🛒 Pães para Gôndolas / Prateleiras</h3>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--ink-soft);">Total do Dia</div>
+            <div id="totKgGondolas" style="font-family:var(--font-mono); font-size:20px; font-weight:700; color:var(--accent-dark);">${fmtKg(kgGondolaTotal)} kg</div>
+          </div>
+        </div>
+      </div>
+      <div class="cards-grid">${prodsGondola.map(p=> montarCardProduto(p, regMap)).join("")}</div>
+    `;
+  }
+
   document.getElementById("lancCardsContainer").innerHTML = html || "<p style='padding:20px; text-align:center;'>Nenhum produto ativo cadastrado.</p>";
+}
+
+async function recalcularTotalGondolas(dataIso){
+  const el = document.getElementById("totKgGondolas");
+  if(!el) return;
+  const registros = await dbGetByIndex("registros","data",dataIso);
+  let totalKg = 0;
+  registros.forEach(r=>{ if(obterLocalProduto(r.produtoId)==="gondola") totalKg += (r.pesoKg||0); });
+  el.textContent = `${fmtKg(totalKg)} kg`;
 }
 
 window.salvarCard = async function(pid){
@@ -805,6 +852,7 @@ window.salvarCard = async function(pid){
   
   document.getElementById(`tot-kg-${pid}`).textContent = `${fmtKg(reg.pesoKg)} kg salvos`;
   if(p.pesoPadrao) document.getElementById(`tot-unid-${pid}`).textContent = `(${fmtInt(reg.unidades)} unid)`;
+  if((p.local||"atendimento")==="gondola") recalcularTotalGondolas(dataIso);
   
   toast(`Adicionado!`, "ok");
 };
@@ -893,14 +941,17 @@ function renderProdutosTabela(){
     const prods = state.produtos.filter(p=>p.categoria===cat);
     if(prods.length===0) return;
 
-    const linhas = prods.map(p=>`
+    const linhas = prods.map(p=>{
+      const isGondola = (p.local||'atendimento')==='gondola';
+      return `
       <tr>
         <td style="font-weight:600; color:${p.ativo?'var(--ink)':'var(--ink-faint)'};">${p.nome}</td>
         <td>${p.pesoPadrao ? p.pesoCorte+' kg' : 'Manual'}</td>
+        <td><span style="font-size:10px; font-weight:700; padding:4px 6px; border-radius:4px; background:${isGondola?'var(--info-soft)':'var(--bg-soft)'}; color:${isGondola?'var(--info)':'var(--ink-soft)'};">${isGondola?'🛒 Gôndolas':'🛎️ Atendimento'}</span></td>
         <td><span style="font-size:10px; font-weight:700; padding:4px 6px; border-radius:4px; background:var(--${p.ativo?'good':'border'}); color:var(--${p.ativo?'panel':'ink-soft'});">${p.ativo?'Ativo':'Inativo'}</span></td>
         <td style="text-align:right;"><button class="btn btn-sm btn-ghost" onclick="abrirModalProduto('${p.id}')">Editar</button></td>
       </tr>
-    `).join("");
+    `;}).join("");
 
     blocos += `
       <div style="background:var(--bg-soft); padding:8px 12px; font-size:12px; font-weight:700; text-transform:uppercase; color:var(--ink-soft);">${cat}</div>
@@ -913,7 +964,7 @@ function renderProdutosTabela(){
 }
 
 window.abrirModalProduto = async function(id = null){
-  const p = id ? state.produtos.find(x=>x.id===id) : {nome:"", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true};
+  const p = id ? state.produtos.find(x=>x.id===id) : {nome:"", categoria:"Massa Francesa", local:"atendimento", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true};
   const categorias = getCategoriasAtivas();
   let catOptions = categorias.map(c => `<option value="${c}" ${p.categoria===c?'selected':''}>${c}</option>`).join('');
   catOptions += `<option value="OUTRA">+ Nova categoria...</option>`;
@@ -932,6 +983,14 @@ window.abrirModalProduto = async function(id = null){
       <label>Família / Categoria</label>
       <select id="modCat" onchange="document.getElementById('modNovaCat').style.display = this.value==='OUTRA'?'block':'none'">${catOptions}</select>
       <input type="text" id="modNovaCat" style="display:none; margin-top:8px;" placeholder="Digite a nova Categoria">
+    </div>
+
+    <div class="field" style="margin-bottom:20px;">
+      <label>Local de Destino</label>
+      <select id="modLocal">
+        <option value="atendimento" ${p.local!=='gondola'?'selected':''}>🛎️ Atendimento (Balcão / a granel)</option>
+        <option value="gondola" ${p.local==='gondola'?'selected':''}>🛒 Gôndolas (Exposição / Prateleiras)</option>
+      </select>
     </div>
 
     <div class="panel" style="background:var(--bg-soft); border:none; padding:16px; margin:0 0 20px;">
@@ -978,6 +1037,7 @@ window.salvarProduto = async function(id){
   
   const prod = {
     id: id || uuid(), nome, categoria,
+    local: document.getElementById("modLocal").value,
     pesoPadrao: document.getElementById("modPadrao").checked,
     pesoCorte: parseFloat(document.getElementById("modCorte").value)||0,
     unidRendimento: parseInt(document.getElementById("modRend").value)||0,
@@ -1058,6 +1118,32 @@ window.abrirDetalhesDia = async function(dataIso){
    ========================================================= */
 function obterNomeProduto(id){ return state.produtos.find(p=>p.id===id)?.nome || "Excluído"; }
 function obterCatProduto(id){ return state.produtos.find(p=>p.id===id)?.categoria || "Outros"; }
+function obterLocalProduto(id){ return state.produtos.find(p=>p.id===id)?.local || "atendimento"; }
+
+// Mapeia, por categoria, quais locais (atendimento/gôndola) existem entre os produtos cadastrados.
+// Usado para decidir se uma categoria precisa ser desdobrada em duas tabelas nos relatórios.
+function mapaLocaisPorCategoria(){
+  const mapa = {};
+  state.produtos.forEach(p=>{
+    const loc = p.local || "atendimento";
+    if(!mapa[p.categoria]) mapa[p.categoria] = new Set();
+    mapa[p.categoria].add(loc);
+  });
+  return mapa;
+}
+
+// Nome do grupo usado nos relatórios (PDF/Excel). Só adiciona sufixo de local
+// quando a categoria de fato tem produtos tanto de Atendimento quanto de Gôndolas.
+function obterGrupoRelatorio(id){
+  const p = state.produtos.find(x=>x.id===id);
+  if(!p) return "Outros";
+  const loc = p.local || "atendimento";
+  const locaisDaCategoria = mapaLocaisPorCategoria()[p.categoria] || new Set([loc]);
+  if(locaisDaCategoria.size > 1){
+    return `${p.categoria} — ${loc==="gondola" ? "Gôndolas" : "Atendimento"}`;
+  }
+  return p.categoria;
+}
 
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const data = document.getElementById("relDiaData").value;
@@ -1069,16 +1155,16 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário - ${fmtData(data)}`, 14, 20);
   let y = 30;
 
-  Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort().forEach(cat=>{
-    const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
-    if(!regsCat.length) return;
+  Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort().forEach(grupo=>{
+    const regsGrupo = regs.filter(r=> obterGrupoRelatorio(r.produtoId) === grupo);
+    if(!regsGrupo.length) return;
     
-    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(`Massa: ${cat}`, 14, y); y += 4;
-    let subKg = 0, subUnid = 0;
-    const body = regsCat.map(r=> { subKg += r.pesoKg; subUnid += r.unidades; return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)]; });
-    body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
+    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(grupo, 14, y); y += 4;
+    let subKg = 0, subUnid = 0, subTelas = 0;
+    const body = regsGrupo.map(r=> { subKg += r.pesoKg; subUnid += r.unidades; subTelas += r.telas||0; return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)]; });
+    body.push(["SUBTOTAL", fmtInt(subTelas), fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.autoTable({ startY: y, head: [["Produto", "Telas", "Total Unid", "Massa (Kg)"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
+    doc.autoTable({ startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
     y = doc.lastAutoTable.finalY + 12;
   });
   doc.save(`Relatorio-${data}.pdf`); toast("PDF gerado!", "ok");
@@ -1093,18 +1179,18 @@ document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
   const doc = new window.jspdf.jsPDF();
   doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Resumo: ${fmtData(ini)} a ${fmtData(fim)}`, 14, 20); let y = 30;
 
-  Array.from(new Set(regs.map(r=>obterCatProduto(r.produtoId)))).sort().forEach(cat=>{
-    const regsCat = regs.filter(r=> obterCatProduto(r.produtoId) === cat);
-    if(!regsCat.length) return;
+  Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort().forEach(grupo=>{
+    const regsGrupo = regs.filter(r=> obterGrupoRelatorio(r.produtoId) === grupo);
+    if(!regsGrupo.length) return;
     const resumo = {};
-    regsCat.forEach(r=>{ if(!resumo[r.produtoId]) resumo[r.produtoId] = {telas:0, unid:0, kg:0}; resumo[r.produtoId].telas += r.telas||0; resumo[r.produtoId].unid += r.unidades||0; resumo[r.produtoId].kg += r.pesoKg||0; });
+    regsGrupo.forEach(r=>{ if(!resumo[r.produtoId]) resumo[r.produtoId] = {telas:0, unid:0, kg:0}; resumo[r.produtoId].telas += r.telas||0; resumo[r.produtoId].unid += r.unidades||0; resumo[r.produtoId].kg += r.pesoKg||0; });
 
-    let subKg = 0, subUnid = 0;
-    const body = Object.keys(resumo).map(id=> { subKg += resumo[id].kg; subUnid += resumo[id].unid; return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)]; });
-    body.push(["SUBTOTAL", "-", fmtInt(subUnid), fmtKg(subKg)]);
+    let subKg = 0, subUnid = 0, subTelas = 0;
+    const body = Object.keys(resumo).map(id=> { subKg += resumo[id].kg; subUnid += resumo[id].unid; subTelas += resumo[id].telas; return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)]; });
+    body.push(["SUBTOTAL", fmtInt(subTelas), fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(`Massa: ${cat}`, 14, y); y += 4;
-    doc.autoTable({ startY: y, head: [["Produto", "Telas", "Unid. Totais", "Massa (Kg)"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
+    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(grupo, 14, y); y += 4;
+    doc.autoTable({ startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
     y = doc.lastAutoTable.finalY + 12;
   });
   doc.save(`Resumo-Periodo.pdf`); toast("PDF gerado!", "ok");
@@ -1117,13 +1203,32 @@ document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
   if(!regs.length) return toast("Sem dados.", "err");
 
   const wb = XLSX.utils.book_new();
-  const detalhes = regs.map(r=>({"Data": fmtData(r.data), "Tipo de Massa": obterCatProduto(r.produtoId), "Produto": obterNomeProduto(r.produtoId), "Telas": r.telas, "Unid. Total": r.unidades, "Massa (Kg)": parseFloat(r.pesoKg.toFixed(3))}));
+  const detalhes = regs.map(r=>({
+    "Data": fmtData(r.data),
+    "Grupo": obterGrupoRelatorio(r.produtoId),
+    "Produto": obterNomeProduto(r.produtoId),
+    "Local": obterLocalProduto(r.produtoId)==="gondola" ? "Gôndolas" : "Atendimento",
+    "Telas": r.telas,
+    "Unid. Total": r.unidades,
+    "Massa (Kg)": parseFloat(r.pesoKg.toFixed(3))
+  }));
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalhes), "Lançamentos");
 
-  const resumoMassa = {};
-  regs.forEach(r=>{ const cat = obterCatProduto(r.produtoId); if(!resumoMassa[cat]) resumoMassa[cat] = {kg:0, unid:0}; resumoMassa[cat].kg += r.pesoKg; resumoMassa[cat].unid += r.unidades; });
-  const resMassArr = Object.keys(resumoMassa).map(cat=>({"Tipo de Massa": cat, "Unidades Produzidas": resumoMassa[cat].unid, "Massa (Kg)": parseFloat(resumoMassa[cat].kg.toFixed(3))}));
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resMassArr), "Resumo por Massa");
+  const resumoGrupo = {};
+  regs.forEach(r=>{
+    const grupo = obterGrupoRelatorio(r.produtoId);
+    if(!resumoGrupo[grupo]) resumoGrupo[grupo] = {telas:0, unid:0, kg:0};
+    resumoGrupo[grupo].telas += r.telas||0;
+    resumoGrupo[grupo].unid += r.unidades||0;
+    resumoGrupo[grupo].kg += r.pesoKg||0;
+  });
+  const resArr = Object.keys(resumoGrupo).sort().map(grupo=>({
+    "Grupo": grupo,
+    "Tot. Telas": resumoGrupo[grupo].telas,
+    "Tot. Unid": resumoGrupo[grupo].unid,
+    "Tot. Kg": parseFloat(resumoGrupo[grupo].kg.toFixed(3))
+  }));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(resArr), "Resumo por Grupo");
   
   XLSX.writeFile(wb, `Planilha-Padaria.xlsx`); toast("Excel gerado!", "ok");
 });
@@ -1198,7 +1303,7 @@ async function init(){
   await abrirDB();
   const prods = await dbGetAll("produtos");
   if(prods.length===0){
-    const padroes = [ {id:uuid(), nome:"Pão Francês", categoria:"Massa Francesa", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true} ];
+    const padroes = [ {id:uuid(), nome:"Pão Francês", categoria:"Massa Francesa", local:"atendimento", pesoPadrao:true, pesoCorte:2.200, unidRendimento:30, ativo:true} ];
     for(const p of padroes) await dbPut("produtos", p); state.produtos = padroes;
   } else { state.produtos = prods; }
   irPara("dashboard");
