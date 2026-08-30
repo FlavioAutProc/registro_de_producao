@@ -21,13 +21,11 @@
   --bad: #DC3545; --bad-soft: #F8D7DA;
   --info: #0D6EFD; --info-soft: #CFE2FF;
   
-  /* BORDAS MAIS RETAS (DESIGN DE APP) */
   --radius-sm: 4px; --radius-md: 6px; --radius-lg: 10px;
-  
   --shadow-sm: 0 1px 3px rgba(0,0,0,.08); 
   --shadow-md: 0 4px 12px rgba(0,0,0,.12);
   
-  --font-display: 'Inter', sans-serif; /* Trocado para Inter para visual mais técnico/app */
+  --font-display: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif; 
   --font-mono: 'IBM Plex Mono', monospace;
 }
@@ -151,10 +149,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 .modal-overlay.active { display: flex; }
 .modal { background: var(--panel); border-radius: var(--radius-md); width: 100%; max-width: 480px; padding: 24px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
 
-.calc-box { background: var(--info-soft); border: 1px solid #A6C8FF; border-radius: var(--radius-sm); padding: 16px; margin-top: 16px; }
-.calc-result-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--info); margin: 0 0 8px; }
-.calc-result-val { font-family: var(--font-mono); font-size: 18px; font-weight: 700; color: var(--ink); }
-
 .toast-stack { position: fixed; bottom: 80px; right: 16px; left: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 1100; pointer-events: none; align-items: center; }
 .toast { background: var(--ink); color: #FFF; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; box-shadow: var(--shadow-md); animation: toastin .2s ease; }
 .toast.ok { background: var(--good); } .toast.err { background: var(--bad); }
@@ -176,7 +170,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
     <button class="tabbtn" data-view="historico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg><span>Histórico</span></button>
     <button class="tabbtn tabbtn-fab" data-view="lancamento"><span class="fab-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 5v14M5 12h14"/></svg></span><span>Produção</span></button>
     <button class="tabbtn" data-view="relatorios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Relatórios</span></button>
-    <button class="tabbtn" data-view="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Config.</span></button>
+    <button class="tabbtn" data-view="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg><span>Config.</span></button>
   </nav>
 
   <main class="content" id="mainContent">
@@ -217,10 +211,6 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <div class="eyebrow">Lançamentos</div>
           <h2 class="view-title">Linha de Produção</h2>
         </div>
-        <button class="btn btn-primary" style="background:var(--info); border-color:var(--info);" onclick="abrirCalculadoraLotes()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg>
-          Calc. Lote Perfeito
-        </button>
       </div>
       
       <div class="panel" style="background:var(--panel); display:flex; align-items:center; flex-wrap:wrap; gap:12px; padding:12px 16px;">
@@ -294,9 +284,53 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
       </div>
     </section>
 
-    <!-- CONFIGURAÇÕES -->
+    <!-- CONFIGURAÇÕES / CALCULADORA -->
     <section class="view" id="view-config">
+      
+      <!-- CALCULADORA DE PRODUÇÃO (META E CORTES) -->
       <div class="view-header">
+        <div>
+          <div class="eyebrow">Planejamento</div>
+          <h2 class="view-title">Calculadora de Produção</h2>
+        </div>
+      </div>
+      <div class="panel" style="background:var(--info-soft); border-color:#A6C8FF;">
+        <div class="panel-sub" style="color:var(--info); margin-bottom:16px;">
+          Calcule os cortes exatos da máquina e o arranjo das assadeiras para atingir a sua meta de pacotes.
+        </div>
+        
+        <div class="grid-2">
+          <div class="field">
+            <label>Peso de Corte da Massa (Kg)</label>
+            <input type="number" id="calcCortePeso" step="0.001" value="1.150" oninput="executarCalculoInteligente()">
+          </div>
+          <div class="field">
+            <label>Unid. por Corte (Máquina)</label>
+            <input type="number" id="calcCorteUnid" value="30" oninput="executarCalculoInteligente()">
+          </div>
+        </div>
+
+        <div style="background:#FFF; padding:16px; border-radius:6px; border:1px solid var(--border-strong); margin-top:16px;">
+          <label style="font-size:12px; font-weight:800; color:var(--ink); text-transform:uppercase; margin-bottom:12px; display:block;">O que você quer produzir?</label>
+          <div class="grid-2">
+            <div class="field">
+              <label>Unidades em cada pacote</label>
+              <input type="number" id="calcUnidPacote" placeholder="Ex: 15" oninput="executarCalculoInteligente()" style="border:2px solid var(--border-strong); font-weight:700; font-size:16px;">
+            </div>
+            <div class="field">
+              <label>Total de pacotes (Meta)</label>
+              <input type="number" id="calcMetaPacotes" placeholder="Ex: 10" oninput="executarCalculoInteligente()" style="border:2px solid var(--info); font-weight:700; font-size:16px;">
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bloco de Resultado -->
+        <div id="calcResultBox" style="display:none; margin-top:16px; background:#FFF; border:2px dashed var(--info); border-radius:6px; padding:16px; text-align:center;">
+          <!-- Preenchido via Javascript -->
+        </div>
+      </div>
+
+      <div class="view-header" style="margin-top:32px;">
         <div>
           <div class="eyebrow">Sistema</div>
           <h2 class="view-title">Configurações</h2>
@@ -315,7 +349,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 
         <div class="panel">
           <div class="panel-title">Backup dos Dados</div>
-          <div class="panel-sub">Exporte um arquivo .json com todos os produtos e lançamentos, ou restaure a partir de um backup.</div>
+          <div class="panel-sub">Exporte um arquivo .json ou restaure a partir de um backup.</div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="exportarBackupJSON()">⭳ Baixar Backup (.json)</button>
             <button class="btn" onclick="document.getElementById('inputImportarBackup').click()">⭱ Importar Backup</button>
@@ -349,7 +383,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
 "use strict";
 
 /* =========================================================
-   1. BANCO DE DADOS (IndexedDB) - Intocado para manter dados
+   1. BANCO DE DADOS (IndexedDB)
    ========================================================= */
 const DB_NAME = "padariaProducaoV5";
 const DB_VERSION = 2;
@@ -407,7 +441,7 @@ function toast(msg, type="ok"){
 }
 
 /* =========================================================
-   2b. TEMA (CLARO / ESCURO)
+   2b. TEMA
    ========================================================= */
 function definirTema(modo){
   localStorage.setItem("padariaTema", modo);
@@ -503,7 +537,6 @@ async function renderDashboard(){
   const corInkSoft = corTema("--ink-soft") || "#495057";
   const corBorder = corTema("--border") || "#DEE2E6";
 
-  // Evolução no período — agrupa por dia (períodos curtos) ou por semana (períodos longos, pra não poluir o eixo X)
   const diasOrdenados = [];
   for(let d=inicio; d<=hoje; d=addDiasISO(d,1)) diasOrdenados.push(d);
   const agruparPorSemana = diasOrdenados.length > 45;
@@ -517,7 +550,7 @@ async function renderDashboard(){
     const semanas = {};
     diasOrdenados.forEach(d=>{
       const dt = new Date(d+"T00:00:00");
-      const seg = new Date(dt); seg.setDate(dt.getDate() - ((dt.getDay()+6)%7)); // segunda-feira da semana
+      const seg = new Date(dt); seg.setDate(dt.getDate() - ((dt.getDay()+6)%7)); 
       const chave = seg.toISOString().slice(0,10);
       if(!semanas[chave]) semanas[chave] = {kg:0, unid:0};
       semanas[chave].kg += diaMap[d]?.kg || 0;
@@ -568,66 +601,62 @@ async function renderDashboard(){
 }
 
 /* =========================================================
-   5. CALCULADORA DE LOTE PERFEITO (MMC)
+   5. CALCULADORA DE PRODUÇÃO (META -> CORTES & TELAS)
    ========================================================= */
-// Função auxiliar de Máximo Divisor Comum e Mínimo Múltiplo Comum
-function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
-function lcm(a, b) { return (a * b) / gcd(a, b); }
-
-window.abrirCalculadoraLotes = function() {
-  abrirModal(`
-    <h3 style="margin:0 0 4px;font-family:var(--font-display);font-size:18px;">Calculadora de Lote Perfeito</h3>
-    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Descubra a quantidade exata para não sobrar nenhum pão solto na bancada.</p>
-    
-    <div class="field-row">
-      <div class="field" style="flex:1;">
-        <label>Corte da Máquina</label>
-        <input type="number" id="calcCorte" oninput="executarCalculoLote()" value="30" min="1">
-      </div>
-      <div class="field" style="flex:1;">
-        <label>Capacidade da Tela</label>
-        <input type="number" id="calcTela" oninput="executarCalculoLote()" value="25" min="1">
-      </div>
-    </div>
-    <div class="field">
-      <label>Peso do Corte Completo (Kg)</label>
-      <input type="number" id="calcPeso" oninput="executarCalculoLote()" step="0.001" value="1.800" min="0.1">
-    </div>
-
-    <div id="calcResultBox" class="calc-box" style="display:none;"></div>
-
-    <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
-      <button class="btn btn-primary" onclick="fecharModal()">Entendido</button>
-    </div>
-  `);
-  executarCalculoLote();
-};
-
-window.executarCalculoLote = function() {
-  const corte = parseInt(document.getElementById("calcCorte").value) || 0;
-  const tela = parseInt(document.getElementById("calcTela").value) || 0;
-  const peso = parseFloat(document.getElementById("calcPeso").value) || 0;
+window.executarCalculoInteligente = function() {
+  const pCorte = parseFloat(document.getElementById("calcCortePeso").value) || 0;
+  const uCorte = parseInt(document.getElementById("calcCorteUnid").value) || 0;
+  const uPacote = parseInt(document.getElementById("calcUnidPacote").value) || 0;
+  const metaPacotes = parseInt(document.getElementById("calcMetaPacotes").value) || 0;
+  
   const box = document.getElementById("calcResultBox");
 
-  if(corte <= 0 || tela <= 0 || peso <= 0) {
+  // Esconde o resultado se faltar dados
+  if(pCorte<=0 || uCorte<=0 || uPacote<=0 || metaPacotes<=0) {
     box.style.display = "none";
     return;
   }
 
-  // O Total de Unidades Perfeitas é o Mínimo Múltiplo Comum (MMC)
-  const totalUnidades = lcm(corte, tela);
-  const qtdCortes = totalUnidades / corte;
-  const qtdTelas = totalUnidades / tela;
-  const pesoTotal = qtdCortes * peso;
+  // 1. Unidades Totais que o usuário vai precisar
+  const totalUnidades = metaPacotes * uPacote;
+  
+  // 2. Calcula os cortes exatos e a sobra
+  const cortes = Math.floor(totalUnidades / uCorte);
+  const avulsas = Math.round(totalUnidades % uCorte);
+  
+  // Calcula o total da massa em Kg
+  const massaTotal = (totalUnidades / uCorte) * pCorte;
 
+  // 3. Pulo do Gato (Arranjo da Assadeira - Valor Par)
+  // O sistema procura qual é a melhor quantidade par de unidades para colocar na tela
+  let pacotesPorTela = 1;
+  let unidTela = uPacote;
+  
+  // A regra: tem que ser Par e, de preferência, um tamanho realista (maior que 24 unidades)
+  while (unidTela % 2 !== 0 || unidTela < 24) {
+    if (unidTela >= 60 && unidTela % 2 === 0) break; // Trava de segurança para pacotes gigantes
+    pacotesPorTela++;
+    unidTela = uPacote * pacotesPorTela;
+  }
+
+  // Montando o visual
   box.style.display = "block";
   box.innerHTML = `
-    <div class="calc-result-title">O Lote Ideal Exige:</div>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      <div><span class="calc-result-val">${qtdCortes}</span> cortes na máquina</div>
-      <div><span class="calc-result-val">${qtdTelas}</span> telas cheias exatas</div>
-      <div><span class="calc-result-val">${fmtKg(pesoTotal)} kg</span> de massa processada</div>
-      <div style="margin-top:8px; font-size:12px; font-weight:600; color:var(--ink-soft);">Total gerado: ${totalUnidades} unidades (Nenhuma sobra).</div>
+    <div style="font-size:18px; font-weight:700; color:var(--ink); margin-bottom:16px;">
+      Total de Cortes: <span style="color:var(--info); font-size:26px; margin:0 4px;">${cortes}</span> 
+      <span style="font-size:14px; color:var(--ink-soft); font-weight:600;">[ + ${avulsas} unidades avulsas ]</span>
+    </div>
+    
+    <div style="font-size:13px; font-weight:700; color:var(--good); background:var(--good-soft); display:inline-block; padding:6px 12px; border-radius:4px; margin-bottom:16px;">
+      Isso representa ${fmtKg(massaTotal)} kg de massa processada.
+    </div>
+
+    <div style="background:var(--bg-soft); padding:14px; border-radius:6px; text-align:left;">
+      <div style="font-size:11px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; margin-bottom:6px;">Dica para as Assadeiras:</div>
+      <div style="font-size:14px; color:var(--ink); line-height:1.5;">
+        Organize a tela com <strong>${unidTela} unidades</strong> (número par).<br>
+        Dessa forma, cada assadeira vai render exatos <strong>${pacotesPorTela} pacotes</strong>, sem sobrar nenhum pão solto.
+      </div>
     </div>
   `;
 };
