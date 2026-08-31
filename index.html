@@ -45,7 +45,7 @@ html[data-theme="dark"] .toast { color: #16181B; }
 html[data-theme="dark"] .toast.ok, html[data-theme="dark"] .toast.err { color: #FFF; }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
 #app { display: flex; flex-direction: column; min-height: 100vh; }
 .topbar { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--panel); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm); }
@@ -81,7 +81,7 @@ nav.bottomnav {
 .tabbtn-fab span:last-child { font-weight: 700; }
 @media (max-width: 420px) { .fab-circle { width: 42px; height: 42px; } .fab-circle svg { width: 20px; height: 20px; } }
 
-main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px; margin: 0 auto; }
+main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px; margin: 0 auto; overflow-x: hidden; }
 .view { display: none; } .view.active { display: block; animation: fadein .2s ease; }
 @keyframes fadein { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -96,14 +96,20 @@ main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px
 .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
 .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; min-width: 0; }
 .kpi-label { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.kpi-value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--ink); }
+.kpi-value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; margin-top: 6px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 480px) {
-  .kpi-grid { gap: 8px; }
-  .kpi { padding: 10px 8px; text-align: center; }
-  .kpi-label { font-size: 9px; letter-spacing: 0.2px; }
-  .kpi-value { font-size: 16px; margin-top: 4px; }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .kpi { padding: 8px 6px; text-align: center; min-width: 0; }
+  .kpi-label { font-size: 8.5px; letter-spacing: 0; }
+  .kpi-value { font-size: 14px; margin-top: 4px; }
 }
-.chart-wrap { position: relative; height: 240px; width: 100%; }
+@media (max-width: 360px) {
+  .kpi-grid { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px; }
+  .kpi { padding: 6px 4px; }
+  .kpi-value { font-size: 12px; }
+}
+.chart-wrap { position: relative; height: 240px; width: 100%; max-width: 100%; overflow: hidden; }
+.chart-wrap canvas { max-width: 100% !important; }
 
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border-strong); background: var(--panel); color: var(--ink); padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; transition: .15s; cursor: pointer; }
 .btn:active { transform: scale(0.98); background: var(--bg-soft); }
@@ -138,6 +144,44 @@ main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px
 .card-footer { padding: 12px 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #FAFAFA; }
 .card-totals .kg { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--good); display: block; }
 .card-totals .unid { font-size: 11px; color: var(--ink-soft); font-weight: 600; display: block; margin-top: 2px; }
+
+.armario-box { border: 1px solid var(--border-strong); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; background: var(--panel); }
+.armario-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--ink); color: #FFF; font-family: var(--font-display); font-weight: 700; font-size: 13px; letter-spacing: 0.5px; }
+.armario-header .armario-cap { font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: var(--accent-soft); background: rgba(255,255,255,.12); padding: 3px 8px; border-radius: var(--radius-sm); }
+.armario-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.armario-shelf-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.armario-extras-label { margin: 4px 8px 0; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent-dark); border-top: 1px dashed var(--border-strong); padding-top: 8px; }
+.armario-extras-actions { display: flex; gap: 8px; padding: 10px; border-top: 1px solid var(--border); }
+.assadeira-box { display: grid; grid-template-columns: 84px 1fr 128px 70px 28px; gap: 6px; align-items: center; padding: 6px 8px; border-radius: var(--radius-sm); background: var(--bg-soft); }
+.assadeira-label { font-size: 10.5px; font-weight: 700; color: var(--ink-soft); }
+.armario-produto, .armario-tela-select { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 7px 8px; font-size: 13px; background: var(--panel); color: var(--ink); width: 100%; font-family: var(--font-body); }
+.armario-qtd { border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 7px 6px; font-size: 13px; text-align: center; font-family: var(--font-mono); font-weight: 600; width: 100%; background: var(--panel); color: var(--ink); }
+.assadeira-qtd-area { min-width: 0; }
+.assadeira-qtd-area input, .assadeira-qtd-area select { width: 100%; }
+.assadeira-peso { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--good); text-align: right; white-space: nowrap; }
+.btn-slot-del { border: none; background: transparent; color: var(--bad); font-size: 14px; cursor: pointer; padding: 4px; border-radius: var(--radius-sm); }
+.btn-slot-del:active { background: var(--bad-soft); }
+.armario-produto:focus, .armario-qtd:focus, .armario-tela-select:focus { outline: none; border-color: var(--info); box-shadow: 0 0 0 3px var(--info-soft); }
+@media (max-width: 560px) {
+  .armario-shelf-pair { grid-template-columns: 1fr; }
+  .assadeira-box {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "label del" "select select" "qtd qtd" "peso peso";
+    row-gap: 5px;
+  }
+  .assadeira-label { grid-area: label; align-self: center; }
+  .btn-slot-del { grid-area: del; justify-self: end; }
+  .armario-produto { grid-area: select; }
+  .assadeira-qtd-area { grid-area: qtd; }
+  .assadeira-peso { grid-area: peso; text-align: left; }
+  .armario-produto, .armario-qtd, .armario-tela-select { font-size: 13px; padding: 8px; }
+}
+.armario-resumo table { font-size: 12.5px; }
+
+.telas-manuais-lista { display: flex; flex-direction: column; gap: 4px; padding: 0 16px 12px; }
+.tela-manual-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; background: var(--bg-soft); border-radius: var(--radius-sm); font-size: 12.5px; }
+.tela-manual-kg { font-family: var(--font-mono); font-weight: 700; color: var(--good); }
+.tela-manual-actions { display: flex; gap: 2px; }
 
 .table-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow-x: auto; background: var(--panel); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; } 
@@ -182,7 +226,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <div class="eyebrow">Visão Geral</div>
           <h2 class="view-title">Desempenho</h2>
         </div>
-        <select id="dashRange" style="padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); font-size:13px; font-weight:600;">
+        <select id="dashRange" style="padding:8px 12px; border-radius:var(--radius-sm); border:1px solid var(--border-strong); font-size:13px; font-weight:600; max-width:100%;">
           <option value="hoje">Hoje</option><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="all">Todo o período</option>
         </select>
       </div>
@@ -218,6 +262,8 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <input type="date" id="lancData" style="padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-sm); flex:1; max-width:200px; font-family:var(--font-body);">
         <span id="lancStatusText" style="font-size:12px; font-weight:600; color:var(--ink-soft); margin-left:auto; background:var(--bg-soft); padding:4px 8px; border-radius:var(--radius-sm);"></span>
       </div>
+
+      <div id="armarioContainer"></div>
 
       <div id="lancCardsContainer"></div>
 
@@ -259,7 +305,14 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         <div class="panel">
           <div class="panel-title">Fechamento Diário (PDF)</div>
           <div class="panel-sub">Lista completa agrupada por família de massa.</div>
-          <div class="field" style="margin-bottom:16px;"><label>Data</label><input type="date" id="relDiaData"></div>
+          <div class="field" style="margin-bottom:12px;"><label>Data</label><input type="date" id="relDiaData"></div>
+          <div class="field" style="margin-bottom:16px;">
+            <label>Formato</label>
+            <select id="relDiaFormato">
+              <option value="parcial">Parcial (resumo por produto)</option>
+              <option value="completo">Completo (+ detalhamento por Armário)</option>
+            </select>
+          </div>
           <button class="btn btn-primary btn-block" id="btnPdfDia">Gerar PDF</button>
         </div>
         <div class="panel">
@@ -358,6 +411,12 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </div>
       </div>
 
+      <div class="panel" style="border:2px solid var(--bad); background:var(--bad-soft); margin-top:16px;">
+        <div class="panel-title" style="color:var(--bad);">⚠ Zona de Risco</div>
+        <div class="panel-sub" style="color:var(--ink-soft);">Apaga registros de produção, assadeiras do Armário e status de fechamento. O catálogo de produtos NÃO é afetado. Faça um backup antes de usar.</div>
+        <button class="btn btn-block" style="background:var(--bad);color:#FFF;border-color:var(--bad);" onclick="confirmarExcluirTudo()">Excluir Todos os Registros de Produção</button>
+      </div>
+
       <div class="view-header" style="margin-top:8px;">
         <div>
           <div class="eyebrow">Gestão</div>
@@ -386,7 +445,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
    1. BANCO DE DADOS (IndexedDB)
    ========================================================= */
 const DB_NAME = "padariaProducaoV5";
-const DB_VERSION = 2;
+const DB_VERSION = 5;
 let dbInstance = null;
 
 function abrirDB(){
@@ -401,7 +460,25 @@ function abrirDB(){
         store.createIndex("data", "data", {unique:false});
       }
       if(!db.objectStoreNames.contains("dias")) db.createObjectStore("dias", {keyPath:"data"});
-    };
+
+  let slotsStore;
+  if(!db.objectStoreNames.contains("armarioSlots")){
+    slotsStore = db.createObjectStore("armarioSlots", {keyPath:"id"});
+    slotsStore.createIndex("data", "data", {unique:false});
+  } else {
+    slotsStore = e.target.transaction.objectStore("armarioSlots");
+  }
+  if(!slotsStore.indexNames.contains("armarioId")) slotsStore.createIndex("armarioId", "armarioId", {unique:false});
+
+  if(!db.objectStoreNames.contains("armarios")){
+    const store = db.createObjectStore("armarios", {keyPath:"id"});
+    store.createIndex("data", "data", {unique:false});
+  }
+  if(!db.objectStoreNames.contains("telasManuais")){
+    const store = db.createObjectStore("telasManuais", {keyPath:"id"});
+    store.createIndex("data", "data", {unique:false});
+  }
+};
     req.onsuccess = (e)=>{ dbInstance = e.target.result; resolve(dbInstance); };
     req.onerror = (e)=> reject(e.target.error);
   });
@@ -666,44 +743,38 @@ window.executarCalculoInteligente = function() {
    ========================================================= */
 document.getElementById("lancData").addEventListener("change", renderLancamento);
 
-function montarCardProduto(p, regMap){
-  const r = regMap[p.id];
-  const uVal = p.pesoPadrao ? p.unidRendimento : "";
-  const jaSalvoKg = r ? r.pesoKg : 0;
-  const jaSalvoUnid = r ? r.unidades : 0;
+function montarCardProduto(p, telasDoProduto){
+  telasDoProduto = telasDoProduto || [];
+  const totalKg = telasDoProduto.reduce((a,t)=>a+(t.kg||0), 0);
+
+  const linhasTelas = telasDoProduto.map(t=> `
+    <div class="tela-manual-item" data-tela="${t.id}">
+      <span>Tela ${t.numero}${t.armarioSlotId?' 🗄️':''}</span>
+      <span class="tela-manual-kg">${fmtKg(t.kg)} kg</span>
+      <div class="tela-manual-actions">
+        <button type="button" class="btn-slot-del" style="color:var(--info);" title="Editar" onclick="editarTelaManual('${t.id}')">✏️</button>
+        <button type="button" class="btn-slot-del" title="Excluir" onclick="confirmarExcluirTelaManual('${t.id}')">🗑</button>
+      </div>
+    </div>`).join("");
 
   return `
     <div class="prod-card" id="card-${p.id}">
       <div class="card-header">
         <h4>${p.nome}</h4>
-        <span class="card-badge">${p.pesoPadrao ? p.pesoCorte+'kg / '+p.unidRendimento+'un' : "Peso Manual"}</span>
+        <span class="card-badge">Peso Manual</span>
       </div>
       <div class="card-body">
         <div class="card-input-group">
-          <label>Telas (+)</label>
-          <input type="number" min="0" step="0.5" id="inp-telas-${p.id}" placeholder="0">
+          <label>Massa Kg da Tela</label>
+          <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" placeholder="0.0">
         </div>
-        ${p.pesoPadrao ? `
-          <span class="multiply">×</span>
-          <div class="card-input-group">
-            <label>Unid/Tela</label>
-            <input type="number" min="0" id="inp-unid-${p.id}" value="${uVal}">
-          </div>
-        ` : `
-          <div class="card-input-group">
-            <label>Massa Kg (+)</label>
-            <input type="number" min="0" step="0.1" id="inp-kg-${p.id}" placeholder="0.0">
-          </div>
-        `}
+        <button class="btn btn-sm btn-primary" onclick="adicionarTelaManual('${p.id}')">+ Adicionar Pão</button>
       </div>
+      ${linhasTelas ? `<div class="telas-manuais-lista">${linhasTelas}</div>` : ''}
       <div class="card-footer">
         <div class="card-totals">
-          <span class="kg" id="tot-kg-${p.id}">${fmtKg(jaSalvoKg)} kg salvos</span>
-          ${p.pesoPadrao ? `<span class="unid" id="tot-unid-${p.id}">(${fmtInt(jaSalvoUnid)} unid)</span>` : ''}
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button class="btn btn-sm btn-ghost" onclick="abrirCorrecao('${p.id}')" title="Corrigir total do dia">Corrigir</button>
-          <button class="btn btn-sm btn-primary" onclick="salvarCard('${p.id}')">+ Somar</button>
+          <span class="kg" id="tot-kg-${p.id}">${fmtKg(totalKg)} kg salvos</span>
+          <span class="unid" id="tot-unid-${p.id}">(${telasDoProduto.length} ${telasDoProduto.length===1?'tela':'telas'})</span>
         </div>
       </div>
     </div>
@@ -740,6 +811,7 @@ async function renderLancamento(){
     ? "🔒 Encerrado" : (registros.length ? `${registros.length} salvos` : `Aberto`);
 
   if(fechado){
+    document.getElementById("armarioContainer").innerHTML = "";
     const regsAtendimento = registros.filter(r=> obterLocalProduto(r.produtoId) !== "gondola");
     const regsGondola = registros.filter(r=> obterLocalProduto(r.produtoId) === "gondola");
 
@@ -762,19 +834,28 @@ async function renderLancamento(){
   btnEncerrar.dataset.action = "encerrar";
   btnEncerrar.className = "btn btn-primary btn-block";
 
+  // ARMÁRIO INTERATIVO (produtos de Peso Padrão e Peso Manual)
+  await renderArmarios(dataIso);
+
+  const todasTelasManuais = await dbGetByIndex("telasManuais","data",dataIso);
+  const telasPorProduto = {};
+  todasTelasManuais.forEach(t=>{ (telasPorProduto[t.produtoId] = telasPorProduto[t.produtoId] || []).push(t); });
+  Object.values(telasPorProduto).forEach(arr=> arr.sort((a,b)=>a.numero-b.numero));
+
   let html = "";
   const categorias = getCategoriasAtivas();
 
   categorias.forEach(cat=>{
-    const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo && (p.local||"atendimento")==="atendimento");
+    const prods = state.produtos.filter(p=>p.categoria===cat && p.ativo && (p.local||"atendimento")==="atendimento" && !p.pesoPadrao);
     if(prods.length===0) return;
     html += `<h3 style="font-size:15px; font-weight:700; color:var(--ink-soft); margin:24px 0 12px; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid var(--border); padding-bottom:6px;">${cat}</h3><div class="cards-grid">`;
-    prods.forEach(p=> html += montarCardProduto(p, regMap));
+    prods.forEach(p=> html += montarCardProduto(p, telasPorProduto[p.id]));
     html += `</div>`;
   });
 
   // Bloco separado: produção para Gôndolas/Prateleiras (fora das categorias acima, é linha à parte)
-  const prodsGondola = state.produtos.filter(p=> p.ativo && (p.local||"atendimento")==="gondola");
+  // Apenas produtos de Peso Manual — os de Peso Padrão são lançados pelo Armário Interativo acima.
+  const prodsGondola = state.produtos.filter(p=> p.ativo && (p.local||"atendimento")==="gondola" && !p.pesoPadrao);
   if(prodsGondola.length){
     let kgGondolaTotal = 0;
     prodsGondola.forEach(p=>{ const r = regMap[p.id]; if(r) kgGondolaTotal += (r.pesoKg||0); });
@@ -792,7 +873,7 @@ async function renderLancamento(){
           </div>
         </div>
       </div>
-      <div class="cards-grid">${prodsGondola.map(p=> montarCardProduto(p, regMap)).join("")}</div>
+      <div class="cards-grid">${prodsGondola.map(p=> montarCardProduto(p, telasPorProduto[p.id])).join("")}</div>
     `;
   }
 
@@ -808,113 +889,637 @@ async function recalcularTotalGondolas(dataIso){
   el.textContent = `${fmtKg(totalKg)} kg`;
 }
 
-window.salvarCard = async function(pid){
-  const p = state.produtos.find(x=>x.id===pid);
-  const dataIso = document.getElementById("lancData").value;
-  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); renderLancamento(); return; }
-  
-  const inputTelas = document.getElementById(`inp-telas-${pid}`);
-  const telasNovas = parseFloat(inputTelas.value)||0;
-  
-  if(telasNovas===0 && p.pesoPadrao){ toast("Informe as telas para somar!","err"); return; }
-  if(telasNovas<0){ toast("Valor de Telas inválido!","err"); return; }
+/* =========================================================
+   6b. ARMÁRIO INTERATIVO (Peso Padrão + Peso Manual)
+   Modelo: LOCAL (atendimento/gôndola) × TIPO DE MASSA (Francesa/Doce)
+   Cada armário tem capacidade padrão (Francesa=20 assadeiras avulsas,
+   Doce=40 assadeiras exibidas em 20 prateleiras de 2 lados) + assadeiras
+   extras avulsas quando necessário.
 
-  let unidadesNovas=0, pesoKgNovo=0, unidTela=0;
+   Cada assadeira é um slot independente. Dependendo do produto
+   selecionado, o controle de "quantidade" muda de comportamento:
+   - Peso Padrão: usuário digita a quantidade de unidades; peso é
+     sempre derivado de pesoCorte/unidRendimento do produto.
+   - Peso Manual: não há como derivar peso a partir de unidades, então
+     o usuário SELECIONA uma das telas já pesadas na balança (criadas
+     no card do produto via "+ Adicionar Pão"). Cada tela só pode
+     ocupar UMA assadeira por vez — uma vez posicionada, ela some da
+     lista de telas disponíveis até ser removida do armário.
 
-  if(p.pesoPadrao){
-    const inputUnid = document.getElementById(`inp-unid-${pid}`);
-    unidTela = parseFloat(inputUnid.value)||0;
-    if(unidTela<0){ toast("Valor de Unid/Tela inválido!","err"); return; }
-    unidadesNovas = telasNovas * unidTela;
-    pesoKgNovo = p.unidRendimento > 0 ? (unidadesNovas / p.unidRendimento) * p.pesoCorte : 0;
-  } else {
-    const inputKg = document.getElementById(`inp-kg-${pid}`);
-    pesoKgNovo = parseFloat(inputKg.value)||0;
-    if(pesoKgNovo<0){ toast("Valor de Kg inválido!","err"); return; }
-    if(pesoKgNovo===0 && telasNovas===0) { toast("Informe os Kg ou Telas!","err"); return; }
-    unidadesNovas = 0; 
+   Toda alteração em produto de Peso Padrão recalcula na hora o
+   registro do dia daquele produto (mesma fonte usada no Painel,
+   Histórico e Relatórios). Produtos de Peso Manual têm seu registro
+   derivado das telas do card (recomputarRegistroManual) — a posição
+   física no Armário é apenas organizacional e não afeta esse total.
+   ========================================================= */
+const TIPOS_MASSA_ARMARIO = ["Massa Francesa", "Massa Doce"];
+function capacidadePadraoTipo(tipoMassa){ return tipoMassa === "Massa Francesa" ? 20 : 40; }
+
+function calcularResumoArmario(armario, slotsDoArmario, telasManuaisMap){
+  telasManuaisMap = telasManuaisMap || {};
+  const porProduto = {}; // produtoId -> {unidades, assadeiras, kgManualTotal}
+  let utilizadasPadrao = 0, utilizadasExtra = 0, totalUnidades = 0;
+
+  slotsDoArmario.forEach(s=>{
+    const kgManual = s.telaManualId ? (telasManuaisMap[s.telaManualId]?.kg||0) : 0;
+    const ocupado = (s.quantidade>0) || (s.telaManualId && kgManual>0);
+    if(!s.produtoId || !ocupado) return;
+    if(!porProduto[s.produtoId]) porProduto[s.produtoId] = { unidades:0, assadeiras:0, kgManualTotal:0 };
+    porProduto[s.produtoId].assadeiras += 1;
+    if(s.quantidade>0){ porProduto[s.produtoId].unidades += s.quantidade; totalUnidades += s.quantidade; }
+    if(kgManual>0) porProduto[s.produtoId].kgManualTotal += kgManual;
+    if(s.slotIndex < armario.capacidadePadrao) utilizadasPadrao++; else utilizadasExtra++;
+  });
+
+  let cortesTotal = 0, pesoTotal = 0;
+  Object.entries(porProduto).forEach(([pid, v])=>{
+    const p = state.produtos.find(x=>x.id===pid);
+    if(!p) return;
+    if(p.pesoPadrao && p.unidRendimento){
+      const cortes = v.unidades / p.unidRendimento;
+      cortesTotal += cortes;
+      pesoTotal += cortes * (p.pesoCorte||0);
+    } else {
+      pesoTotal += v.kgManualTotal;
+    }
+  });
+  return { porProduto, utilizadasPadrao, utilizadasExtra, totalUnidades, cortesTotal, pesoTotal };
+}
+
+function montarResumoArmarioHTML(resumo){
+  const linhas = Object.entries(resumo.porProduto).map(([pid, v])=>{
+    const p = state.produtos.find(x=>x.id===pid);
+    const nome = p?.nome || "Removido";
+    let cortesTxt = "—", peso = 0, unidTxt = "—";
+    if(p && p.pesoPadrao && p.unidRendimento){
+      const cortes = v.unidades / p.unidRendimento;
+      cortesTxt = cortes.toFixed(3).replace('.',',');
+      peso = cortes * (p.pesoCorte||0);
+      unidTxt = fmtInt(v.unidades);
+    } else {
+      peso = v.kgManualTotal||0;
+    }
+    return `<tr><td style="font-weight:600;">${nome}</td><td class="num-cell">${v.assadeiras}</td><td class="num-cell">${unidTxt}</td><td class="num-cell">${cortesTxt}</td><td class="num-cell" style="font-weight:700;">${fmtKg(peso)}</td></tr>`;
+  }).join("");
+  return `
+    <div class="table-wrap" style="margin-top:10px;">
+      <table>
+        <thead><tr><th>Pão</th><th style="text-align:right">Assad.</th><th style="text-align:right">Unid.</th><th style="text-align:right">Cortes</th><th style="text-align:right">Kg</th></tr></thead>
+        <tbody>
+          ${linhas || '<tr><td colspan="5" style="text-align:center;color:var(--ink-soft);">Nenhuma assadeira preenchida.</td></tr>'}
+          <tr style="font-weight:700;background:var(--bg-soft);"><td>TOTAL</td><td class="num-cell">${resumo.utilizadasPadrao+resumo.utilizadasExtra}</td><td class="num-cell">${fmtInt(resumo.totalUnidades)}</td><td class="num-cell">${resumo.cortesTotal.toFixed(3).replace('.',',')}</td><td class="num-cell">${fmtKg(resumo.pesoTotal)}</td></tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// Monta o conteúdo do "controle de quantidade" de uma assadeira, de acordo
+// com o tipo do produto selecionado (ou vazio). Usado tanto na renderização
+// inicial quanto ao trocar o produto de uma assadeira já na tela.
+function montarQtdAreaHTML(produto, slot, telasManuaisMap, telaAnteriorId){
+  if(!produto){
+    return `<input type="number" min="0" step="1" class="armario-qtd" placeholder="Qtd" onchange="handleAssadeiraInput(this)">`;
+  }
+  if(produto.pesoPadrao){
+    const qtd = slot?.quantidade || "";
+    return `<input type="number" min="0" step="1" class="armario-qtd" placeholder="Qtd" value="${qtd}" onchange="handleAssadeiraInput(this)">`;
+  }
+  const disponiveis = Object.values(telasManuaisMap||{}).filter(t=> t.produtoId===produto.id && (!t.armarioSlotId || t.id===telaAnteriorId));
+  if(disponiveis.length===0){
+    return `<span style="font-size:11px;color:var(--bad);">Sem telas</span>`;
+  }
+  disponiveis.sort((a,b)=>a.numero-b.numero);
+  const opts = disponiveis.map(t=> `<option value="${t.id}" ${t.id===telaAnteriorId?'selected':''}>Tela ${t.numero} — ${fmtKg(t.kg)}kg</option>`).join("");
+  return `<select class="armario-tela-select" onchange="handleAssadeiraInput(this)"><option value="">— tela —</option>${opts}</select>`;
+}
+
+function montarAssadeiraBoxHTML(armario, slotIndex, slot, produtosOpts, label, telasManuaisMap){
+  const produtoId = slot?.produtoId || "";
+  const p = produtoId ? state.produtos.find(x=>x.id===produtoId) : null;
+  const opts = produtosOpts.map(pp=> `<option value="${pp.id}" ${pp.id===produtoId?'selected':''}>${pp.nome}${pp.pesoPadrao?'':' (Peso Manual)'}</option>`).join("");
+
+  const telaAnteriorId = (p && !p.pesoPadrao) ? (slot?.telaManualId || "") : "";
+  const qtdAreaHTML = montarQtdAreaHTML(p, slot, telasManuaisMap, telaAnteriorId);
+
+  let peso = 0;
+  if(p && p.pesoPadrao){
+    peso = (p.unidRendimento && slot?.quantidade) ? (slot.quantidade/p.unidRendimento)*p.pesoCorte : 0;
+  } else if(p && telaAnteriorId && telasManuaisMap[telaAnteriorId]){
+    peso = telasManuaisMap[telaAnteriorId].kg;
   }
 
-  const existentes = await dbGetByIndex("registros","data",dataIso);
-  let reg = existentes.find(r=>r.produtoId===pid);
-  
-  if(reg){
-    reg.telas += telasNovas; reg.unidades += unidadesNovas; reg.pesoKg += pesoKgNovo;
-    if(p.pesoPadrao) reg.unidTela = unidTela;
+  return `
+    <div class="assadeira-box" id="slot-${armario.id}-${slotIndex}" data-armario="${armario.id}" data-slot="${slotIndex}" data-produto-anterior="${produtoId}" data-tela-anterior="${telaAnteriorId}">
+      <div class="assadeira-label">${label}</div>
+      <select class="armario-produto" onchange="onArmarioProdutoChange(this)">
+        <option value="">— vazio —</option>${opts}
+      </select>
+      <div class="assadeira-qtd-area" id="qtdarea-${armario.id}-${slotIndex}">${qtdAreaHTML}</div>
+      <div class="assadeira-peso" id="peso-${armario.id}-${slotIndex}">${peso>0?fmtKg(peso)+' kg':''}</div>
+      <button type="button" class="btn-slot-del" title="Excluir assadeira" onclick="confirmarExcluirAssadeira('${armario.id}',${slotIndex})">🗑</button>
+    </div>`;
+}
+
+function montarArmarioBoxHTML(armario, slotsArm, telasManuaisMap){
+  const slotsMap = {}; slotsArm.forEach(s=> slotsMap[s.slotIndex]=s);
+  const produtosOpts = state.produtos.filter(p=> p.ativo && p.categoria===armario.tipoMassa && (p.local||"atendimento")===armario.local);
+
+  let corpo = "";
+  if(produtosOpts.length===0){
+    corpo = `<div style="padding:14px; text-align:center; font-size:12.5px; color:var(--ink-soft);">
+      Nenhum produto ativo de ${armario.tipoMassa} cadastrado para ${armario.local==="gondola"?"Gôndolas":"Atendimento"}.
+      Verifique em Configurações → Produtos se o pão está <strong>Ativo</strong>, com <strong>Local</strong> e <strong>Categoria</strong> corretos.
+    </div>`;
+  } else if(armario.tipoMassa === "Massa Francesa"){
+    for(let i=0;i<armario.capacidadePadrao;i++){
+      corpo += montarAssadeiraBoxHTML(armario, i, slotsMap[i], produtosOpts, `Assadeira ${i+1}`, telasManuaisMap);
+    }
   } else {
-    reg = { id:uuid(), data:dataIso, produtoId:pid, categoria:p.categoria, telas:telasNovas, unidTela, unidades:unidadesNovas, pesoKg:pesoKgNovo };
+    for(let row=0; row<armario.capacidadePadrao/2; row++){
+      corpo += `<div class="armario-shelf-pair">`;
+      corpo += montarAssadeiraBoxHTML(armario, row*2, slotsMap[row*2], produtosOpts, `Prat. ${row+1} · Lado 1`, telasManuaisMap);
+      corpo += montarAssadeiraBoxHTML(armario, row*2+1, slotsMap[row*2+1], produtosOpts, `Prat. ${row+1} · Lado 2`, telasManuaisMap);
+      corpo += `</div>`;
+    }
   }
 
-  await dbPut("registros", reg);
-  
-  inputTelas.value = "";
-  if(!p.pesoPadrao) document.getElementById(`inp-kg-${pid}`).value = "";
-  
-  document.getElementById(`tot-kg-${pid}`).textContent = `${fmtKg(reg.pesoKg)} kg salvos`;
-  if(p.pesoPadrao) document.getElementById(`tot-unid-${pid}`).textContent = `(${fmtInt(reg.unidades)} unid)`;
-  if((p.local||"atendimento")==="gondola") recalcularTotalGondolas(dataIso);
-  
-  toast(`Adicionado!`, "ok");
-};
+  let extras = "";
+  if(produtosOpts.length){
+    const totalSlots = armario.capacidadePadrao + (armario.extras||0);
+    for(let i=armario.capacidadePadrao; i<totalSlots; i++){
+      extras += montarAssadeiraBoxHTML(armario, i, slotsMap[i], produtosOpts, `Extra ${i-armario.capacidadePadrao+1}`, telasManuaisMap);
+    }
+  }
 
-window.abrirCorrecao = async function(pid){
-  const p = state.produtos.find(x=>x.id===pid);
-  const dataIso = document.getElementById("lancData").value;
-  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para editar.","err"); return; }
-  const existentes = await dbGetByIndex("registros","data",dataIso);
-  const reg = existentes.find(r=>r.produtoId===pid);
+  const resumo = calcularResumoArmario(armario, slotsArm, telasManuaisMap);
+  const capTexto = `${resumo.utilizadasPadrao}/${armario.capacidadePadrao}${armario.extras?` + ${resumo.utilizadasExtra}/${armario.extras} extras`:''}`;
 
-  const telasAtual = reg ? reg.telas : 0;
-  const unidTelaAtual = (reg && reg.unidTela) ? reg.unidTela : (p.pesoPadrao ? p.unidRendimento : 0);
-  const kgAtual = reg ? reg.pesoKg : 0;
-
-  abrirModal(`
-    <h3 style="margin:0 0 4px;font-family:var(--font-display); font-size:18px;">Corrigir: ${p.nome}</h3>
-    <p style="margin:0 0 16px;color:var(--ink-soft);font-size:12.5px;">Atenção: Isso substitui o total final, apagando a soma anterior deste dia.</p>
-    ${p.pesoPadrao ? `
-      <div class="field-row">
-        <div class="field" style="flex:1;"><label>Telas Totais do Dia</label><input type="number" min="0" step="0.5" id="corrTelas" value="${telasAtual}"></div>
-        <div class="field" style="flex:1;"><label>Unid/Tela (Média)</label><input type="number" min="0" id="corrUnidTela" value="${unidTelaAtual}"></div>
+  return `
+    <div class="armario-box" id="armario-${armario.id}">
+      <div class="armario-header">
+        <span>ARMÁRIO ${String(armario.ordem).padStart(2,'0')} — ${armario.tipoMassa.toUpperCase()}</span>
+        <span class="armario-cap">${capTexto}</span>
       </div>
-    ` : `
-      <div class="field"><label>Peso Kg Total do Dia</label><input type="number" min="0" step="0.1" id="corrKg" value="${kgAtual}"></div>
-    `}
-    <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
+      <div class="armario-body">${corpo}</div>
+      ${extras ? `<div class="armario-extras-label">Assadeiras Extras</div>${extras}` : ''}
+      <div class="armario-extras-actions">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="adicionarAssadeiraExtra('${armario.id}')">+ Adicionar Assadeira</button>
+        ${armario.extras>0 ? `<button type="button" class="btn btn-sm btn-ghost" onclick="removerAssadeiraExtra('${armario.id}')">− Remover Extra</button>` : ''}
+      </div>
+      <div class="armario-resumo" id="resumo-${armario.id}">${montarResumoArmarioHTML(resumo)}</div>
+    </div>`;
+}
+
+function renderSecaoLocalArmario(local, titulo, armariosDoLocal, todosSlots, telasManuaisMap){
+  if(armariosDoLocal.length===0) return "";
+  let box = `<div class="panel"><div class="panel-title">${titulo}</div>`;
+  armariosDoLocal.forEach(arm=>{
+    const slotsArm = todosSlots.filter(s=>s.armarioId===arm.id);
+    box += montarArmarioBoxHTML(arm, slotsArm, telasManuaisMap);
+  });
+  box += `</div>`;
+  return box;
+}
+
+async function renderArmarios(dataIso){
+  const armarios = (await dbGetByIndex("armarios","data",dataIso)).sort((a,b)=>a.ordem-b.ordem);
+  const slots = await dbGetByIndex("armarioSlots","data",dataIso);
+  const telasArr = await dbGetByIndex("telasManuais","data",dataIso);
+  const telasManuaisMap = {}; telasArr.forEach(t=> telasManuaisMap[t.id]=t);
+
+  const porLocal = {
+    atendimento: armarios.filter(a=>a.local==="atendimento"),
+    gondola: armarios.filter(a=>a.local==="gondola")
+  };
+
+  let html = `
+    <div class="panel" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div class="panel-title" style="margin:0;">🗄️ Armário Interativo</div>
+      <button type="button" class="btn btn-sm btn-accent" onclick="abrirModalNovoArmario('${dataIso}')">+ Adicionar Armário</button>
+    </div>`;
+  html += renderSecaoLocalArmario("atendimento", "🛎️ Atendimento a Granel", porLocal.atendimento, slots, telasManuaisMap);
+  html += renderSecaoLocalArmario("gondola", "🛒 Gôndolas / Prateleiras", porLocal.gondola, slots, telasManuaisMap);
+
+  document.getElementById("armarioContainer").innerHTML = html;
+}
+
+window.abrirModalNovoArmario = function(dataIso){
+  abrirModal(`
+    <h3 style="margin:0 0 16px;font-family:var(--font-display);font-size:18px;">Novo Armário</h3>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Local</label>
+      <select id="novoArmLocal">
+        <option value="atendimento">Atendimento a Granel</option>
+        <option value="gondola">Gôndolas / Prateleiras</option>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:20px;">
+      <label>Tipo de Massa</label>
+      <select id="novoArmTipo">
+        <option value="Massa Francesa">Massa Francesa (20 assadeiras)</option>
+        <option value="Massa Doce">Massa Doce (40 assadeiras)</option>
+      </select>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCorrecao('${pid}')">Salvar Substituição</button>
+      <button class="btn btn-primary" onclick="executarNovoArmario('${dataIso}')">Adicionar</button>
     </div>
   `);
 };
 
-window.salvarCorrecao = async function(pid){
-  const p = state.produtos.find(x=>x.id===pid);
+window.executarNovoArmario = async function(dataIso){
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); fecharModal(); return; }
+  const local = document.getElementById("novoArmLocal").value;
+  const tipoMassa = document.getElementById("novoArmTipo").value;
+  const existentes = await dbGetByIndex("armarios","data",dataIso);
+  const armario = {
+    id: uuid(), data: dataIso, local, tipoMassa,
+    ordem: existentes.length + 1,
+    capacidadePadrao: capacidadePadraoTipo(tipoMassa),
+    extras: 0
+  };
+  await dbPut("armarios", armario);
+  fecharModal();
+  await renderArmarios(dataIso);
+  toast("Armário criado!", "ok");
+};
+
+window.adicionarAssadeiraExtra = async function(armarioId){
   const dataIso = document.getElementById("lancData").value;
-  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada!","err"); fecharModal(); renderLancamento(); return; }
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); return; }
+  const armario = await dbGetOne("armarios", armarioId);
+  if(!armario) return;
+  armario.extras = (armario.extras||0) + 1;
+  await dbPut("armarios", armario);
+  await renderArmarios(dataIso);
+};
 
-  let telas=0, unidTela=0, unidades=0, pesoKg=0;
+window.removerAssadeiraExtra = async function(armarioId){
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); return; }
+  const armario = await dbGetOne("armarios", armarioId);
+  if(!armario || !armario.extras) return;
+  const lastIndex = armario.capacidadePadrao + armario.extras - 1;
+  const id = `${armarioId}-slot-${lastIndex}`;
+  const slot = await dbGetOne("armarioSlots", id).catch(()=>null);
+  if(slot && (slot.quantidade>0 || slot.telaManualId)){ toast("Esvazie a última assadeira extra antes de removê-la.","err"); return; }
+  if(slot) await dbDelete("armarioSlots", id);
+  armario.extras -= 1;
+  await dbPut("armarios", armario);
+  await renderArmarios(dataIso);
+};
 
-  if(p.pesoPadrao){
-    telas = parseFloat(document.getElementById("corrTelas").value)||0;
-    unidTela = parseFloat(document.getElementById("corrUnidTela").value)||0;
-    if(telas<0 || unidTela<0) return toast("Valores inválidos!","err");
-    unidades = telas * unidTela;
-    pesoKg = p.unidRendimento > 0 ? (unidades / p.unidRendimento) * p.pesoCorte : 0;
-  } else {
-    pesoKg = parseFloat(document.getElementById("corrKg").value)||0;
-    if(pesoKg<0) return toast("Valor inválido!","err");
+// Dispara ao trocar o produto de uma assadeira: reconstrói o controle de
+// quantidade (input numérico ou seletor de telas) de acordo com o tipo do
+// produto recém-selecionado, e então salva o novo estado do slot.
+window.onArmarioProdutoChange = async function(selEl){
+  const box = selEl.closest(".assadeira-box");
+  const armarioId = box.dataset.armario;
+  const slotIndex = box.dataset.slot;
+  const produtoId = selEl.value;
+  const area = document.getElementById(`qtdarea-${armarioId}-${slotIndex}`);
+  const telaAnteriorId = box.dataset.telaAnterior || "";
+
+  const p = produtoId ? state.produtos.find(x=>x.id===produtoId) : null;
+  let telasManuaisMap = {};
+  if(p && !p.pesoPadrao){
+    const dataIso = document.getElementById("lancData").value;
+    const todas = (await dbGetByIndex("telasManuais","data",dataIso)).filter(t=>t.produtoId===produtoId);
+    todas.forEach(t=> telasManuaisMap[t.id]=t);
   }
+  area.innerHTML = montarQtdAreaHTML(p, null, telasManuaisMap, telaAnteriorId);
+  await handleAssadeiraInput(selEl);
+};
+
+window.handleAssadeiraInput = async function(el){
+  const box = el.closest(".assadeira-box");
+  const armarioId = box.dataset.armario;
+  const slotIndex = parseInt(box.dataset.slot, 10);
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); renderLancamento(); return; }
+
+  const selEl = box.querySelector(".armario-produto");
+  const produtoId = selEl.value;
+  const produtoAnteriorId = box.dataset.produtoAnterior || "";
+  const telaAnteriorId = box.dataset.telaAnterior || "";
+  const id = `${armarioId}-slot-${slotIndex}`;
+  const p = produtoId ? state.produtos.find(x=>x.id===produtoId) : null;
+
+  let quantidade = 0, telaManualId = "", valido = false;
+  if(p && p.pesoPadrao){
+    const qtdEl = box.querySelector(".armario-qtd");
+    quantidade = qtdEl ? (parseFloat(qtdEl.value)||0) : 0;
+    if(quantidade<0){ toast("Quantidade inválida!","err"); return; }
+    valido = quantidade>0;
+  } else if(p){
+    const telaEl = box.querySelector(".armario-tela-select");
+    telaManualId = telaEl ? telaEl.value : "";
+    valido = !!telaManualId;
+  }
+
+  // Edição normal (inclusive esvaziar) NUNCA pede confirmação — isso é
+  // distinto do botão explícito de exclusão (🗑) mais abaixo.
+  if(telaAnteriorId && telaAnteriorId!==telaManualId){
+    const telaAntiga = await dbGetOne("telasManuais", telaAnteriorId).catch(()=>null);
+    if(telaAntiga){ telaAntiga.armarioSlotId = null; await dbPut("telasManuais", telaAntiga); }
+  }
+
+  const pesoEl = document.getElementById(`peso-${armarioId}-${slotIndex}`);
+
+  if(!produtoId || !valido){
+    try{ await dbDelete("armarioSlots", id); }catch(e){}
+    box.dataset.produtoAnterior = ""; box.dataset.telaAnterior = "";
+    if(pesoEl) pesoEl.textContent = "";
+    if(produtoAnteriorId){
+      const pAnt = state.produtos.find(x=>x.id===produtoAnteriorId);
+      if(pAnt && pAnt.pesoPadrao) await recomputarRegistroArmario(produtoAnteriorId, dataIso);
+    }
+  } else {
+    await dbPut("armarioSlots", {
+      id, data:dataIso, armarioId, slotIndex, produtoId,
+      quantidade: p.pesoPadrao ? quantidade : 0,
+      telaManualId: p.pesoPadrao ? null : telaManualId
+    });
+    box.dataset.produtoAnterior = produtoId;
+    box.dataset.telaAnterior = p.pesoPadrao ? "" : telaManualId;
+
+    let peso = 0;
+    if(p.pesoPadrao){
+      peso = p.unidRendimento ? (quantidade/p.unidRendimento)*p.pesoCorte : 0;
+      await recomputarRegistroArmario(produtoId, dataIso);
+    } else {
+      const telaSel = await dbGetOne("telasManuais", telaManualId).catch(()=>null);
+      if(telaSel){ telaSel.armarioSlotId = id; await dbPut("telasManuais", telaSel); peso = telaSel.kg; }
+    }
+    if(pesoEl) pesoEl.textContent = peso>0 ? fmtKg(peso)+" kg" : "";
+
+    if(produtoAnteriorId && produtoAnteriorId!==produtoId){
+      const pAnt = state.produtos.find(x=>x.id===produtoAnteriorId);
+      if(pAnt && pAnt.pesoPadrao) await recomputarRegistroArmario(produtoAnteriorId, dataIso);
+    }
+  }
+  await atualizarResumoArmarioDOM(armarioId);
+};
+
+// Botão explícito 🗑 por assadeira — SEMPRE pede confirmação (diferente de esvaziar via edição).
+window.confirmarExcluirAssadeira = function(armarioId, slotIndex){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;">Excluir esta assadeira?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">Esta ação não poderá ser desfeita. Se houver uma tela de Peso Manual posicionada, ela volta a ficar disponível para outra assadeira.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirAssadeira('${armarioId}',${slotIndex})">Excluir</button>
+    </div>
+  `);
+};
+
+window.executarExcluirAssadeira = async function(armarioId, slotIndex){
+  const dataIso = document.getElementById("lancData").value;
+  const id = `${armarioId}-slot-${slotIndex}`;
+  const slot = await dbGetOne("armarioSlots", id).catch(()=>null);
+  fecharModal();
+  if(slot){
+    if(slot.telaManualId){
+      const tela = await dbGetOne("telasManuais", slot.telaManualId).catch(()=>null);
+      if(tela){ tela.armarioSlotId = null; await dbPut("telasManuais", tela); }
+    }
+    await dbDelete("armarioSlots", id);
+    const p = state.produtos.find(x=>x.id===slot.produtoId);
+    if(p && p.pesoPadrao) await recomputarRegistroArmario(slot.produtoId, dataIso);
+  }
+  await renderArmarios(dataIso);
+  toast("Assadeira excluída.", "ok");
+};
+
+// Recalcula do zero o registro de produção do dia para um produto de Peso
+// Padrão, a partir de TODAS as assadeiras (de qualquer armário) atribuídas
+// a ele naquele dia. "telas" passa a significar "assadeiras ocupadas".
+async function recomputarRegistroArmario(produtoId, dataIso){
+  const p = state.produtos.find(x=>x.id===produtoId);
+  if(!p) return;
+
+  const slots = await dbGetByIndex("armarioSlots", "data", dataIso);
+  const doProduto = slots.filter(s=>s.produtoId===produtoId && s.quantidade>0);
+  const telas = doProduto.length; // = assadeiras ocupadas
+  const unidades = doProduto.reduce((a,s)=>a+s.quantidade, 0);
+  const unidTela = telas>0 ? unidades/telas : 0;
+  const pesoKg = (p.pesoPadrao && p.unidRendimento>0) ? (unidades/p.unidRendimento)*p.pesoCorte : 0;
 
   const existentes = await dbGetByIndex("registros","data",dataIso);
-  let reg = existentes.find(r=>r.produtoId===pid);
-  if(reg){
-    reg.telas = telas; reg.unidTela = unidTela; reg.unidades = unidades; reg.pesoKg = pesoKg;
-  } else {
-    reg = { id:uuid(), data:dataIso, produtoId:pid, categoria:p.categoria, telas, unidTela, unidades, pesoKg };
-  }
+  let reg = existentes.find(r=>r.produtoId===produtoId);
 
-  await dbPut("registros", reg);
-  fecharModal(); toast("Correção aplicada!","ok"); renderLancamento();
+  if(telas===0 && unidades===0){
+    if(reg) await dbDelete("registros", reg.id);
+  } else if(reg){
+    reg.telas=telas; reg.unidTela=unidTela; reg.unidades=unidades; reg.pesoKg=pesoKg; reg.categoria=p.categoria;
+    await dbPut("registros", reg);
+  } else {
+    reg = { id:uuid(), data:dataIso, produtoId, categoria:p.categoria, telas, unidTela, unidades, pesoKg };
+    await dbPut("registros", reg);
+  }
+  if((p.local||"atendimento")==="gondola") recalcularTotalGondolas(dataIso);
+}
+
+async function atualizarResumoArmarioDOM(armarioId){
+  const armario = await dbGetOne("armarios", armarioId).catch(()=>null);
+  if(!armario) return;
+  const slots = await dbGetByIndex("armarioSlots", "armarioId", armarioId);
+  const telasArr = await dbGetByIndex("telasManuais", "data", armario.data);
+  const telasManuaisMap = {}; telasArr.forEach(t=> telasManuaisMap[t.id]=t);
+  const resumo = calcularResumoArmario(armario, slots, telasManuaisMap);
+
+  const resumoEl = document.getElementById(`resumo-${armarioId}`);
+  if(resumoEl) resumoEl.innerHTML = montarResumoArmarioHTML(resumo);
+
+  const capEl = document.querySelector(`#armario-${armarioId} .armario-cap`);
+  if(capEl) capEl.textContent = `${resumo.utilizadasPadrao}/${armario.capacidadePadrao}${armario.extras?` + ${resumo.utilizadasExtra}/${armario.extras} extras`:''}`;
+}
+
+
+/* =========================================================
+   6c. EXCLUSÃO DE PRODUÇÃO (individual / por data / geral)
+   Nunca apaga o cadastro de produtos — só dados de produção.
+   ========================================================= */
+window.confirmarExcluirRegistro = function(regId, dataIso){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;">Excluir este registro?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">Esta ação não poderá ser desfeita. Se o produto ainda tiver assadeiras lançadas no Armário, o registro pode ser recriado na próxima edição — apague as assadeiras correspondentes para um resultado definitivo.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="abrirDetalhesDia('${dataIso}')">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirRegistro('${regId}','${dataIso}')">Excluir</button>
+    </div>
+  `);
 };
+
+window.executarExcluirRegistro = async function(regId, dataIso){
+  await dbDelete("registros", regId);
+  toast("Registro excluído.", "ok");
+  await abrirDetalhesDia(dataIso);
+  renderHistorico();
+};
+
+window.confirmarExcluirProducaoData = function(dataIso){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;color:var(--bad);">Excluir produção de ${fmtData(dataIso)}?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">Isso apaga todos os registros e assadeiras lançadas nesse dia, e reabre o dia se estiver fechado. Não pode ser desfeito.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirProducaoData('${dataIso}')">Excluir</button>
+    </div>
+  `);
+};
+
+window.executarExcluirProducaoData = async function(dataIso){
+  const regs = await dbGetByIndex("registros","data",dataIso);
+  const slots = await dbGetByIndex("armarioSlots","data",dataIso);
+  const armarios = await dbGetByIndex("armarios","data",dataIso);
+  const telas = await dbGetByIndex("telasManuais","data",dataIso);
+  for(const r of regs) await dbDelete("registros", r.id);
+  for(const s of slots) await dbDelete("armarioSlots", s.id);
+  for(const a of armarios) await dbDelete("armarios", a.id);
+  for(const m of telas) await dbDelete("telasManuais", m.id);
+  try{ await dbDelete("dias", dataIso); }catch(e){}
+  fecharModal();
+  toast("Produção do dia excluída.", "ok");
+  if(document.getElementById("view-historico").classList.contains("active")) renderHistorico();
+  if(document.getElementById("view-lancamento").classList.contains("active")) renderLancamento();
+};
+
+window.confirmarExcluirTudo = function(){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;color:var(--bad);">Excluir todos os registros?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">
+      Esta ação excluirá <strong>todos os registros de produção</strong>, assadeiras do Armário e status de fechamento armazenados no sistema. Produtos cadastrados e configurações NÃO serão apagados. Os dados excluídos não poderão ser recuperados, a menos que exista um backup.
+    </p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirTudo()">Excluir tudo</button>
+    </div>
+  `);
+};
+
+window.executarExcluirTudo = async function(){
+  const db = await abrirDB();
+  const t = db.transaction(["registros","armarioSlots","armarios","dias","telasManuais"], "readwrite");
+  t.objectStore("registros").clear();
+  t.objectStore("armarioSlots").clear();
+  t.objectStore("armarios").clear();
+  t.objectStore("dias").clear();
+  t.objectStore("telasManuais").clear();
+  await new Promise((res,rej)=>{ t.oncomplete=res; t.onerror=()=>rej(t.error); });
+  fecharModal();
+  toast("Todos os registros de produção foram excluídos.", "ok");
+  irPara("dashboard");
+};
+
+/* =========================================================
+   6d. TELAS MANUAIS (produtos de Peso Manual)
+   Cada "+ Adicionar Pão" cria UM registro de tela (peso pesado
+   na balança). O card mostra a lista de telas do dia, cada uma
+   editável/excluível individualmente. O registro agregado do dia
+   é sempre derivado da soma dessas telas — nunca digitado direto.
+   Cada tela vira uma opção selecionável no Armário Interativo
+   (1 tela = 1 assadeira possível); uma tela já posicionada não
+   aparece disponível para uma segunda assadeira.
+   ========================================================= */
+window.adicionarTelaManual = async function(pid){
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada — reabra para lançar.","err"); renderLancamento(); return; }
+
+  const kgInput = document.getElementById(`inp-kg-${pid}`);
+  const kg = parseFloat(kgInput.value)||0;
+  if(kg<=0){ toast("Informe o Kg da tela!","err"); return; }
+
+  const existentes = (await dbGetByIndex("telasManuais","data",dataIso)).filter(t=>t.produtoId===pid);
+  const numero = existentes.length + 1;
+  await dbPut("telasManuais", { id:uuid(), data:dataIso, produtoId:pid, numero, kg, armarioSlotId:null });
+  await recomputarRegistroManual(pid, dataIso);
+  toast("Pão adicionado!", "ok");
+  renderLancamento();
+};
+
+window.editarTelaManual = async function(telaId){
+  const tela = await dbGetOne("telasManuais", telaId).catch(()=>null);
+  if(!tela) return;
+  abrirModal(`
+    <h3 style="margin:0 0 16px;font-family:var(--font-display);font-size:18px;">Editar Tela ${tela.numero}</h3>
+    <div class="field" style="margin-bottom:20px;">
+      <label>Massa Kg</label>
+      <input type="number" min="0" step="0.1" id="editTelaKg" value="${tela.kg}">
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarEdicaoTelaManual('${telaId}')">Salvar</button>
+    </div>
+  `);
+};
+
+window.salvarEdicaoTelaManual = async function(telaId){
+  const dataIso = document.getElementById("lancData").value;
+  if(await diaEstaFechado(dataIso)){ toast("Produção encerrada.","err"); fecharModal(); return; }
+  const tela = await dbGetOne("telasManuais", telaId).catch(()=>null);
+  if(!tela) return;
+  const kg = parseFloat(document.getElementById("editTelaKg").value)||0;
+  if(kg<=0){ toast("Informe um Kg válido.","err"); return; }
+  tela.kg = kg;
+  await dbPut("telasManuais", tela);
+  await recomputarRegistroManual(tela.produtoId, dataIso);
+  fecharModal();
+  renderLancamento();
+  toast("Tela atualizada.", "ok");
+};
+
+window.confirmarExcluirTelaManual = function(telaId){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;">Excluir esta tela?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">Esta ação não poderá ser desfeita. Se essa tela estiver posicionada no Armário, a assadeira correspondente também será liberada.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirTelaManual('${telaId}')">Excluir</button>
+    </div>
+  `);
+};
+
+window.executarExcluirTelaManual = async function(telaId){
+  const dataIso = document.getElementById("lancData").value;
+  const tela = await dbGetOne("telasManuais", telaId).catch(()=>null);
+  fecharModal();
+  if(!tela) return;
+  if(tela.armarioSlotId){
+    const slot = await dbGetOne("armarioSlots", tela.armarioSlotId).catch(()=>null);
+    if(slot) await dbDelete("armarioSlots", slot.id);
+  }
+  await dbDelete("telasManuais", telaId);
+  await recomputarRegistroManual(tela.produtoId, dataIso);
+  renderLancamento();
+  toast("Tela excluída.", "ok");
+};
+
+// Recalcula o registro agregado do dia para um produto de Peso Manual,
+// somando todas as telas registradas via card (independente de já
+// estarem posicionadas no Armário ou não).
+async function recomputarRegistroManual(produtoId, dataIso){
+  const p = state.produtos.find(x=>x.id===produtoId);
+  if(!p) return;
+
+  const telas = (await dbGetByIndex("telasManuais","data",dataIso)).filter(t=>t.produtoId===produtoId);
+  const count = telas.length;
+  const kgTotal = telas.reduce((a,t)=>a+(t.kg||0), 0);
+
+  const existentes = await dbGetByIndex("registros","data",dataIso);
+  let reg = existentes.find(r=>r.produtoId===produtoId);
+
+  if(count===0){
+    if(reg) await dbDelete("registros", reg.id);
+  } else if(reg){
+    reg.telas=count; reg.pesoKg=kgTotal; reg.unidades=0; reg.unidTela=0; reg.categoria=p.categoria;
+    await dbPut("registros", reg);
+  } else {
+    reg = { id:uuid(), data:dataIso, produtoId, categoria:p.categoria, telas:count, unidTela:0, unidades:0, pesoKg:kgTotal };
+    await dbPut("registros", reg);
+  }
+  if((p.local||"atendimento")==="gondola") recalcularTotalGondolas(dataIso);
+}
 
 document.getElementById("btnEncerrarDia").addEventListener("click", async ()=>{
   const dataIso = document.getElementById("lancData").value;
@@ -1099,17 +1704,20 @@ async function renderHistorico(){
 
 window.abrirDetalhesDia = async function(dataIso){
   const regs = await dbGetByIndex("registros","data",dataIso);
-  let linhas = regs.map(r=>`<tr><td style="font-weight:600;">${state.produtos.find(x=>x.id===r.produtoId)?.nome||"Deletado"}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)}</td></tr>`).join("");
+  let linhas = regs.map(r=>`<tr><td style="font-weight:600;">${state.produtos.find(x=>x.id===r.produtoId)?.nome||"Deletado"}</td><td class="num-cell">${r.telas}</td><td class="num-cell">${fmtInt(r.unidades)}</td><td class="num-cell" style="font-weight:700;">${fmtKg(r.pesoKg)}</td><td style="text-align:right;"><button class="btn btn-sm btn-ghost" style="color:var(--bad);" onclick="confirmarExcluirRegistro('${r.id}','${dataIso}')">🗑</button></td></tr>`).join("");
   abrirModal(`
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <h3 style="margin:0;font-family:var(--font-display);font-size:18px;">${fmtData(dataIso)}</h3>
       <button class="btn btn-sm btn-ghost" onclick="document.getElementById('lancData').value='${dataIso}'; fecharModal(); irPara('lancamento');">Editar Data</button>
     </div>
     <div class="table-wrap"><table>
-      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Kg</th></tr></thead>
-      <tbody>${linhas || '<tr><td colspan="4">Vazio</td></tr>'}</tbody>
+      <thead><tr><th>Produto</th><th style="text-align:right">Telas</th><th style="text-align:right">Unid</th><th style="text-align:right">Kg</th><th></th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="5">Vazio</td></tr>'}</tbody>
     </table></div>
-    <div class="btn-row" style="justify-content:flex-end; margin-top:16px;"><button class="btn btn-primary" onclick="fecharModal()">Fechar</button></div>
+    <div class="btn-row" style="justify-content:space-between; margin-top:16px;">
+      <button class="btn btn-sm" style="color:var(--bad);border-color:var(--bad);" onclick="confirmarExcluirProducaoData('${dataIso}')">Excluir produção deste dia</button>
+      <button class="btn btn-primary" onclick="fecharModal()">Fechar</button>
+    </div>
   `);
 };
 
@@ -1148,11 +1756,12 @@ function obterGrupoRelatorio(id){
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const data = document.getElementById("relDiaData").value;
   if(!data) return toast("Selecione uma data", "err");
+  const formato = document.getElementById("relDiaFormato")?.value || "parcial";
   const regs = await dbGetByIndex("registros","data",data);
   if(!regs.length) return toast("Sem dados.", "err");
 
   const doc = new window.jspdf.jsPDF();
-  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário - ${fmtData(data)}`, 14, 20);
+  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário${formato==='completo'?' Completo':''} - ${fmtData(data)}`, 14, 20);
   let y = 30;
 
   Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort().forEach(grupo=>{
@@ -1167,7 +1776,56 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
     doc.autoTable({ startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
     y = doc.lastAutoTable.finalY + 12;
   });
-  doc.save(`Relatorio-${data}.pdf`); toast("PDF gerado!", "ok");
+
+  if(formato === 'completo'){
+    const armarios = (await dbGetByIndex("armarios","data",data)).sort((a,b)=>a.ordem-b.ordem);
+    if(armarios.length){
+      const todosSlots = await dbGetByIndex("armarioSlots","data",data);
+      const telasArr = await dbGetByIndex("telasManuais","data",data);
+      const telasMap = {}; telasArr.forEach(t=> telasMap[t.id]=t);
+
+      doc.addPage(); y = 20;
+      doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor(0,0,0);
+      doc.text(`Detalhamento por Armário - ${fmtData(data)}`, 14, y); y += 10;
+
+      let granAssadeiras = 0, granKg = 0;
+
+      armarios.forEach(arm=>{
+        const slotsArm = todosSlots.filter(s=>s.armarioId===arm.id);
+        const resumo = calcularResumoArmario(arm, slotsArm, telasMap);
+        const localTxt = arm.local==='gondola' ? 'Gôndolas' : 'Atendimento';
+        const totalAssadeiras = resumo.utilizadasPadrao + resumo.utilizadasExtra;
+        if(totalAssadeiras===0) return;
+
+        if(y > 255){ doc.addPage(); y = 20; }
+        doc.setFontSize(12); doc.setTextColor(230,126,34);
+        doc.text(`ARMÁRIO ${String(arm.ordem).padStart(2,'0')} — ${arm.tipoMassa.toUpperCase()} (${localTxt})`, 14, y); y += 4;
+
+        const body = Object.entries(resumo.porProduto).map(([pid,v])=>{
+          const p = state.produtos.find(x=>x.id===pid);
+          const nome = p?.nome || "Removido";
+          let cortesTxt = "—", peso = 0, unidTxt = "—";
+          if(p && p.pesoPadrao && p.unidRendimento){
+            const c = v.unidades/p.unidRendimento; cortesTxt = c.toFixed(3).replace('.',','); peso = c*(p.pesoCorte||0); unidTxt = fmtInt(v.unidades);
+          } else { peso = v.kgManualTotal||0; }
+          return [nome, v.assadeiras, unidTxt, cortesTxt, fmtKg(peso)];
+        });
+        body.push(["SUBTOTAL ARMÁRIO", totalAssadeiras, fmtInt(resumo.totalUnidades), resumo.cortesTotal.toFixed(3).replace('.',','), fmtKg(resumo.pesoTotal)]);
+
+        doc.autoTable({ startY: y, head: [["Pão","Assad.","Unid","Cortes","Kg"]], body, theme:"grid", headStyles:{fillColor:[33,37,41]} });
+        y = doc.lastAutoTable.finalY + 10;
+
+        granAssadeiras += totalAssadeiras;
+        granKg += resumo.pesoTotal;
+      });
+
+      if(y > 260){ doc.addPage(); y = 20; }
+      doc.setFontSize(13); doc.setTextColor(0,0,0); doc.setFont("helvetica","bold");
+      doc.text(`TOTAL GERAL DOS ARMÁRIOS  —  Assadeiras: ${granAssadeiras}   |   Kg: ${fmtKg(granKg)}`, 14, y);
+    }
+  }
+
+  doc.save(`Relatorio-${data}${formato==='completo'?'-Completo':''}.pdf`); toast("PDF gerado!", "ok");
 });
 
 document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
@@ -1241,7 +1899,10 @@ window.exportarBackupJSON = async function(){
     app: "Padaria OS", versao: DB_VERSION, geradoEm: new Date().toISOString(),
     produtos: await dbGetAll("produtos"),
     registros: await dbGetAll("registros"),
-    dias: await dbGetAll("dias")
+    dias: await dbGetAll("dias"),
+    armarioSlots: await dbGetAll("armarioSlots"),
+    armarios: await dbGetAll("armarios"),
+    telasManuais: await dbGetAll("telasManuais")
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -1284,11 +1945,14 @@ window.executarRestauracao = async function(){
   const dados = window._backupPendente;
   if(!dados) return;
   const db = await abrirDB();
-  const t = db.transaction(["produtos","registros","dias"], "readwrite");
-  t.objectStore("produtos").clear(); t.objectStore("registros").clear(); t.objectStore("dias").clear();
+  const t = db.transaction(["produtos","registros","dias","armarioSlots","armarios","telasManuais"], "readwrite");
+  t.objectStore("produtos").clear(); t.objectStore("registros").clear(); t.objectStore("dias").clear(); t.objectStore("armarioSlots").clear(); t.objectStore("armarios").clear(); t.objectStore("telasManuais").clear();
   (dados.produtos||[]).forEach(p=> t.objectStore("produtos").put(p));
   (dados.registros||[]).forEach(r=> t.objectStore("registros").put(r));
   (dados.dias||[]).forEach(d=> t.objectStore("dias").put(d));
+  (dados.armarioSlots||[]).forEach(s=> t.objectStore("armarioSlots").put(s));
+  (dados.armarios||[]).forEach(a=> t.objectStore("armarios").put(a));
+  (dados.telasManuais||[]).forEach(m=> t.objectStore("telasManuais").put(m));
   await new Promise((res,rej)=>{ t.oncomplete=res; t.onerror=()=>rej(t.error); });
   state.produtos = await dbGetAll("produtos");
   window._backupPendente = null;
