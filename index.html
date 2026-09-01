@@ -1824,6 +1824,95 @@ function obterGrupoRelatorio(id){
   return p.categoria;
 }
 
+/* =========================================================
+   Identidade visual dos relatórios em PDF (cabeçalho de marca,
+   rodapé com paginação, tabelas com estilo consistente).
+   ========================================================= */
+const PDF_BRAND = {
+  ink: [33,37,41], inkSoft: [73,80,87], accent: [230,126,34], accentDark: [211,84,0],
+  accentSoft: [253,235,208], rowStripe: [248,249,250], border: [225,228,231]
+};
+
+function pdfCabecalho(doc, titulo, subtitulo){
+  const w = doc.internal.pageSize.getWidth();
+  doc.setFillColor(...PDF_BRAND.ink);
+  doc.rect(0, 0, w, 30, "F");
+  doc.setFillColor(...PDF_BRAND.accent);
+  doc.rect(0, 30, w, 1.6, "F");
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(255,255,255);
+  doc.text("PADARIA OS", 14, 13);
+  doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(215,217,220);
+  doc.text("Controle de Produção", 14, 19);
+
+  doc.setFont("helvetica","bold"); doc.setFontSize(13); doc.setTextColor(255,255,255);
+  doc.text(titulo, w-14, 13, {align:"right"});
+  if(subtitulo){
+    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(215,217,220);
+    doc.text(subtitulo, w-14, 19, {align:"right"});
+  }
+  doc.setTextColor(0,0,0);
+  return 42;
+}
+
+function pdfRodape(doc){
+  const totalPaginas = doc.internal.getNumberOfPages();
+  const w = doc.internal.pageSize.getWidth();
+  const h = doc.internal.pageSize.getHeight();
+  const geradoEm = new Date().toLocaleString("pt-BR");
+  for(let i=1;i<=totalPaginas;i++){
+    doc.setPage(i);
+    doc.setDrawColor(...PDF_BRAND.border); doc.setLineWidth(0.3);
+    doc.line(14, h-14, w-14, h-14);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(150,150,150);
+    doc.text(`Gerado em ${geradoEm}`, 14, h-9);
+    doc.text(`Página ${i} de ${totalPaginas}`, w-14, h-9, {align:"right"});
+  }
+}
+
+function pdfTituloSecao(doc, texto, y){
+  const w = doc.internal.pageSize.getWidth();
+  doc.setFillColor(...PDF_BRAND.accentSoft);
+  doc.rect(14, y-5, w-28, 8, "F");
+  doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(...PDF_BRAND.accentDark);
+  doc.text(texto, 18, y);
+  doc.setTextColor(0,0,0);
+  return y+9;
+}
+
+// Opções padrão de autoTable com o visual da marca. Redesenha o cabeçalho
+// em toda página nova que a própria tabela criar (quando o conteúdo não
+// cabe), e deixa a última linha (subtotal) em negrito automaticamente.
+function pdfTableOpts(doc, titulo, subtitulo, extra){
+  return Object.assign({
+    theme: "striped",
+    margin: { top: 36 },
+    styles: { fontSize: 9, cellPadding: 4, textColor: PDF_BRAND.ink, lineColor: PDF_BRAND.border, lineWidth: 0.1 },
+    headStyles: { fillColor: PDF_BRAND.ink, textColor: 255, fontStyle: "bold", fontSize: 9 },
+    alternateRowStyles: { fillColor: PDF_BRAND.rowStripe },
+    didParseCell: (d)=>{ if(d.row.index === d.table.body.length-1){ d.cell.styles.fontStyle="bold"; d.cell.styles.fillColor = PDF_BRAND.accentSoft; } },
+    didDrawPage: (d)=>{ if(d.pageNumber>1) pdfCabecalho(doc, titulo, subtitulo); }
+  }, extra||{});
+}
+
+// Três caixas de KPI lado a lado (resumo executivo) no topo do relatório.
+function pdfResumoExecutivo(doc, y, itens){
+  const w = doc.internal.pageSize.getWidth();
+  const margemLateral = 14, gap = 6;
+  const largura = (w - margemLateral*2 - gap*(itens.length-1)) / itens.length;
+  itens.forEach((item, i)=>{
+    const x = margemLateral + i*(largura+gap);
+    doc.setFillColor(...PDF_BRAND.rowStripe);
+    doc.setDrawColor(...PDF_BRAND.border); doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, largura, 20, 2, 2, "FD");
+    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...PDF_BRAND.inkSoft);
+    doc.text(item.label.toUpperCase(), x+5, y+7);
+    doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(...PDF_BRAND.accentDark);
+    doc.text(String(item.valor), x+5, y+15.5);
+  });
+  return y + 20 + 10;
+}
+
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const data = document.getElementById("relDiaData").value;
   if(!data) return toast("Selecione uma data", "err");
@@ -1831,20 +1920,34 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const regs = await dbGetByIndex("registros","data",data);
   if(!regs.length) return toast("Sem dados.", "err");
 
+  const tituloDoc = `Relatório Diário${formato==='completo'?' Completo':''}`;
+  const subtituloDoc = fmtData(data);
+
   const doc = new window.jspdf.jsPDF();
-  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Relatório Diário${formato==='completo'?' Completo':''} - ${fmtData(data)}`, 14, 20);
-  let y = 30;
+  doc.setProperties({ title: `${tituloDoc} - ${subtituloDoc}`, subject: "Relatório de Produção", author: "Padaria OS" });
+
+  let y = pdfCabecalho(doc, tituloDoc, subtituloDoc);
+
+  const totalKgDia = regs.reduce((a,r)=>a+(r.pesoKg||0), 0);
+  const totalUnidDia = regs.reduce((a,r)=>a+(r.unidades||0), 0);
+  y = pdfResumoExecutivo(doc, y, [
+    { label: "Total Produzido", valor: fmtKg(totalKgDia)+" kg" },
+    { label: "Total de Unidades", valor: fmtInt(totalUnidDia) },
+    { label: "Produtos Lançados", valor: regs.length }
+  ]);
 
   Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort().forEach(grupo=>{
     const regsGrupo = regs.filter(r=> obterGrupoRelatorio(r.produtoId) === grupo);
     if(!regsGrupo.length) return;
-    
-    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(grupo, 14, y); y += 4;
+
+    if(y > 250){ doc.addPage(); y = pdfCabecalho(doc, tituloDoc, subtituloDoc); }
+    y = pdfTituloSecao(doc, grupo, y);
+
     let subKg = 0, subUnid = 0, subTelas = 0;
     const body = regsGrupo.map(r=> { subKg += r.pesoKg; subUnid += r.unidades; subTelas += r.telas||0; return [obterNomeProduto(r.produtoId), r.telas, fmtInt(r.unidades), fmtKg(r.pesoKg)]; });
     body.push(["SUBTOTAL", fmtInt(subTelas), fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.autoTable({ startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
+    doc.autoTable(pdfTableOpts(doc, tituloDoc, subtituloDoc, { startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body }));
     y = doc.lastAutoTable.finalY + 12;
   });
 
@@ -1856,9 +1959,8 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
       const telasManuaisMap = {}; telasArr.forEach(t=> telasManuaisMap[t.id]=t);
       const qtdDoSlot = (s)=> s.telaManualId ? (telasManuaisMap[s.telaManualId]?.quantidade||0) : (s.quantidade||0);
 
-      doc.addPage(); y = 20;
-      doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.setTextColor(0,0,0);
-      doc.text(`Detalhamento por Armário - ${fmtData(data)}`, 14, y); y += 10;
+      const tituloArm = "Detalhamento por Armário";
+      doc.addPage(); y = pdfCabecalho(doc, tituloArm, subtituloDoc);
 
       let granAssadeiras = 0, granKg = 0;
 
@@ -1870,11 +1972,11 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
         const totalAssadeiras = resumo.utilizadasPadrao + resumo.utilizadasExtra;
         if(totalAssadeiras===0) return;
 
-        if(y > 240){ doc.addPage(); y = 20; }
-        doc.setFontSize(13); doc.setTextColor(20,20,20); doc.setFont("helvetica","bold");
+        if(y > 235){ doc.addPage(); y = pdfCabecalho(doc, tituloArm, subtituloDoc); }
+        doc.setFont("helvetica","bold"); doc.setFontSize(12.5); doc.setTextColor(...PDF_BRAND.ink);
         doc.text(`Armário ${arm.ordem}`, 14, y); y += 5;
-        doc.setFontSize(10); doc.setTextColor(120,120,120); doc.setFont("helvetica","normal");
-        doc.text(`${arm.tipoMassa} · ${localTxt}`, 14, y); y += 5;
+        doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(...PDF_BRAND.inkSoft);
+        doc.text(`${arm.tipoMassa} · ${localTxt}`, 14, y); y += 4;
 
         // Tabela física: Lado 1 / Lado 2 (Massa Doce) ou Assadeira/Pão/Qtd (Massa Francesa)
         const totalSlots = arm.capacidadePadrao + (arm.extras||0);
@@ -1893,8 +1995,8 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
             bodyFisico.push([`Extra ${i-arm.capacidadePadrao+1}`, `${obterNomeProduto(s.produtoId)} (${fmtInt(qtdDoSlot(s))})`, ""]);
           }
           if(bodyFisico.length){
-            doc.autoTable({ startY:y, head:[["Prateleira","Lado 1","Lado 2"]], body:bodyFisico, theme:"grid", headStyles:{fillColor:[80,80,80]}, styles:{fontSize:9} });
-            y = doc.lastAutoTable.finalY + 8;
+            doc.autoTable(pdfTableOpts(doc, tituloArm, subtituloDoc, { startY:y, head:[["Prateleira","Lado 1","Lado 2"]], body:bodyFisico, styles:{fontSize:8.5, cellPadding:3, textColor:PDF_BRAND.ink, lineColor:PDF_BRAND.border, lineWidth:0.1}, headStyles:{fillColor:PDF_BRAND.inkSoft, textColor:255, fontStyle:"bold", fontSize:8.5}, didParseCell:null }));
+            y = doc.lastAutoTable.finalY + 6;
           }
         } else {
           for(let i=0;i<totalSlots;i++){
@@ -1904,12 +2006,12 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
             bodyFisico.push([label, obterNomeProduto(s.produtoId), fmtInt(qtdDoSlot(s))]);
           }
           if(bodyFisico.length){
-            doc.autoTable({ startY:y, head:[["Assadeira","Pão","Qtd"]], body:bodyFisico, theme:"grid", headStyles:{fillColor:[80,80,80]}, styles:{fontSize:9} });
-            y = doc.lastAutoTable.finalY + 8;
+            doc.autoTable(pdfTableOpts(doc, tituloArm, subtituloDoc, { startY:y, head:[["Assadeira","Pão","Qtd"]], body:bodyFisico, styles:{fontSize:8.5, cellPadding:3, textColor:PDF_BRAND.ink, lineColor:PDF_BRAND.border, lineWidth:0.1}, headStyles:{fillColor:PDF_BRAND.inkSoft, textColor:255, fontStyle:"bold", fontSize:8.5}, didParseCell:null }));
+            y = doc.lastAutoTable.finalY + 6;
           }
         }
 
-        if(y > 250){ doc.addPage(); y = 20; }
+        if(y > 245){ doc.addPage(); y = pdfCabecalho(doc, tituloArm, subtituloDoc); }
 
         const body = Object.entries(resumo.porProduto).map(([pid,v])=>{
           const p = state.produtos.find(x=>x.id===pid);
@@ -1921,16 +2023,19 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
         });
         body.push(["SUBTOTAL ARMÁRIO", totalAssadeiras, fmtInt(resumo.totalUnidades), fmtKg(resumo.pesoTotal)]);
 
-        doc.autoTable({ startY: y, head: [["Pão","Assad.","Unid","Kg"]], body, theme:"grid", headStyles:{fillColor:[33,37,41]} });
+        doc.autoTable(pdfTableOpts(doc, tituloArm, subtituloDoc, { startY: y, head: [["Pão","Assad.","Unid","Kg"]], body }));
         y = doc.lastAutoTable.finalY + 10;
 
         granAssadeiras += totalAssadeiras;
         granKg += resumo.pesoTotal;
       });
 
-      if(y > 260){ doc.addPage(); y = 20; }
-      doc.setFontSize(13); doc.setTextColor(0,0,0); doc.setFont("helvetica","bold");
-      doc.text(`TOTAL GERAL DOS ARMÁRIOS  —  Assadeiras: ${granAssadeiras}   |   Kg: ${fmtKg(granKg)}`, 14, y);
+      if(y > 255){ doc.addPage(); y = pdfCabecalho(doc, tituloArm, subtituloDoc); }
+      const w = doc.internal.pageSize.getWidth();
+      doc.setFillColor(...PDF_BRAND.ink);
+      doc.roundedRect(14, y, w-28, 16, 2, 2, "F");
+      doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(255,255,255);
+      doc.text(`TOTAL GERAL DOS ARMÁRIOS   —   Assadeiras: ${granAssadeiras}     Kg: ${fmtKg(granKg)}`, 14+((w-28)/2), y+10.5, {align:"center"});
     }
   }
 
@@ -1938,12 +2043,12 @@ document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
     const imgData = await gerarImagemGraficoTopPaes(regs, `Pães Mais Produzidos - ${fmtData(data)}`);
     if(imgData){
       doc.addPage();
-      doc.setFontSize(16); doc.setTextColor(0,0,0); doc.setFont("helvetica","bold");
-      doc.text("Pães Mais Produzidos (Kg)", 14, 20);
-      doc.addImage(imgData, "PNG", 14, 30, 180, 100);
+      const yImg = pdfCabecalho(doc, "Pães Mais Produzidos", subtituloDoc);
+      doc.addImage(imgData, "PNG", 14, yImg, 180, 100);
     }
   }
 
+  pdfRodape(doc);
   doc.save(`Relatorio-${data}${formato==='completo'?'-Completo':''}.pdf`); toast("PDF gerado!", "ok");
 });
 
@@ -1953,8 +2058,22 @@ document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
   const regs = (await dbGetAll("registros")).filter(r=> r.data>=ini && r.data<=fim);
   if(!regs.length) return toast("Sem dados.", "err");
 
+  const tituloDoc = "Resumo por Período";
+  const subtituloDoc = `${fmtData(ini)} a ${fmtData(fim)}`;
+
   const doc = new window.jspdf.jsPDF();
-  doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`Resumo: ${fmtData(ini)} a ${fmtData(fim)}`, 14, 20); let y = 30;
+  doc.setProperties({ title: `${tituloDoc} - ${subtituloDoc}`, subject: "Relatório de Produção", author: "Padaria OS" });
+
+  let y = pdfCabecalho(doc, tituloDoc, subtituloDoc);
+
+  const totalKgPeriodo = regs.reduce((a,r)=>a+(r.pesoKg||0), 0);
+  const totalUnidPeriodo = regs.reduce((a,r)=>a+(r.unidades||0), 0);
+  const diasComProducao = new Set(regs.map(r=>r.data)).size;
+  y = pdfResumoExecutivo(doc, y, [
+    { label: "Total Produzido", valor: fmtKg(totalKgPeriodo)+" kg" },
+    { label: "Total de Unidades", valor: fmtInt(totalUnidPeriodo) },
+    { label: "Dias com Produção", valor: diasComProducao }
+  ]);
 
   Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort().forEach(grupo=>{
     const regsGrupo = regs.filter(r=> obterGrupoRelatorio(r.produtoId) === grupo);
@@ -1966,11 +2085,14 @@ document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
     const body = Object.keys(resumo).map(id=> { subKg += resumo[id].kg; subUnid += resumo[id].unid; subTelas += resumo[id].telas; return [obterNomeProduto(id), resumo[id].telas, fmtInt(resumo[id].unid), fmtKg(resumo[id].kg)]; });
     body.push(["SUBTOTAL", fmtInt(subTelas), fmtInt(subUnid), fmtKg(subKg)]);
 
-    doc.setFontSize(12); doc.setTextColor(230,126,34); doc.text(grupo, 14, y); y += 4;
-    doc.autoTable({ startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body, theme: "grid", headStyles: {fillColor:[33,37,41]} });
+    if(y > 250){ doc.addPage(); y = pdfCabecalho(doc, tituloDoc, subtituloDoc); }
+    y = pdfTituloSecao(doc, grupo, y);
+    doc.autoTable(pdfTableOpts(doc, tituloDoc, subtituloDoc, { startY: y, head: [["Produto", "Tot. Telas", "Tot. Unid", "Tot. Kg"]], body: body }));
     y = doc.lastAutoTable.finalY + 12;
   });
-  doc.save(`Resumo-Periodo.pdf`); toast("PDF gerado!", "ok");
+
+  pdfRodape(doc);
+  doc.save(`Resumo-Periodo-${ini}_a_${fim}.pdf`); toast("PDF gerado!", "ok");
 });
 
 document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
