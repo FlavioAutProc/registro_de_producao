@@ -11,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root {
   --bg: #F8F9FA; --bg-soft: #E9ECEF; --panel: #FFFFFF;
@@ -183,6 +184,10 @@ main.content { flex: 1; width: 100%; padding: 20px 16px 100px; max-width: 1000px
 .tela-manual-kg { font-family: var(--font-mono); font-weight: 700; color: var(--good); }
 .tela-manual-actions { display: flex; gap: 2px; }
 
+.anot-input { width: 100%; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); padding: 6px 8px; font-size: 13px; background: var(--panel); color: var(--ink); font-family: var(--font-body); }
+.anot-num { font-family: var(--font-mono); text-align: right; }
+.anot-input:focus { outline: none; border-color: var(--info); box-shadow: 0 0 0 3px var(--info-soft); }
+
 .table-wrap { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow-x: auto; background: var(--panel); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; } 
 th { text-align: left; font-size: 11px; text-transform: uppercase; font-weight: 600; padding: 12px; background: var(--bg-soft); color: var(--ink-soft); }
@@ -317,7 +322,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
           <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin-bottom:16px; cursor:pointer;">
             <input type="checkbox" id="relDiaGrafico" style="width:16px;height:16px;"> Incluir gráfico (pães mais produzidos)
           </label>
-          <button class="btn btn-primary btn-block" id="btnPdfDia">Gerar PDF</button>
+          <div class="btn-row">
+            <button class="btn btn-primary" style="flex:1;" id="btnPdfDia">Gerar PDF</button>
+            <button class="btn" style="flex:1;" id="btnImgDia">🖼️ Imagem</button>
+          </div>
         </div>
         <div class="panel">
           <div class="panel-title">Resumo por Período (PDF)</div>
@@ -326,7 +334,10 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
             <div class="field" style="flex:1;"><label>De</label><input type="date" id="relPerInicio"></div>
             <div class="field" style="flex:1;"><label>Até</label><input type="date" id="relPerFim"></div>
           </div>
-          <button class="btn btn-primary btn-block" id="btnPdfPeriodo" style="margin-top:16px;">Gerar PDF</button>
+          <div class="btn-row" style="margin-top:16px;">
+            <button class="btn btn-primary" style="flex:1;" id="btnPdfPeriodo">Gerar PDF</button>
+            <button class="btn" style="flex:1;" id="btnImgPeriodo">🖼️ Imagem</button>
+          </div>
         </div>
       </div>
 
@@ -339,6 +350,28 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
         </div>
         <button class="btn btn-primary" style="background:var(--good); border-color:var(--good);" id="btnExportXlsx">Baixar Excel</button>
       </div>
+
+      <div class="panel">
+        <div class="panel-title">📝 Anotação de Armário (Manual)</div>
+        <div class="panel-sub">Anotação livre, digitada à mão — não usa produtos cadastrados nem entra nos relatórios automáticos acima. Fica salva à parte, com exportação própria.</div>
+        <button class="btn btn-primary btn-block" onclick="irPara('anotacoes')">Abrir Anotações</button>
+      </div>
+    </section>
+
+    <!-- ANOTAÇÕES DE ARMÁRIO (MANUAL) -->
+    <section class="view" id="view-anotacoes">
+      <div class="view-header">
+        <div>
+          <div class="eyebrow">Manual · Independente dos relatórios</div>
+          <h2 class="view-title">Anotações de Armário</h2>
+        </div>
+        <button class="btn btn-sm btn-ghost" onclick="irPara('relatorios')">← Voltar</button>
+      </div>
+
+      <div id="anotacoesLista"></div>
+      <button class="btn btn-primary btn-block" style="margin-top:8px;" onclick="abrirEditorAnotacao()">+ Nova Anotação</button>
+
+      <div id="anotacaoEditor" style="display:none; margin-top:20px;"></div>
     </section>
 
     <!-- CONFIGURAÇÕES / CALCULADORA -->
@@ -449,7 +482,7 @@ td { padding: 12px; border-bottom: 1px solid var(--border); }
    1. BANCO DE DADOS (IndexedDB)
    ========================================================= */
 const DB_NAME = "padariaProducaoV5";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 let dbInstance = null;
 
 function abrirDB(){
@@ -480,6 +513,10 @@ function abrirDB(){
   }
   if(!db.objectStoreNames.contains("telasManuais")){
     const store = db.createObjectStore("telasManuais", {keyPath:"id"});
+    store.createIndex("data", "data", {unique:false});
+  }
+  if(!db.objectStoreNames.contains("anotacoes")){
+    const store = db.createObjectStore("anotacoes", {keyPath:"id"});
     store.createIndex("data", "data", {unique:false});
   }
 };
@@ -576,6 +613,7 @@ function irPara(view){
   else if(view==="lancamento") renderLancamento();
   else if(view==="historico") renderHistorico();
   else if(view==="config") { renderProdutosTabela(); aplicarEstadoTema(); }
+  else if(view==="anotacoes") renderListaAnotacoes();
   else if(view==="relatorios") {
     document.getElementById("relDiaData").value = hojeISO();
     document.getElementById("relPerInicio").value = addDiasISO(hojeISO(), -7);
@@ -1825,6 +1863,193 @@ function obterGrupoRelatorio(id){
 }
 
 /* =========================================================
+   6e. ANOTAÇÕES DE ARMÁRIO (MANUAL)
+   Registro 100% livre, digitado pelo usuário — sem vínculo com produtos
+   cadastrados, sem cálculo automático de peso/rendimento. O único cálculo
+   feito é a soma de pães do Armário e de pacotes das Gôndolas. Cada
+   anotação é salva como um registro independente (store "anotacoes"),
+   com sua própria exportação (PDF, Imagem, Excel) — nunca entra nos
+   relatórios automáticos de produção.
+   ========================================================= */
+function calcularTotaisAnotacao(anot){
+  const totalArmario = (anot.armario||[]).reduce((a,r)=> a + (parseFloat(r.qtd1)||0) + (parseFloat(r.qtd2)||0), 0);
+  const totalGondolas = (anot.gondolas||[]).reduce((a,r)=> a + (parseFloat(r.pacotes)||0), 0);
+  return { totalArmario, totalGondolas };
+}
+
+function montarLinhaArmarioAnotacao(row, idx){
+  return `
+    <tr>
+      <td class="num-cell">${idx+1}</td>
+      <td><input type="text" class="anot-input" value="${row.pao1||''}" placeholder="Pão" oninput="atualizarCampoAnotacao('armario',${idx},'pao1',this.value)"></td>
+      <td><input type="number" min="0" step="1" class="anot-input anot-num" value="${row.qtd1||''}" placeholder="Qtd" oninput="atualizarCampoAnotacao('armario',${idx},'qtd1',this.value)"></td>
+      <td><input type="text" class="anot-input" value="${row.pao2||''}" placeholder="Pão" oninput="atualizarCampoAnotacao('armario',${idx},'pao2',this.value)"></td>
+      <td><input type="number" min="0" step="1" class="anot-input anot-num" value="${row.qtd2||''}" placeholder="Qtd" oninput="atualizarCampoAnotacao('armario',${idx},'qtd2',this.value)"></td>
+      <td><button type="button" class="btn-slot-del" onclick="removerLinhaAnotacao('armario',${idx})">🗑</button></td>
+    </tr>`;
+}
+
+function montarLinhaGondolaAnotacao(row, idx){
+  return `
+    <tr>
+      <td><input type="text" class="anot-input" value="${row.pao||''}" placeholder="Pão" oninput="atualizarCampoAnotacao('gondolas',${idx},'pao',this.value)"></td>
+      <td><input type="number" min="0" step="1" class="anot-input anot-num" value="${row.quantidade||''}" placeholder="Qtd" oninput="atualizarCampoAnotacao('gondolas',${idx},'quantidade',this.value)"></td>
+      <td><input type="text" class="anot-input" value="${row.cortes||''}" placeholder="Ex: 3 + 18 unid." oninput="atualizarCampoAnotacao('gondolas',${idx},'cortes',this.value)"></td>
+      <td><input type="number" min="0" step="1" class="anot-input anot-num" value="${row.pacotes||''}" placeholder="Pacotes" oninput="atualizarCampoAnotacao('gondolas',${idx},'pacotes',this.value)"></td>
+      <td><button type="button" class="btn-slot-del" onclick="removerLinhaAnotacao('gondolas',${idx})">🗑</button></td>
+    </tr>`;
+}
+
+function renderEditorAnotacao(){
+  const a = state.anotacaoAtual;
+  if(!a) return;
+  const { totalArmario, totalGondolas } = calcularTotaisAnotacao(a);
+  document.getElementById("anotacaoEditor").innerHTML = `
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div class="panel-title" style="margin:0;">${a.id?"Editar":"Nova"} Anotação</div>
+        <button class="btn btn-sm btn-ghost" onclick="fecharEditorAnotacao()">← Cancelar</button>
+      </div>
+      <div class="field-row" style="margin-bottom:8px;">
+        <div class="field" style="flex:1;"><label>Data da Produção</label><input type="date" value="${a.data}" onchange="state.anotacaoAtual.data=this.value"></div>
+        <div class="field" style="flex:2;"><label>Título</label><input type="text" value="${a.titulo||''}" placeholder="Ex: Massa Doce - Balcão de Atendimento" onchange="state.anotacaoAtual.titulo=this.value"></div>
+      </div>
+
+      <h4 style="margin:24px 0 8px;font-size:14px;font-weight:700;">Armário</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Lado 1 — Pão</th><th>Qtd</th><th>Lado 2 — Pão</th><th>Qtd</th><th></th></tr></thead>
+          <tbody id="anotArmarioBody">${a.armario.map((r,i)=>montarLinhaArmarioAnotacao(r,i)).join("")}</tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 8px;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="adicionarLinhaAnotacao('armario')">+ Adicionar Linha</button>
+        <span style="font-weight:700;font-family:var(--font-mono);" id="anotTotalArmario">Total Armário: ${fmtInt(totalArmario)} pães</span>
+      </div>
+
+      <h4 style="margin:24px 0 8px;font-size:14px;font-weight:700;">Gôndolas</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pão</th><th>Quantidade</th><th>Cortes</th><th>Pacotes</th><th></th></tr></thead>
+          <tbody id="anotGondolasBody">${a.gondolas.map((r,i)=>montarLinhaGondolaAnotacao(r,i)).join("")}</tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 24px;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="btn btn-sm btn-ghost" onclick="adicionarLinhaAnotacao('gondolas')">+ Adicionar Linha</button>
+        <span style="font-weight:700;font-family:var(--font-mono);" id="anotTotalGondolas">Total Gôndolas: ${fmtInt(totalGondolas)} pacotes</span>
+      </div>
+
+      <button class="btn btn-primary btn-block" onclick="salvarAnotacao()">Salvar Anotação</button>
+    </div>`;
+}
+
+function atualizarTotaisAnotacaoDOM(){
+  const { totalArmario, totalGondolas } = calcularTotaisAnotacao(state.anotacaoAtual);
+  const elA = document.getElementById("anotTotalArmario"); if(elA) elA.textContent = `Total Armário: ${fmtInt(totalArmario)} pães`;
+  const elG = document.getElementById("anotTotalGondolas"); if(elG) elG.textContent = `Total Gôndolas: ${fmtInt(totalGondolas)} pacotes`;
+}
+
+window.atualizarCampoAnotacao = function(secao, idx, campo, valor){
+  const ehNumero = campo.startsWith("qtd") || campo==="quantidade" || campo==="pacotes";
+  state.anotacaoAtual[secao][idx][campo] = ehNumero ? (parseFloat(valor)||0) : valor;
+  atualizarTotaisAnotacaoDOM();
+};
+
+window.adicionarLinhaAnotacao = function(secao){
+  if(secao==="armario") state.anotacaoAtual.armario.push({pao1:'',qtd1:0,pao2:'',qtd2:0});
+  else state.anotacaoAtual.gondolas.push({pao:'',quantidade:0,cortes:'',pacotes:0});
+  renderEditorAnotacao();
+};
+
+window.removerLinhaAnotacao = function(secao, idx){
+  state.anotacaoAtual[secao].splice(idx,1);
+  renderEditorAnotacao();
+};
+
+window.abrirEditorAnotacao = async function(id){
+  if(id){
+    const a = await dbGetOne("anotacoes", id).catch(()=>null);
+    if(!a) return;
+    state.anotacaoAtual = JSON.parse(JSON.stringify(a));
+    if(!state.anotacaoAtual.armario.length) state.anotacaoAtual.armario.push({pao1:'',qtd1:0,pao2:'',qtd2:0});
+    if(!state.anotacaoAtual.gondolas.length) state.anotacaoAtual.gondolas.push({pao:'',quantidade:0,cortes:'',pacotes:0});
+  } else {
+    state.anotacaoAtual = { id:null, data: hojeISO(), titulo:"", armario:[{pao1:'',qtd1:0,pao2:'',qtd2:0}], gondolas:[{pao:'',quantidade:0,cortes:'',pacotes:0}] };
+  }
+  document.getElementById("anotacoesLista").style.display = "none";
+  document.querySelector("#view-anotacoes > button.btn-primary.btn-block").style.display = "none";
+  document.getElementById("anotacaoEditor").style.display = "block";
+  renderEditorAnotacao();
+};
+
+window.fecharEditorAnotacao = function(){
+  document.getElementById("anotacaoEditor").style.display = "none";
+  document.getElementById("anotacoesLista").style.display = "block";
+  document.querySelector("#view-anotacoes > button.btn-primary.btn-block").style.display = "block";
+  state.anotacaoAtual = null;
+};
+
+window.salvarAnotacao = async function(){
+  const a = state.anotacaoAtual;
+  if(!a.data){ toast("Informe a data da produção.","err"); return; }
+  if(!a.id) a.id = uuid();
+  if(!a.criadoEm) a.criadoEm = new Date().toISOString();
+  await dbPut("anotacoes", a);
+  toast("Anotação salva!", "ok");
+  fecharEditorAnotacao();
+  renderListaAnotacoes();
+};
+
+async function renderListaAnotacoes(){
+  document.getElementById("anotacaoEditor").style.display = "none";
+  document.getElementById("anotacoesLista").style.display = "block";
+  const btnNova = document.querySelector("#view-anotacoes > button.btn-primary.btn-block");
+  if(btnNova) btnNova.style.display = "block";
+
+  const todas = (await dbGetAll("anotacoes")).sort((x,y)=> y.data.localeCompare(x.data) || (y.criadoEm||"").localeCompare(x.criadoEm||""));
+  const el = document.getElementById("anotacoesLista");
+  if(!todas.length){ el.innerHTML = `<div class="panel" style="text-align:center;color:var(--ink-soft);padding:24px;">Nenhuma anotação salva ainda.</div>`; return; }
+
+  el.innerHTML = todas.map(a=>{
+    const { totalArmario, totalGondolas } = calcularTotaisAnotacao(a);
+    return `
+      <div class="panel" style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-weight:700;font-size:14px;">${a.titulo || "Anotação sem título"}</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:2px;">${fmtData(a.data)} · ${fmtInt(totalArmario)} pães no armário · ${fmtInt(totalGondolas)} pacotes gôndola</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-ghost" onclick="abrirEditorAnotacao('${a.id}')">Editar</button>
+            <button class="btn btn-sm btn-ghost" onclick="exportarAnotacaoPDF('${a.id}')">PDF</button>
+            <button class="btn btn-sm btn-ghost" onclick="exportarAnotacaoImagem('${a.id}')">Imagem</button>
+            <button class="btn btn-sm btn-ghost" onclick="exportarAnotacaoExcel('${a.id}')">Excel</button>
+            <button class="btn btn-sm btn-ghost" style="color:var(--bad);" onclick="confirmarExcluirAnotacao('${a.id}')">🗑</button>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+window.confirmarExcluirAnotacao = function(id){
+  abrirModal(`
+    <h3 style="margin:0 0 8px;font-family:var(--font-display);font-size:17px;">Excluir esta anotação?</h3>
+    <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;">Esta ação não poderá ser desfeita.</p>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" style="background:var(--bad);border-color:var(--bad);" onclick="executarExcluirAnotacao('${id}')">Excluir</button>
+    </div>
+  `);
+};
+
+window.executarExcluirAnotacao = async function(id){
+  await dbDelete("anotacoes", id);
+  fecharModal();
+  toast("Anotação excluída.", "ok");
+  renderListaAnotacoes();
+};
+
+/* =========================================================
    Identidade visual dos relatórios em PDF (cabeçalho de marca,
    rodapé com paginação, tabelas com estilo consistente).
    ========================================================= */
@@ -1912,6 +2137,208 @@ function pdfResumoExecutivo(doc, y, itens){
   });
   return y + 20 + 10;
 }
+
+// Rasteriza um elemento (ou HTML criado fora da tela) em PNG via
+// html2canvas e dispara o download. Usado pela Anotação e por todos os
+// relatórios (botão "🖼️ Imagem").
+async function exportarElementoComoImagem(elementoOuHTML, nomeArquivo){
+  let el, criado = false;
+  if(typeof elementoOuHTML === "string"){
+    el = document.createElement("div");
+    el.innerHTML = elementoOuHTML;
+    el.style.position = "fixed"; el.style.left = "-9999px"; el.style.top = "0";
+    el.style.background = "#ffffff";
+    document.body.appendChild(el);
+    criado = true;
+  } else { el = elementoOuHTML; }
+
+  try{
+    const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff" });
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url; a.download = nomeArquivo;
+    document.body.appendChild(a); a.click(); a.remove();
+  } finally {
+    if(criado) document.body.removeChild(el);
+  }
+}
+
+// Monta o HTML (fora da tela) de uma anotação, no mesmo espírito visual
+// da planilha de referência do usuário — cabeçalho escuro, tabela Lado 1
+// / Lado 2 e tabela de Gôndolas com totais.
+function montarHTMLAnotacao(a){
+  const { totalArmario, totalGondolas } = calcularTotaisAnotacao(a);
+  const linhasArmario = (a.armario||[]).map((r,i)=> `
+    <tr style="${i%2?'background:#f8f9fa;':''}">
+      <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:center;">${i+1}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;">${r.pao1||''}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(r.qtd1||0)}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;">${r.pao2||''}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(r.qtd2||0)}</td>
+    </tr>`).join("");
+  const linhasGondolas = (a.gondolas||[]).map((r,i)=> `
+    <tr style="${i%2?'background:#f8f9fa;':''}">
+      <td style="padding:6px 10px;border:1px solid #dee2e6;">${r.pao||''}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(r.quantidade||0)}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;">${r.cortes||''}</td>
+      <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(r.pacotes||0)}</td>
+    </tr>`).join("");
+
+  return `
+    <div style="width:640px;font-family:Arial,sans-serif;background:#fff;padding:0;">
+      <div style="background:#212529;padding:16px 20px;border-bottom:3px solid #E67E22;">
+        <div style="color:#fff;font-size:17px;font-weight:700;">${a.titulo || "Anotação de Armário"}</div>
+        <div style="color:#d7d9dc;font-size:12px;margin-top:2px;">${fmtData(a.data)}</div>
+      </div>
+      <div style="padding:20px;">
+        ${a.armario && a.armario.length ? `
+          <div style="font-size:13px;font-weight:700;color:#E67E22;margin-bottom:8px;">ARMÁRIO</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;">
+            <thead><tr style="background:#212529;color:#fff;">
+              <th style="padding:6px 10px;border:1px solid #dee2e6;">#</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;text-align:left;">Lado 1 — Pão</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;">Qtd</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;text-align:left;">Lado 2 — Pão</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;">Qtd</th>
+            </tr></thead>
+            <tbody>${linhasArmario}</tbody>
+          </table>
+          <div style="text-align:right;font-weight:700;font-size:13px;color:#212529;margin-bottom:20px;">Total Armário: ${fmtInt(totalArmario)} pães</div>
+        ` : ''}
+        ${a.gondolas && a.gondolas.length ? `
+          <div style="font-size:13px;font-weight:700;color:#E67E22;margin-bottom:8px;">GÔNDOLAS</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;">
+            <thead><tr style="background:#212529;color:#fff;">
+              <th style="padding:6px 10px;border:1px solid #dee2e6;text-align:left;">Pão</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;">Quantidade</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;text-align:left;">Cortes</th>
+              <th style="padding:6px 10px;border:1px solid #dee2e6;">Pacotes</th>
+            </tr></thead>
+            <tbody>${linhasGondolas}</tbody>
+          </table>
+          <div style="text-align:right;font-weight:700;font-size:13px;color:#212529;">Total Gôndolas: ${fmtInt(totalGondolas)} pacotes</div>
+        ` : ''}
+      </div>
+    </div>`;
+}
+
+// HTML (fora da tela) reaproveitado pela exportação de Imagem do
+// Fechamento Diário e do Resumo por Período — mesmo agrupamento por
+// família de massa das tabelas em PDF, com resumo executivo no topo.
+function montarHTMLRelatorioProducao(titulo, subtitulo, regs, resumoItens){
+  const grupos = Array.from(new Set(regs.map(r=>obterGrupoRelatorio(r.produtoId)))).sort();
+  const kpisHTML = resumoItens.map(it=> `
+    <div style="flex:1;background:#f8f9fa;border:1px solid #e1e4e7;border-radius:6px;padding:10px 12px;">
+      <div style="font-size:10px;color:#6c757d;text-transform:uppercase;font-weight:600;">${it.label}</div>
+      <div style="font-size:18px;font-weight:700;color:#c0530e;margin-top:3px;">${it.valor}</div>
+    </div>`).join("");
+
+  const gruposHTML = grupos.map(grupo=>{
+    const regsGrupo = regs.filter(r=>obterGrupoRelatorio(r.produtoId)===grupo);
+    const porProduto = {};
+    regsGrupo.forEach(r=>{ if(!porProduto[r.produtoId]) porProduto[r.produtoId]={telas:0,unid:0,kg:0}; porProduto[r.produtoId].telas+=r.telas||0; porProduto[r.produtoId].unid+=r.unidades||0; porProduto[r.produtoId].kg+=r.pesoKg||0; });
+    let subKg=0,subUnid=0,subTelas=0;
+    const linhas = Object.keys(porProduto).map((id,i)=>{
+      const v = porProduto[id]; subKg+=v.kg; subUnid+=v.unid; subTelas+=v.telas;
+      return `<tr style="${i%2?'background:#f8f9fa;':''}">
+        <td style="padding:6px 10px;border:1px solid #dee2e6;">${obterNomeProduto(id)}</td>
+        <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(v.telas)}</td>
+        <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(v.unid)}</td>
+        <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtKg(v.kg)}</td>
+      </tr>`;
+    }).join("");
+    return `
+      <div style="font-size:13px;font-weight:700;color:#E67E22;margin:18px 0 8px;">${grupo}</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#212529;color:#fff;">
+          <th style="padding:6px 10px;border:1px solid #dee2e6;text-align:left;">Produto</th>
+          <th style="padding:6px 10px;border:1px solid #dee2e6;">Tot. Telas</th>
+          <th style="padding:6px 10px;border:1px solid #dee2e6;">Tot. Unid</th>
+          <th style="padding:6px 10px;border:1px solid #dee2e6;">Tot. Kg</th>
+        </tr></thead>
+        <tbody>${linhas}
+          <tr style="background:#fdebd0;font-weight:700;">
+            <td style="padding:6px 10px;border:1px solid #dee2e6;">SUBTOTAL</td>
+            <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(subTelas)}</td>
+            <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtInt(subUnid)}</td>
+            <td style="padding:6px 10px;border:1px solid #dee2e6;text-align:right;">${fmtKg(subKg)}</td>
+          </tr>
+        </tbody>
+      </table>`;
+  }).join("");
+
+  return `
+    <div style="width:680px;font-family:Arial,sans-serif;background:#fff;">
+      <div style="background:#212529;padding:16px 20px;border-bottom:3px solid #E67E22;">
+        <div style="color:#fff;font-size:11px;letter-spacing:0.5px;">PADARIA OS · CONTROLE DE PRODUÇÃO</div>
+        <div style="color:#fff;font-size:18px;font-weight:700;margin-top:4px;">${titulo}</div>
+        <div style="color:#d7d9dc;font-size:12px;margin-top:2px;">${subtitulo}</div>
+      </div>
+      <div style="padding:20px;">
+        <div style="display:flex;gap:10px;margin-bottom:8px;">${kpisHTML}</div>
+        ${gruposHTML}
+      </div>
+    </div>`;
+}
+
+window.exportarAnotacaoPDF = async function(id){
+  const a = await dbGetOne("anotacoes", id).catch(()=>null);
+  if(!a) return;
+  const { totalArmario, totalGondolas } = calcularTotaisAnotacao(a);
+  const titulo = a.titulo || "Anotação de Armário";
+
+  const doc = new window.jspdf.jsPDF();
+  doc.setProperties({ title: titulo, subject: "Anotação de Armário (manual)", author: "Padaria OS" });
+  let y = pdfCabecalho(doc, titulo, fmtData(a.data));
+
+  if(a.armario && a.armario.length){
+    y = pdfTituloSecao(doc, "Armário", y);
+    const body = a.armario.map((r,i)=> [i+1, r.pao1||'', fmtInt(r.qtd1||0), r.pao2||'', fmtInt(r.qtd2||0)]);
+    doc.autoTable(pdfTableOpts(doc, titulo, fmtData(a.data), { startY:y, head:[["#","Lado 1","Qtd","Lado 2","Qtd"]], body, didParseCell:null }));
+    y = doc.lastAutoTable.finalY + 6;
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...PDF_BRAND.accentDark);
+    doc.text(`Total Armário: ${fmtInt(totalArmario)} pães`, 14, y); y += 14;
+  }
+
+  if(a.gondolas && a.gondolas.length){
+    if(y > 245){ doc.addPage(); y = pdfCabecalho(doc, titulo, fmtData(a.data)); }
+    y = pdfTituloSecao(doc, "Gôndolas", y);
+    const body = a.gondolas.map(r=> [r.pao||'', fmtInt(r.quantidade||0), r.cortes||'', fmtInt(r.pacotes||0)]);
+    doc.autoTable(pdfTableOpts(doc, titulo, fmtData(a.data), { startY:y, head:[["Pão","Quantidade","Cortes","Pacotes"]], body, didParseCell:null }));
+    y = doc.lastAutoTable.finalY + 6;
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...PDF_BRAND.accentDark);
+    doc.text(`Total Gôndolas: ${fmtInt(totalGondolas)} pacotes`, 14, y);
+  }
+
+  pdfRodape(doc);
+  doc.save(`Anotacao-${a.data}.pdf`);
+  toast("PDF gerado!", "ok");
+};
+
+window.exportarAnotacaoImagem = async function(id){
+  const a = await dbGetOne("anotacoes", id).catch(()=>null);
+  if(!a) return;
+  toast("Gerando imagem...", "ok");
+  await exportarElementoComoImagem(montarHTMLAnotacao(a), `Anotacao-${a.data}.png`);
+};
+
+window.exportarAnotacaoExcel = async function(id){
+  const a = await dbGetOne("anotacoes", id).catch(()=>null);
+  if(!a) return;
+  const { totalArmario, totalGondolas } = calcularTotaisAnotacao(a);
+
+  const wb = XLSX.utils.book_new();
+  const armarioRows = (a.armario||[]).map((r,i)=>({ "#": i+1, "Lado 1 - Pão": r.pao1||'', "Qtd Lado 1": r.qtd1||0, "Lado 2 - Pão": r.pao2||'', "Qtd Lado 2": r.qtd2||0 }));
+  armarioRows.push({ "#":"", "Lado 1 - Pão":"TOTAL", "Qtd Lado 1":"", "Lado 2 - Pão":"", "Qtd Lado 2": totalArmario });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(armarioRows), "Armário");
+
+  const gondolaRows = (a.gondolas||[]).map(r=>({ "Pão": r.pao||'', "Quantidade": r.quantidade||0, "Cortes": r.cortes||'', "Pacotes": r.pacotes||0 }));
+  gondolaRows.push({ "Pão":"TOTAL", "Quantidade":"", "Cortes":"", "Pacotes": totalGondolas });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(gondolaRows), "Gôndolas");
+
+  XLSX.writeFile(wb, `Anotacao-${a.data}.xlsx`);
+  toast("Excel gerado!", "ok");
+};
 
 document.getElementById("btnPdfDia").addEventListener("click", async ()=>{
   const data = document.getElementById("relDiaData").value;
@@ -2095,6 +2522,39 @@ document.getElementById("btnPdfPeriodo").addEventListener("click", async ()=>{
   doc.save(`Resumo-Periodo-${ini}_a_${fim}.pdf`); toast("PDF gerado!", "ok");
 });
 
+document.getElementById("btnImgDia").addEventListener("click", async ()=>{
+  const data = document.getElementById("relDiaData").value;
+  if(!data) return toast("Selecione uma data", "err");
+  const regs = await dbGetByIndex("registros","data",data);
+  if(!regs.length) return toast("Sem dados.", "err");
+  const totalKg = regs.reduce((a,r)=>a+(r.pesoKg||0),0);
+  const totalUnid = regs.reduce((a,r)=>a+(r.unidades||0),0);
+  toast("Gerando imagem...", "ok");
+  const html = montarHTMLRelatorioProducao("Relatório Diário", fmtData(data), regs, [
+    { label:"Total Produzido", valor: fmtKg(totalKg)+" kg" },
+    { label:"Total de Unidades", valor: fmtInt(totalUnid) },
+    { label:"Produtos Lançados", valor: regs.length }
+  ]);
+  await exportarElementoComoImagem(html, `Relatorio-${data}.png`);
+});
+
+document.getElementById("btnImgPeriodo").addEventListener("click", async ()=>{
+  const ini = document.getElementById("relPerInicio").value, fim = document.getElementById("relPerFim").value;
+  if(!ini || !fim) return toast("Selecione o período", "err");
+  const regs = (await dbGetAll("registros")).filter(r=> r.data>=ini && r.data<=fim);
+  if(!regs.length) return toast("Sem dados.", "err");
+  const totalKg = regs.reduce((a,r)=>a+(r.pesoKg||0),0);
+  const totalUnid = regs.reduce((a,r)=>a+(r.unidades||0),0);
+  const dias = new Set(regs.map(r=>r.data)).size;
+  toast("Gerando imagem...", "ok");
+  const html = montarHTMLRelatorioProducao("Resumo por Período", `${fmtData(ini)} a ${fmtData(fim)}`, regs, [
+    { label:"Total Produzido", valor: fmtKg(totalKg)+" kg" },
+    { label:"Total de Unidades", valor: fmtInt(totalUnid) },
+    { label:"Dias com Produção", valor: dias }
+  ]);
+  await exportarElementoComoImagem(html, `Resumo-Periodo-${ini}_a_${fim}.png`);
+});
+
 document.getElementById("btnExportXlsx").addEventListener("click", async ()=>{
   const ini = document.getElementById("xlsInicio").value, fim = document.getElementById("xlsFim").value;
   let regs = await dbGetAll("registros");
@@ -2143,7 +2603,8 @@ window.exportarBackupJSON = async function(){
     dias: await dbGetAll("dias"),
     armarioSlots: await dbGetAll("armarioSlots"),
     armarios: await dbGetAll("armarios"),
-    telasManuais: await dbGetAll("telasManuais")
+    telasManuais: await dbGetAll("telasManuais"),
+    anotacoes: await dbGetAll("anotacoes")
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
@@ -2186,14 +2647,15 @@ window.executarRestauracao = async function(){
   const dados = window._backupPendente;
   if(!dados) return;
   const db = await abrirDB();
-  const t = db.transaction(["produtos","registros","dias","armarioSlots","armarios","telasManuais"], "readwrite");
-  t.objectStore("produtos").clear(); t.objectStore("registros").clear(); t.objectStore("dias").clear(); t.objectStore("armarioSlots").clear(); t.objectStore("armarios").clear(); t.objectStore("telasManuais").clear();
+  const t = db.transaction(["produtos","registros","dias","armarioSlots","armarios","telasManuais","anotacoes"], "readwrite");
+  t.objectStore("produtos").clear(); t.objectStore("registros").clear(); t.objectStore("dias").clear(); t.objectStore("armarioSlots").clear(); t.objectStore("armarios").clear(); t.objectStore("telasManuais").clear(); t.objectStore("anotacoes").clear();
   (dados.produtos||[]).forEach(p=> t.objectStore("produtos").put(p));
   (dados.registros||[]).forEach(r=> t.objectStore("registros").put(r));
   (dados.dias||[]).forEach(d=> t.objectStore("dias").put(d));
   (dados.armarioSlots||[]).forEach(s=> t.objectStore("armarioSlots").put(s));
   (dados.armarios||[]).forEach(a=> t.objectStore("armarios").put(a));
   (dados.telasManuais||[]).forEach(m=> t.objectStore("telasManuais").put(m));
+  (dados.anotacoes||[]).forEach(n=> t.objectStore("anotacoes").put(n));
   await new Promise((res,rej)=>{ t.oncomplete=res; t.onerror=()=>rej(t.error); });
   state.produtos = await dbGetAll("produtos");
   window._backupPendente = null;
