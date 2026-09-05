@@ -12,6 +12,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#E67E22">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Padaria OS">
+<link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+
 <style>
 :root {
   --bg: #F8F9FA; --bg-soft: #E9ECEF; --panel: #FFFFFF;
@@ -2677,5 +2685,7 @@ async function init(){
 }
 init();
 </script>
+<script src="sw.js"></script>
+<script src="pwa.js"></script>
 </body>
 </html>
